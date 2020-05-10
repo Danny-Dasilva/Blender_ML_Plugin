@@ -63,6 +63,36 @@ class SimpleOperator(bpy.types.Operator):
         main(context)
         return {'FINISHED'}
 
+class test():
+    def __init__(self):
+
+        self.count = 0
+t = test()
+class AddButtonOperator(bpy.types.Operator):
+    bl_idname = "scene.add_button_operator"
+    bl_label = "Add Button"
+    
+    def execute(self, context):
+        print(context.scene.collection)
+        t.count += 1
+        print(t.count)
+        ids = t.count
+        # ids = len(context.scene.collection)
+        return {'FINISHED'}
+
+class ButtonOperator(bpy.types.Operator):
+    bl_idname = "scene.button_operator"
+    bl_label = "Button"
+
+    id = bpy.props.IntProperty()
+
+    def execute(self, context):
+        print("Pressed button ", self.id)
+        return {'FINISHED'}
+
+
+
+
 class Test_PT_Panel(bpy.types.Panel):
     bl_idname = "Test+_PT_Panel"
     bl_label = "Test panel"
@@ -112,10 +142,13 @@ class Test_PT_Panel(bpy.types.Panel):
 
         # check if bool property is enabled
         if (mytool.my_bool == True):
-            print ("Property Enabled")
+            print ("Property Enabled11")
         else:
             print ("Property Disabled")
 
+        self.layout.operator("scene.add_button_operator")
+        for item in range(t.count):
+               self.layout.operator("scene.button_operator", text="Button #"+str( t.count)).id =  t.count
 
 
 
