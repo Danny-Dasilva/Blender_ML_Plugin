@@ -25,8 +25,8 @@ bl_info = {
 import bpy
 from bpy.props import PointerProperty
 from . test_op import Test_OT_Operator
-from . test_panel import Test_PT_Panel, SimpleOperator, MySettings, AddButtonOperator, ButtonOperator
-classes = (Test_PT_Panel, Test_OT_Operator, SimpleOperator, MySettings, AddButtonOperator, ButtonOperator)  
+from . test_panel import Test_PT_Panel, SimpleOperator, MySettings, AddButtonOperator, ButtonOperator, CamSpawnOperator
+classes = (Test_PT_Panel, Test_OT_Operator, SimpleOperator, MySettings, AddButtonOperator, ButtonOperator, CamSpawnOperator)  
 
 
 
