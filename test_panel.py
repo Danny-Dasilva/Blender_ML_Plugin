@@ -63,46 +63,6 @@ class SimpleOperator(bpy.types.Operator):
         main(context)
         return {'FINISHED'}
 
-
-class CamSpawnOperator(bpy.types.Operator):
-    """Tooltip"""
-    bl_idname = "object.cam_spawn"
-    bl_label = "Cam Spawn Op"
-
-    my_bool : BoolProperty(
-        name="Enable or Disable",
-        description="A bool property",
-        default = False
-        )
-    my_float : FloatProperty(
-        name = "Set a value",
-        description = "A float property",
-        default = 23.7,
-        min = 0.0,
-        max = 30.0
-        )
-    my_string : StringProperty(
-        name = "Set a value",
-        description = "A float property",
-        )
-
-    @classmethod
-    def poll(cls, context):
-        return context.active_object is not None
-
-    def execute(self, context):
-        main(context)
-        self.report(
-            {'INFO'}, 'F: %.2f  B: %s  S: %r' %
-            (self.my_float, self.my_bool, self.my_string)
-        )
-        print('My float:', self.my_float)
-        print('My bool:', self.my_bool)
-        print('My string:', self.my_string)
-
-        return {'FINISHED'}
-
-
 class test():
     def __init__(self):
 
@@ -161,7 +121,7 @@ class Test_PT_Panel(bpy.types.Panel):
         box.prop(props, "my_string", text="Integer Property")
         box.prop(props, "my_float", text="Float Property")
         box.operator("object.simple_operator")
-
+        
 
         # Create two columns, by using a split layout.
         split = layout.split()
