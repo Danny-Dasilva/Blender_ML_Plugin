@@ -109,13 +109,23 @@ class MyProperties(PropertyGroup):
         max = 30.0
         )
 
-    my_float_vector: FloatVectorProperty(
-        name = "Float Vector Value",
+
+    cam_xyz_max: FloatVectorProperty(
+        name = "XYZ",
         description="Something",
         default=(0.0, 0.0, 0.0), 
-        min= 0.0, # float
-        max = 0.1
+        min= -10000.0, # float
+        max = 10000.0
     ) 
+
+    cam_xyz_min: FloatVectorProperty(
+        name = "XYZ",
+        description="Something",
+        default=(0.0, 0.0, 0.0), 
+        min= -10000.0, # float
+        max = 10000.0
+    ) 
+
 
     my_string: StringProperty(
         name="User Input",
@@ -160,25 +170,26 @@ class WM_OT_HelloWorld(Operator):
         print("float value:", mytool.my_float)
         print("string value:", mytool.my_string)
         print("enum state:", mytool.my_enum)
+        
 
         return {'FINISHED'}
 
-# ------------------------------------------------------------------------
-#    Menus
-# ------------------------------------------------------------------------
+class OT_Cam_Spawn(Operator):
+    bl_label = "Cam_Spawn"
+    bl_idname = "wm.cam_spawn"
 
-class OBJECT_MT_CustomMenu(bpy.types.Menu):
-    bl_label = "Select"
-    bl_idname = "OBJECT_MT_custom_menu"
+    def execute(self, context):
+        scene = context.scene
+        mytool = scene.my_tool
 
-    def draw(self, context):
-        layout = self.layout
+        # print the values to the console
+        print("Cam_Test")
+        print("Cam_XYZ:", mytool.cam_xyz_max[0])
+        print("Cam_XYZ:", mytool.cam_xyz_min[0])
 
-        # Built-in operators
-        layout.operator("object.select_all", text="Select/Deselect All").action = 'TOGGLE'
-        layout.operator("object.select_all", text="Inverse").action = 'INVERT'
-        layout.operator("object.select_random", text="Random")
 
+
+        return {'FINISHED'}
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
 # ------------------------------------------------------------------------
@@ -203,14 +214,17 @@ class OBJECT_PT_CustomPanel(Panel):
 
         layout.prop(mytool, "my_bool")
         layout.prop(mytool, "my_enum", text="") 
-        layout.prop(mytool, "my_int")
-        layout.prop(mytool, "my_float")
-        layout.prop(mytool, "my_float_vector", text="")
         layout.prop(mytool, "my_string")
         layout.prop(mytool, "my_path")
         layout.operator("wm.hello_world")
-        layout.menu(OBJECT_MT_CustomMenu.bl_idname, text="Presets", icon="SCENE")
         layout.separator()
+
+
+
+        layout.prop(mytool, "cam_xyz_max")
+        layout.operator("wm.cam_spawn")
+        layout.separator()
+
 
 # ------------------------------------------------------------------------
 #    Registration
@@ -219,8 +233,9 @@ class OBJECT_PT_CustomPanel(Panel):
 classes = (
     MyProperties,
     WM_OT_HelloWorld,
-    OBJECT_MT_CustomMenu,
-    OBJECT_PT_CustomPanel
+    OBJECT_PT_CustomPanel,
+    OT_Cam_Spawn,
+
 )
 
 def register():
@@ -240,4 +255,3 @@ def unregister():
 if __name__ == "__main__":
     register()
 
-    
