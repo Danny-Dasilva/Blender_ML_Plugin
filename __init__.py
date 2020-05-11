@@ -22,7 +22,7 @@ bl_info = {
     "category" : "Generic"
 }
 from .ml_class import ML_Gen
-
+from . draw_op import OT_Draw_Operator
 import bpy
 
 from bpy.props import (StringProperty,
@@ -165,7 +165,7 @@ class OBJECT_PT_CustomPanel(Panel):
     bl_idname = "OBJECT_PT_custom_panel"
     bl_space_type = "VIEW_3D"   
     bl_region_type = "UI"
-    bl_category = "Tools"
+    bl_category = "Blender ML"
     bl_context = "objectmode"   
 
 
@@ -203,6 +203,7 @@ classes = (
     WM_OT_HelloWorld,
     OBJECT_PT_CustomPanel,
     OT_Cam_Spawn,
+    OT_Draw_Operator,
 
 )
 
