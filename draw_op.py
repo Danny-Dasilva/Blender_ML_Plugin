@@ -31,7 +31,7 @@ class OT_Draw_Operator(Operator):
         )
         self.draw_event = context.window_manager.event_timer_add(0.1, window = context.window)
     
-    def unregister_handler(self, context):
+    def unregister_handlers(self, context):
         context.window_manager.event_timer_remove(self.draw_event)
         bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, "WINDOW")
 
@@ -39,4 +39,26 @@ class OT_Draw_Operator(Operator):
         self.draw_event = None
     def modal(self, context, event):
         if context.area:
-            context.area
+            context.area.tag_redraw()
+
+        if event.type in {"ESC"}:
+            self.unregister_handler(context)
+            return {"CANCELLED"}
+        
+        return {"PASS_THROUGH"}
+    def finish(self):
+        self.unregister_handlers(context)
+        return {"FINISHED"}
+    
+    def create_batch(self):
+        vertices = [(0,3,3), (0,4,4), (0,6,2), (0,3,3)]
+
+        self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+        self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': vertices})
+    def draw_callback_px(self, op, context):
+        
+
+        bgl.glLineWidth(5)
+        self.shader.bind()
+        self.shader.uniform_float("color", (1, 0, 0, 1))
+        self.batch.draw(self.shader)
