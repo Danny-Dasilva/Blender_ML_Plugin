@@ -21,48 +21,7 @@ bl_info = {
     "warning" : "",
     "category" : "Generic"
 }
-
-# import bpy
-# from bpy.props import PointerProperty
-# from . test_panel import Test_PT_Panel, SimpleOperator, MySettings, AddButtonOperator, ButtonOperator
-# classes = (Test_PT_Panel, SimpleOperator, MySettings, AddButtonOperator, ButtonOperator)  
-
-
-
-# def register():
-#     from bpy.utils import register_class
-#     for cls in classes:
-#         register_class(cls)
-
-#     bpy.types.Scene.my_tool = PointerProperty(type=MySettings)
-
-# def unregister():
-#     from bpy.utils import unregister_class
-#     for cls in reversed(classes):
-#         unregister_class(cls)
-
-#     del bpy.types.Scene.my_tool
-
-
-# register, unregister = bpy.utils.register_classes_factory(classes)
-
-
-
-# https://blender.stackexchange.com/q/57306/3710
-
-bl_info = {
-    "name": "Add-on Template",
-    "description": "",
-    "author": "p2or",
-    "version": (0, 0, 3),
-    "blender": (2, 80, 0),
-    "location": "3D View > Tools",
-    "warning": "", # used for warning icon and text in addons panel
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Development"
-}
-
+from .ml_class import ML_Gen
 
 import bpy
 
@@ -111,7 +70,7 @@ class MyProperties(PropertyGroup):
 
 
     cam_xyz_max: FloatVectorProperty(
-        name = "XYZ",
+        name = "XYZ+",
         description="Something",
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
@@ -119,7 +78,7 @@ class MyProperties(PropertyGroup):
     ) 
 
     cam_xyz_min: FloatVectorProperty(
-        name = "XYZ",
+        name = "XYZ-",
         description="Something",
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
@@ -151,6 +110,9 @@ class MyProperties(PropertyGroup):
                ]
         )
 
+
+
+gen = ML_Gen()
 # ------------------------------------------------------------------------
 #    Operators
 # ------------------------------------------------------------------------
@@ -184,9 +146,13 @@ class OT_Cam_Spawn(Operator):
 
         # print the values to the console
         print("Cam_Test")
-        print("Cam_XYZ:", mytool.cam_xyz_max[0])
-        print("Cam_XYZ:", mytool.cam_xyz_min[0])
+        
+        gen.xyz_max = [val for val in mytool.cam_xyz_max]
+        gen.xyz_min = [val for val in mytool.cam_xyz_min]
+        gen.randomize_camera(scene)
 
+        print(gen.xyz_max, gen.xyz_min)
+        
 
 
         return {'FINISHED'}
@@ -220,8 +186,10 @@ class OBJECT_PT_CustomPanel(Panel):
         layout.separator()
 
 
-
+        layout.label(text="Camera Spawn:")
         layout.prop(mytool, "cam_xyz_max")
+        layout.prop(mytool, "cam_xyz_min")
+
         layout.operator("wm.cam_spawn")
         layout.separator()
 
