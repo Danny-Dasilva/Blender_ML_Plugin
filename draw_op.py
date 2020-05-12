@@ -1,7 +1,7 @@
 import bpy
 import bgl
 import gpu
-from gpu.extras.batch import batch_for_shader
+from gpu_extras.batch import batch_for_shader
 
 from bpy.types import Operator
 
@@ -51,7 +51,7 @@ class OT_Draw_Operator(Operator):
         return {"FINISHED"}
     
     def create_batch(self):
-        vertices = [(0,3,3), (0,4,4), (0,6,2), (0,3,3)]
+        vertices = [(0,3,4), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
 
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
         self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': vertices})

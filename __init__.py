@@ -206,18 +206,24 @@ classes = (
     OT_Draw_Operator,
 
 )
-
+addon_keymaps = []
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
+    kcfg = bpy.context.window_manager.keyconfigs.addon
+    if kcfg:
+        km = kcfg.keymaps.new(name="3D View", space_type='VIEW_3D')
+        kmi = km.keymap_items.new("object.draw_op", 'F', 'PRESS', shift=True, ctrl=True)
 
+        addon_keymaps.append((km, kmi))
     bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
 
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
+    addon_keymaps.clear()
     del bpy.types.Scene.my_tool
 
 
