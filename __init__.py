@@ -38,6 +38,16 @@ from bpy.types import (Panel,
                        Operator,
                        PropertyGroup,
                        )
+# ------------------------------------------------------------------------
+#    Update functions
+# ------------------------------------------------------------------------
+def my_update_func(self, context):
+    scene = bpy.context.scene
+    mytool = scene.my_tool
+    
+    xyz_min = [val for val in mytool.cam_xyz_max]
+
+    print("hello", xyz_min)
 
 
 # ------------------------------------------------------------------------
@@ -74,7 +84,8 @@ class MyProperties(PropertyGroup):
         description="Something",
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
-        max = 10000.0
+        max = 10000.0,
+        update=my_update_func
     ) 
 
     cam_xyz_min: FloatVectorProperty(
@@ -177,7 +188,7 @@ class OBJECT_PT_CustomPanel(Panel):
         layout = self.layout
         scene = context.scene
         mytool = scene.my_tool
-
+        
         layout.prop(mytool, "my_bool")
         layout.prop(mytool, "my_enum", text="") 
         layout.prop(mytool, "my_string")

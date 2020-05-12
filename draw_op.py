@@ -62,3 +62,5 @@ class OT_Draw_Operator(Operator):
         self.shader.bind()
         self.shader.uniform_float("color", (1, 0, 0, 1))
         self.batch.draw(self.shader)
+
+
