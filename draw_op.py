@@ -13,9 +13,8 @@ class OT_Draw_Operator(Operator):
     bl_options = {'REGISTER'}
 
 
-    
-    x: bpy.props.IntProperty()
-    y: bpy.props.IntProperty()
+
+    myvar = bpy.props.FloatProperty()
     def __init__(self):
         self.draw_handle = None
         self.draw_event = None
@@ -35,6 +34,7 @@ class OT_Draw_Operator(Operator):
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
     def register_handlers(self, args, context):
+        
         self.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
             self.draw_callback_px, args, "WINDOW", "POST_VIEW"
         )
@@ -51,7 +51,7 @@ class OT_Draw_Operator(Operator):
             context.area.tag_redraw()
 
         if event.type in {"ESC"}:
-            self.unregister_handler(context)
+            self.unregister_handlers(context)
             return {"CANCELLED"}
         
         return {"PASS_THROUGH"}
@@ -60,13 +60,14 @@ class OT_Draw_Operator(Operator):
         return {"FINISHED"}
     
     def create_batch(self):
-        vertices = [(0,self.x,self.x), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
-        print("create batch", self.x)
+        vertices = [(0,self.myvar,self.myvar), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
+        
+        print("create batch", self.myvar)
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
         self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': vertices})
     def draw_callback_px(self, op, context):
         
-
+    
         bgl.glLineWidth(5)
         self.shader.bind()
         self.shader.uniform_float("color", (1, 0, 0, 1))

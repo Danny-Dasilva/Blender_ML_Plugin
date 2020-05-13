@@ -50,10 +50,8 @@ def my_update_func(self, context):
 
     
     # bpy.ops.object.draw_op.x = xyz_min[0]
-    bpy.ops.object.draw_op('INVOKE_DEFAULT')
+    bpy.ops.object.draw_op("INVOKE_DEFAULT", myvar = xyz_min[0]) 
     
-
-    bpy.ops.object.draw_op('EXEC_DEFAULT', x=13, y=66)
    
     print("hello", xyz_min[0])
 
