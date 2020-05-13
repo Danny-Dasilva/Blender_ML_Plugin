@@ -44,7 +44,7 @@ from bpy.types import (Panel,
 def my_update_func(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
-    
+    bpy.ops.object.draw_op('INVOKE_DEFAULT')
     xyz_min = [val for val in mytool.cam_xyz_max]
 
     print("hello", xyz_min)
@@ -86,7 +86,7 @@ class MyProperties(PropertyGroup):
         min= -10000.0, # float
         max = 10000.0,
         update=my_update_func
-    ) 
+        ) 
 
     cam_xyz_min: FloatVectorProperty(
         name = "XYZ-",
@@ -94,7 +94,7 @@ class MyProperties(PropertyGroup):
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
         max = 10000.0
-    ) 
+        )
 
 
     my_string: StringProperty(
@@ -196,7 +196,7 @@ class OBJECT_PT_CustomPanel(Panel):
         layout.operator("wm.hello_world")
         layout.separator()
 
-
+        self.layout.operator(OT_Draw_Operator.bl_idname)
         layout.label(text="Camera Spawn:")
         layout.prop(mytool, "cam_xyz_max")
         layout.prop(mytool, "cam_xyz_min")
@@ -222,12 +222,14 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-    kcfg = bpy.context.window_manager.keyconfigs.addon
-    if kcfg:
-        km = kcfg.keymaps.new(name="3D View", space_type='VIEW_3D')
-        kmi = km.keymap_items.new("object.draw_op", 'F', 'PRESS', shift=True, ctrl=True)
+    
 
-        addon_keymaps.append((km, kmi))
+    # kcfg = bpy.context.window_manager.keyconfigs.addon
+    # if kcfg:
+    #     km = kcfg.keymaps.new(name="3D View", space_type='VIEW_3D')
+    #     kmi = km.keymap_items.new("object.draw_op", 'F', 'PRESS', shift=True, ctrl=True)
+
+    #     addon_keymaps.append((km, kmi))
     bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
 
 def unregister():
@@ -239,5 +241,7 @@ def unregister():
 
 
 if __name__ == "__main__":
+
     register()
+    bpy.ops.object.draw_op('INVOKE_DEFAULT')
 
