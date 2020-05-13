@@ -12,11 +12,20 @@ class OT_Draw_Operator(Operator):
     bl_description = "Operator for drawing"   
     bl_options = {'REGISTER'}
 
+
+    
+    x: bpy.props.IntProperty()
+    y: bpy.props.IntProperty()
     def __init__(self):
         self.draw_handle = None
         self.draw_event = None
 
         self.widgets = []
+
+        self.x = 0
+
+    def execute(self, context):
+        return self.invoke(context, None)
     def invoke(self, context, event):
         self.create_batch()
 
@@ -51,8 +60,8 @@ class OT_Draw_Operator(Operator):
         return {"FINISHED"}
     
     def create_batch(self):
-        vertices = [(0,3,4), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
-
+        vertices = [(0,self.x,self.x), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
+        print("create batch", self.x)
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
         self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': vertices})
     def draw_callback_px(self, op, context):

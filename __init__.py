@@ -44,10 +44,18 @@ from bpy.types import (Panel,
 def my_update_func(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
-    bpy.ops.object.draw_op('INVOKE_DEFAULT')
+    
     xyz_min = [val for val in mytool.cam_xyz_max]
 
-    print("hello", xyz_min)
+
+    
+    # bpy.ops.object.draw_op.x = xyz_min[0]
+    bpy.ops.object.draw_op('INVOKE_DEFAULT')
+    
+
+    bpy.ops.object.draw_op('EXEC_DEFAULT', x=13, y=66)
+   
+    print("hello", xyz_min[0])
 
 
 # ------------------------------------------------------------------------
