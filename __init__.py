@@ -25,6 +25,10 @@ from .ml_class import ML_Gen
 from . draw_op import OT_Draw_Operator
 import bpy
 
+import bgl
+import gpu
+from gpu_extras.batch import batch_for_shader
+
 from bpy.props import (StringProperty,
                        BoolProperty,
                        IntProperty,
@@ -41,6 +45,13 @@ from bpy.types import (Panel,
 # ------------------------------------------------------------------------
 #    Update functions
 # ------------------------------------------------------------------------
+
+class DataStore():
+    a = 0
+    draw_handle = None
+
+data = DataStore()
+
 def my_update_func(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
@@ -50,9 +61,36 @@ def my_update_func(self, context):
 
     
     # bpy.ops.object.draw_op.x = xyz_min[0]
-    bpy.ops.object.draw_op("INVOKE_DEFAULT", myvar = xyz_min[0]) 
+    # bpy.ops.object.draw_op("INVOKE_DEFAULT", myvar = xyz_min[0]) 
     
-   
+    
+    vertices = [(0, xyz_min[0], xyz_min[0]), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
+        
+        
+    shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+    batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
+
+    def draw_callback_px():
+        bgl.glLineWidth(5)
+        shader.bind()
+        shader.uniform_float("color", (1, 0, 0, 1))
+        batch.draw(shader)
+
+    args = None
+    
+    # bpy.type.SpaceView3D.draw_handler_remove(draw_handler, 'WINDOW')
+    # print(draw_handler)
+    if data.draw_handle != None:
+        bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+
+
+    data.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
+        draw_callback_px, (), "WINDOW", "POST_VIEW"
+        )
+    
+    
+    
+
     print("hello", xyz_min[0])
 
 
