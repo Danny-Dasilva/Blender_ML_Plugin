@@ -10,6 +10,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+# to do
+# cube draw 
+# panel for object select
+# display pabel for obj spawn and cube draw
+# batch render
 
 bl_info = {
     "name" : "Test_addon",
