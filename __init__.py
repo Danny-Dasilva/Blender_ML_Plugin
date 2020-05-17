@@ -54,6 +54,20 @@ from bpy.types import (Panel,
 class DataStore():
     a = 0
     draw_handle = None
+    def register(self):
+        self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+        self.batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
+    def unregister(self):
+        pass
+    def setxyz(self, xyz_min, xyz_max):
+        pass
+
+
+    def draw_callback_px(self):
+        bgl.glLineWidth(5)
+        self.shader.bind()
+        self.shader.uniform_float("color", (1, 0, 0, 1))
+        self.batch.draw(self.shader)
 
 data = DataStore()
 
@@ -68,7 +82,7 @@ def my_update_func(self, context):
     # bpy.ops.object.draw_op.x = xyz_min[0]
     # bpy.ops.object.draw_op("INVOKE_DEFAULT", myvar = xyz_min[0]) 
     
-    
+    #first is first
     vertices = [(0, 0, 4), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
     (0,4,4), (0,4,0), (4,4,0), (4, 4, 4), (4, 0, 4), (4, 0, 0), (0,0,0)]
         
@@ -82,8 +96,7 @@ def my_update_func(self, context):
         shader.uniform_float("color", (1, 0, 0, 1))
         batch.draw(shader)
 
-    args = None
-    
+
     # bpy.type.SpaceView3D.draw_handler_remove(draw_handler, 'WINDOW')
     # print(draw_handler)
     if data.draw_handle != None:
