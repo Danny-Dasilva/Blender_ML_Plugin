@@ -69,7 +69,7 @@ def my_update_func(self, context):
     # bpy.ops.object.draw_op("INVOKE_DEFAULT", myvar = xyz_min[0]) 
     
     
-    vertices = [(0, xyz_min[0], xyz_min[0]), (0,3,1), (0,6,1),  (0,6,4), (0,3,4),]
+    vertices = [(0, 0, 4), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4)]
         
         
     shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
