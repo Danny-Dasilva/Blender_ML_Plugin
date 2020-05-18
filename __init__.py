@@ -51,45 +51,53 @@ from bpy.types import (Panel,
 #    Update functions
 # ------------------------------------------------------------------------
 
-class DataStore():
+class DrawBox():
 
     draw_handle = None
     vertices = None
     def register(self):
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
         self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': self.vertices})
-    def unregister(self):
-        pass
-    def setxyz(self, xyz_min, xyz_max):
-        print(xyz_min, "in data class")
-        self.vertices = [(0, 0, xyz_min[0]), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
-        (0,4,4), (0,4,0), (4,4,0), (4, 4, 4), (4, 0, 4), (4, 0, 0), (0,0,0)]
-
-    def run(self):
-        if self.draw_handle != None:
-            bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
-
-        self.register()
         self.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
             self.draw_callback_px, (), "WINDOW", "POST_VIEW"
             )
+    def unregister(self):
+        bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+
+    def setxyz(self, xyz_max, xyz_min):
+        print(xyz_min, "in data class")
+        x_min = xyz_min[0]
+        x_max = xyz_max[0]
+        y_min = xyz_min[1]
+        y_max = xyz_max[1]
+        z_min = xyz_min[2]
+        z_max = xyz_max[2]
+        
+        self.vertices = [(x_min, y_min, z_max), (x_max,y_min,z_max), (x_max,y_min,z_min),  (x_max,y_max, z_min), (x_max,y_max, z_max), (x_min,y_max, z_max), (x_min,y_max,z_min),(x_min,y_min,z_min), (x_min,y_min,z_max),
+        (x_min,y_max,z_max), (x_min,y_max,z_min), (x_max,y_max,z_min), (x_max, y_max, z_max), (x_max, y_min, z_max), (x_max, y_min, z_min), (x_min,y_min,z_min)]
 
 
+    def run(self):
+        if self.draw_handle != None:
+            self.unregister()
+
+        self.register()
+        
     def draw_callback_px(self):
         bgl.glLineWidth(5)
         self.shader.bind()
         self.shader.uniform_float("color", (1, 0, 0, 1))
         self.batch.draw(self.shader)
 
-data = DataStore()
+data = DrawBox()
 
 def my_update_func(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
     
-    xyz_min = [val for val in mytool.cam_xyz_max]
-
-    data.setxyz(xyz_min, xyz_min)
+    xyz_max = [val for val in mytool.cam_xyz_max]
+    xyz_min = [val for val in mytool.cam_xyz_min]
+    data.setxyz(xyz_max, xyz_min)
     data.run()
     
     
@@ -97,33 +105,29 @@ def my_update_func(self, context):
    
     
     
-    
-
-    print("hello", xyz_min[0])
-
 
 
  # vertices = [(0, 0, 4), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
     # (0,4,4), (0,4,0), (4,4,0), (4, 4, 4), (4, 0, 4), (4, 0, 0), (0,0,0)]
         
         
-    # shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-    # batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
+# shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+# batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
 
-    # def draw_callback_px():
-    #     bgl.glLineWidth(5)
-    #     shader.bind()
-    #     shader.uniform_float("color", (1, 0, 0, 1))
-    #     batch.draw(shader)
-
-
-    # if data.draw_handle != None:
-    #     bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+# def draw_callback_px():
+#     bgl.glLineWidth(5)
+#     shader.bind()
+#     shader.uniform_float("color", (1, 0, 0, 1))
+#     batch.draw(shader)
 
 
-    # data.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
-    #     draw_callback_px, (), "WINDOW", "POST_VIEW"
-    #     )
+# if data.draw_handle != None:
+#     bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+
+
+# data.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
+#     draw_callback_px, (), "WINDOW", "POST_VIEW"
+#     )
 
 
 
@@ -170,7 +174,8 @@ class MyProperties(PropertyGroup):
         description="Something",
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
-        max = 10000.0
+        max = 10000.0,
+        update=my_update_func
         )
 
 
