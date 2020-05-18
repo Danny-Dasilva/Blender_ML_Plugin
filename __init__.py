@@ -52,15 +52,27 @@ from bpy.types import (Panel,
 # ------------------------------------------------------------------------
 
 class DataStore():
-    a = 0
+
     draw_handle = None
+    vertices = None
     def register(self):
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-        self.batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
+        self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': self.vertices})
     def unregister(self):
         pass
     def setxyz(self, xyz_min, xyz_max):
-        pass
+        print(xyz_min, "in data class")
+        self.vertices = [(0, 0, xyz_min[0]), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
+        (0,4,4), (0,4,0), (4,4,0), (4, 4, 4), (4, 0, 4), (4, 0, 0), (0,0,0)]
+
+    def run(self):
+        if self.draw_handle != None:
+            bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+
+        self.register()
+        self.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
+            self.draw_callback_px, (), "WINDOW", "POST_VIEW"
+            )
 
 
     def draw_callback_px(self):
@@ -77,40 +89,42 @@ def my_update_func(self, context):
     
     xyz_min = [val for val in mytool.cam_xyz_max]
 
-
+    data.setxyz(xyz_min, xyz_min)
+    data.run()
     
-    # bpy.ops.object.draw_op.x = xyz_min[0]
-    # bpy.ops.object.draw_op("INVOKE_DEFAULT", myvar = xyz_min[0]) 
     
-    #first is first
-    vertices = [(0, 0, 4), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
-    (0,4,4), (0,4,0), (4,4,0), (4, 4, 4), (4, 0, 4), (4, 0, 0), (0,0,0)]
-        
-        
-    shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-    batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
-
-    def draw_callback_px():
-        bgl.glLineWidth(5)
-        shader.bind()
-        shader.uniform_float("color", (1, 0, 0, 1))
-        batch.draw(shader)
-
-
-    # bpy.type.SpaceView3D.draw_handler_remove(draw_handler, 'WINDOW')
-    # print(draw_handler)
-    if data.draw_handle != None:
-        bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
-
-
-    data.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
-        draw_callback_px, (), "WINDOW", "POST_VIEW"
-        )
+    
+   
     
     
     
 
     print("hello", xyz_min[0])
+
+
+
+ # vertices = [(0, 0, 4), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
+    # (0,4,4), (0,4,0), (4,4,0), (4, 4, 4), (4, 0, 4), (4, 0, 0), (0,0,0)]
+        
+        
+    # shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+    # batch = batch_for_shader(shader, 'LINE_STRIP', {'pos': vertices})
+
+    # def draw_callback_px():
+    #     bgl.glLineWidth(5)
+    #     shader.bind()
+    #     shader.uniform_float("color", (1, 0, 0, 1))
+    #     batch.draw(shader)
+
+
+    # if data.draw_handle != None:
+    #     bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+
+
+    # data.draw_handle = bpy.types.SpaceView3D.draw_handler_add(
+    #     draw_callback_px, (), "WINDOW", "POST_VIEW"
+    #     )
+
 
 
 # ------------------------------------------------------------------------
