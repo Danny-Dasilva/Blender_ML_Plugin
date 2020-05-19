@@ -18,8 +18,6 @@ class ML_Gen():
         x = uniform(self.xyz_min[0], self.xyz_max[0])   
         y = uniform(self.xyz_min[1], self.xyz_max[1])                                                                                                                                       
         z = uniform(self.xyz_min[2], self.xyz_max[2])
-       
-
         
         # Set camera translation
         scene.camera.location.x = x
@@ -27,5 +25,4 @@ class ML_Gen():
         scene.camera.location.z = z
         # #call update
         self.update()
-
         return scene.camera

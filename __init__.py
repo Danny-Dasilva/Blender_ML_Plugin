@@ -249,6 +249,20 @@ class OT_Cam_Spawn(Operator):
 
 
         return {'FINISHED'}
+
+class OT_Obj_Spawn(Operator):
+    bl_label = "Obj_Spawn"
+    bl_idname = "wm.obj_spawn"
+
+    def execute(self, context):
+        scene = context.scene
+        mytool = scene.my_tool
+
+        
+
+
+        return {'FINISHED'}
+
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
 # ------------------------------------------------------------------------
@@ -261,6 +275,7 @@ class OBJECT_PT_CustomPanel(Panel):
     bl_category = "Blender ML"
     bl_context = "objectmode"   
 
+    bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
 
     @classmethod
     def poll(self,context):
@@ -278,13 +293,16 @@ class OBJECT_PT_CustomPanel(Panel):
         layout.operator("wm.hello_world")
         layout.separator()
 
-        self.layout.operator(OT_Draw_Operator.bl_idname)
         layout.label(text="Camera Spawn:")
         layout.prop(mytool, "cam_xyz_max")
         layout.prop(mytool, "cam_xyz_min")
 
         layout.operator("wm.cam_spawn")
         layout.separator()
+
+        layout.prop(scene, "prop")
+        #enable physics
+        layout.operator("wm.obj_spawn")
 
 
 # ------------------------------------------------------------------------
