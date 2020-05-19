@@ -84,7 +84,7 @@ class DrawBox():
         self.register()
         
     def draw_callback_px(self):
-        bgl.glLineWidth(5)
+        bgl.glLineWidth(3)
         self.shader.bind()
         self.shader.uniform_float("color", (1, 0, 0, 1))
         self.batch.draw(self.shader)
