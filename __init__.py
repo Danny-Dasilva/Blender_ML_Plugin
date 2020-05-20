@@ -15,7 +15,7 @@
 # panel for object select
 # display pabel for obj spawn and cube draw
 # batch render
-
+# id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
 bl_info = {
     "name" : "Test_addon",
     "author" : "Danny Dasilva",
