@@ -55,6 +55,8 @@ class DrawBox():
 
     draw_handle = None
     vertices = None
+    def __init__(self, set_cam):
+        self.set_cam = set_cam
     def register(self):
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
         self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': self.vertices})
@@ -62,7 +64,7 @@ class DrawBox():
             self.draw_callback_px, (), "WINDOW", "POST_VIEW"
             )
     def unregister(self):
-        bpy.types.SpaceView3D.draw_handler_remove(data.draw_handle, 'WINDOW')
+        bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, 'WINDOW')
 
     def setxyz(self, xyz_max, xyz_min):
         print(xyz_min, "in data class")
@@ -86,25 +88,35 @@ class DrawBox():
     def draw_callback_px(self):
         bgl.glLineWidth(3)
         self.shader.bind()
-        self.shader.uniform_float("color", (1, 0, 0, 1))
+        if self.set_cam != None:
+            self.shader.uniform_float("color", (0, 1, 1, 1))
+        else:
+            self.shader.uniform_float("color", (1, 0, 0, 1))
         self.batch.draw(self.shader)
 
-data = DrawBox()
+cam = DrawBox(None)
 
-def my_update_func(self, context):
+def cam_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
     
     xyz_max = [val for val in mytool.cam_xyz_max]
     xyz_min = [val for val in mytool.cam_xyz_min]
-    data.setxyz(xyz_max, xyz_min)
-    data.run()
+    cam.setxyz(xyz_max, xyz_min)
+    cam.run()
     
     
     
    
+obj = DrawBox(1)
+def obj_domain(self, context):
+    scene = bpy.context.scene
+    mytool = scene.my_tool
     
-    
+    xyz_max = [val for val in mytool.obj_xyz_max]
+    xyz_min = [val for val in mytool.obj_xyz_min]
+    obj.setxyz(xyz_max, xyz_min)
+    obj.run()
 
 
  # vertices = [(0, 0, 4), (4,0,4), (4,0,0),  (4,4,0), (4,4,4), (0,4,4), (0,4,0),(0,0,0), (0,0,4),
@@ -170,7 +182,7 @@ class MyProperties(PropertyGroup):
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
         max = 10000.0,
-        update=my_update_func
+        update=cam_domain
         ) 
 
     cam_xyz_min: FloatVectorProperty(
@@ -179,9 +191,26 @@ class MyProperties(PropertyGroup):
         default=(0.0, 0.0, 0.0), 
         min= -10000.0, # float
         max = 10000.0,
-        update=my_update_func
+        update=cam_domain
         )
+        # this is dumb fix this with less code
+    obj_xyz_max: FloatVectorProperty(
+        name = "XYZ+",
+        description="Something",
+        default=(0.0, 0.0, 0.0), 
+        min= -10000.0, # float
+        max = 10000.0,
+        update=obj_domain
+        ) 
 
+    obj_xyz_min: FloatVectorProperty(
+        name = "XYZ-",
+        description="Something",
+        default=(0.0, 0.0, 0.0), 
+        min= -10000.0, # float
+        max = 10000.0,
+        update=obj_domain
+        )
 
     id_name: StringProperty(
         name="name",
@@ -282,7 +311,6 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         layout.prop(mytool, "my_enum", text="") 
      
         layout.prop(mytool, "my_path")
-        layout.operator("wm.hello_world")
         layout.separator()
 
         layout.label(text="Camera Spawn:")
@@ -320,9 +348,10 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
             layout.label(text=" Aligned Row:")
 
 
-            row = layout.row(align=True)
-            row.prop(scene, "frame_start")
-            row.prop(scene, "frame_end")
+           
+            layout.label(text="Obj Spawn:")
+            layout.prop(mytool, "obj_xyz_max")
+            layout.prop(mytool, "obj_xyz_min")
 
 
             
