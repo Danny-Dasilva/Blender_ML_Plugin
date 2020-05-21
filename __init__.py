@@ -142,7 +142,11 @@ class MyProperties(PropertyGroup):
         description="A bool property",
         default = False
         )
-
+    enable_physics: BoolProperty(
+        name="Enable Physics",
+        description="A bool property",
+        default = False
+        )
     my_int: IntProperty(
         name = "Int Value",
         description="A integer property",
@@ -179,8 +183,8 @@ class MyProperties(PropertyGroup):
         )
 
 
-    my_string: StringProperty(
-        name="User Input",
+    id_name: StringProperty(
+        name="name",
         description=":",
         default="",
         maxlen=1024,
@@ -210,24 +214,6 @@ gen = ML_Gen()
 #    Operators
 # ------------------------------------------------------------------------
 
-class WM_OT_HelloWorld(Operator):
-    bl_label = "Print Values Operator"
-    bl_idname = "wm.hello_world"
-
-    def execute(self, context):
-        scene = context.scene
-        mytool = scene.my_tool
-
-        # print the values to the console
-        print("Hello World")
-        print("bool state:", mytool.my_bool)
-        print("int value:", mytool.my_int)
-        print("float value:", mytool.my_float)
-        print("string value:", mytool.my_string)
-        print("enum state:", mytool.my_enum)
-        
-
-        return {'FINISHED'}
 
 class OT_Cam_Spawn(Operator):
     bl_label = "Cam_Spawn"
@@ -266,15 +252,18 @@ class OT_Obj_Spawn(Operator):
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
 # ------------------------------------------------------------------------
-
-class OBJECT_PT_CustomPanel(Panel):
-    bl_label = "My Panel"
-    bl_idname = "OBJECT_PT_custom_panel"
+class Inherit_Panel:
     bl_space_type = "VIEW_3D"   
     bl_region_type = "UI"
     bl_category = "Blender ML"
     bl_context = "objectmode"   
+    
 
+
+class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
+    bl_label = "My Panel"
+    bl_idname = "OBJECT_PT_CustomPanel"
+   
     bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
 
     @classmethod
@@ -291,7 +280,7 @@ class OBJECT_PT_CustomPanel(Panel):
 
         layout.prop(mytool, "my_bool")
         layout.prop(mytool, "my_enum", text="") 
-        layout.prop(mytool, "my_string")
+     
         layout.prop(mytool, "my_path")
         layout.operator("wm.hello_world")
         layout.separator()
@@ -304,74 +293,37 @@ class OBJECT_PT_CustomPanel(Panel):
         layout.separator()
 
             
-            # layout.prop(scene, "prop")
 
 
+class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    bl_label = "Object id #1"
+    bl_options = {"DEFAULT_CLOSED"}
+    bpy.types.Scene.object = PointerProperty(type=bpy.types.Object)
 
-# class OBJECT_PT_CustomPanel:
-#     bl_space_type = "VIEW_3D"
-#     bl_region_type = "UI"
-#     bl_category = "Blender ML"
-#     bl_context = "objectmode"   
-#     bl_options = {"DEFAULT_CLOSED"}
+    @classmethod
+    def poll(self,context):
+        return context.object is not None
 
-
-
-# class OBJECT_PT_Cam(OBJECT_PT_CustomPanel,  bpy.types.Panel):
-#     bl_label = "My Panel"
-#     bl_idname = "OBJECT_PT_custom_panel"
-   
-
-#     bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
-
-#     @classmethod
-#     def poll(self,context):
-#         return context.object is not None
-
-#     def draw(self, context):
-#         layout = self.layout
-#         scene = context.scene
-#         mytool = scene.my_tool
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        mytool = scene.my_tool
 
 
+        layout.prop(mytool, "id_name")
 
+        layout.prop(scene, "object")
+        layout.prop(mytool, "enable_physics")
 
-#         layout.prop(mytool, "my_bool")
-#         layout.prop(mytool, "my_enum", text="") 
-#         layout.prop(mytool, "my_string")
-#         layout.prop(mytool, "my_path")
-#         layout.operator("wm.hello_world")
-#         layout.separator()
-
-#         layout.label(text="Camera Spawn:")
-#         layout.prop(mytool, "cam_xyz_max")
-#         layout.prop(mytool, "cam_xyz_min")
-
-#         layout.operator("wm.cam_spawn")
-#         layout.separator()
 
             
-#             # layout.prop(scene, "prop")
-
-# class HELLO_PT_World2(OBJECT_PT_CustomPanel,  bpy.types.Panel):
-#     bl_parent_id = "OBJECT_PT_Cam"
-#     bl_label = "Panel 2"
-
-#     def draw(self, context):
-#         layout = self.layout
-#         layout.label(text="First Sub Panel of Panel 1.")
-
-
-# ------------------------------------------------------------------------
-#    Registration
-# ------------------------------------------------------------------------
-
 classes = (
     MyProperties,
-    WM_OT_HelloWorld,
-    OBJECT_PT_CustomPanel,
     OT_Cam_Spawn,
     OT_Draw_Operator,
+    OBJECT_PT_CustomPanel,
+    OBJECT_PT_CustomPanel1,
 
 )
 
