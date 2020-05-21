@@ -316,6 +316,14 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         layout.prop(scene, "object")
         layout.prop(mytool, "enable_physics")
 
+        if mytool.enable_physics:#if bool property is true, show rows, else don't
+            layout.label(text=" Aligned Row:")
+
+
+            row = layout.row(align=True)
+            row.prop(scene, "frame_start")
+            row.prop(scene, "frame_end")
+
 
             
 classes = (
