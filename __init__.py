@@ -285,7 +285,10 @@ class OBJECT_PT_CustomPanel(Panel):
         layout = self.layout
         scene = context.scene
         mytool = scene.my_tool
-        
+
+
+
+
         layout.prop(mytool, "my_bool")
         layout.prop(mytool, "my_enum", text="") 
         layout.prop(mytool, "my_string")
@@ -300,9 +303,63 @@ class OBJECT_PT_CustomPanel(Panel):
         layout.operator("wm.cam_spawn")
         layout.separator()
 
-        layout.prop(scene, "prop")
-        #enable physics
-        layout.operator("wm.obj_spawn")
+            
+            # layout.prop(scene, "prop")
+
+
+
+# class OBJECT_PT_CustomPanel:
+#     bl_space_type = "VIEW_3D"
+#     bl_region_type = "UI"
+#     bl_category = "Blender ML"
+#     bl_context = "objectmode"   
+#     bl_options = {"DEFAULT_CLOSED"}
+
+
+
+# class OBJECT_PT_Cam(OBJECT_PT_CustomPanel,  bpy.types.Panel):
+#     bl_label = "My Panel"
+#     bl_idname = "OBJECT_PT_custom_panel"
+   
+
+#     bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
+
+#     @classmethod
+#     def poll(self,context):
+#         return context.object is not None
+
+#     def draw(self, context):
+#         layout = self.layout
+#         scene = context.scene
+#         mytool = scene.my_tool
+
+
+
+
+#         layout.prop(mytool, "my_bool")
+#         layout.prop(mytool, "my_enum", text="") 
+#         layout.prop(mytool, "my_string")
+#         layout.prop(mytool, "my_path")
+#         layout.operator("wm.hello_world")
+#         layout.separator()
+
+#         layout.label(text="Camera Spawn:")
+#         layout.prop(mytool, "cam_xyz_max")
+#         layout.prop(mytool, "cam_xyz_min")
+
+#         layout.operator("wm.cam_spawn")
+#         layout.separator()
+
+            
+#             # layout.prop(scene, "prop")
+
+# class HELLO_PT_World2(OBJECT_PT_CustomPanel,  bpy.types.Panel):
+#     bl_parent_id = "OBJECT_PT_Cam"
+#     bl_label = "Panel 2"
+
+#     def draw(self, context):
+#         layout = self.layout
+#         layout.label(text="First Sub Panel of Panel 1.")
 
 
 # ------------------------------------------------------------------------
@@ -317,26 +374,17 @@ classes = (
     OT_Draw_Operator,
 
 )
-addon_keymaps = []
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-    
-
-    # kcfg = bpy.context.window_manager.keyconfigs.addon
-    # if kcfg:
-    #     km = kcfg.keymaps.new(name="3D View", space_type='VIEW_3D')
-    #     kmi = km.keymap_items.new("object.draw_op", 'F', 'PRESS', shift=True, ctrl=True)
-
-    #     addon_keymaps.append((km, kmi))
     bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
 
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
-    addon_keymaps.clear()
     del bpy.types.Scene.my_tool
 
 
