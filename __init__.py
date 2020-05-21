@@ -320,7 +320,28 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         layout.operator("wm.cam_spawn")
         layout.separator()
 
-            
+class DataStore:
+    value = 0
+    def increment(self):
+        self.value +=1   
+test = DataStore()
+class AddButtonOperator(bpy.types.Operator):
+    bl_idname = "scene.add_button_operator"
+    bl_label = "Add Button"
+
+    def execute(self, context):
+        test.increment()
+        return {'FINISHED'}
+
+class ButtonOperator(bpy.types.Operator):
+    bl_idname = "scene.button_operator"
+    bl_label = "Button"
+
+    id = bpy.props.IntProperty()
+
+    def execute(self, context):
+        print("Pressed button ", self.id)
+        return {'FINISHED'}
 
 
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
@@ -338,21 +359,39 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-
+        
+        
         layout.prop(mytool, "id_name")
 
         layout.prop(scene, "object")
+        
+
+        self.layout.operator("scene.add_button_operator")
+        for item in range(test.value):
+               self.layout.operator("scene.button_operator", text="Button #"+str(item)).id = item
+
         layout.prop(mytool, "enable_physics")
 
-        if mytool.enable_physics:#if bool property is true, show rows, else don't
-            layout.label(text=" Aligned Row:")
-
-
-           
+        if mytool.enable_physics:
             layout.label(text="Obj Spawn:")
             layout.prop(mytool, "obj_xyz_max")
             layout.prop(mytool, "obj_xyz_min")
 
+class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    bl_label = "Render Options"
+    bpy.types.Scene.object = PointerProperty(type=bpy.types.Object)
+
+    @classmethod
+    def poll(self,context):
+        return context.object is not None
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        mytool = scene.my_tool
+        if mytool.enable_physics:#if bool property is true, show rows, else don't
+            layout.label(text="put frame thing")
 
             
 classes = (
@@ -361,6 +400,9 @@ classes = (
     OT_Draw_Operator,
     OBJECT_PT_CustomPanel,
     OBJECT_PT_CustomPanel1,
+    OBJECT_PT_CustomPanel2,
+    ButtonOperator,
+    AddButtonOperator,
 
 )
 
