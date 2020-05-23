@@ -17,7 +17,7 @@
 # batch render
 # id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
 
-# add and delete button for add button, replace with obj select, check the names and obj ids if I can
+# !! check the names and obj ids if I can
 # see if its possible to dubliicate menus
 bl_info = {
     "name" : "Test_addon",
@@ -44,6 +44,7 @@ from bpy.props import (StringProperty,
                        FloatVectorProperty,
                        EnumProperty,
                        PointerProperty,
+                       CollectionProperty,
                        )
 from bpy.types import (Panel,
                        Menu,
@@ -305,23 +306,18 @@ class DataStore:
     def decrement(self):
         self.value -=1   
 test = DataStore()
+class SceneItems(bpy.types.PropertyGroup):
+    value = bpy.props.IntProperty()
 
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
-    bl_label = "Add Object"
-    bpy.types.Scene.obj1 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj2 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj3 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj4 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj5 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj6 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj7 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj8 = PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.obj9 = PointerProperty(type=bpy.types.Object)
+    bl_label = "Add Button"
 
     def execute(self, context):
-        
-        test.increment()
+        id = len(context.scene.collection)
+        new = context.scene.collection.add()
+        new.name = str(id)
+        new.value = id
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
@@ -347,7 +343,9 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_label = "Object id #1"
     bl_options = {"DEFAULT_CLOSED"}
-    
+
+    bpy.types.Scene.unlucky = CollectionProperty(type=SceneItems)
+
     @classmethod
     def poll(self,context):
         return context.object is not None
@@ -362,11 +360,13 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         layout.prop(mytool, "id_name")
 
         
-
+        
        
 
-        for item in range(test.value):
-            layout.prop(scene, f"obj{item + 1}")
+        # for item in range(test.value):
+        #     layout.prop(scene, f"obj{item + 1}")
+        for item in context.scene.fuck:
+               self.layout.operator("scene.button_operator", text="Button #"+item.name).id = item.value
             #    self.layout.operator("scene.button_operator", text="Button #"+str(item)).id = item
 
         split = layout.split()
@@ -407,6 +407,7 @@ classes = (
     ButtonOperator,
     AddButtonOperator,
     RemoveButtonOperator,
+    SceneItems,
 
 )
 
