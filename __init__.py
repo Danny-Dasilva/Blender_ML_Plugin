@@ -285,9 +285,6 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-
-
-
         layout.prop(mytool, "my_bool")
         layout.prop(mytool, "my_enum", text="") 
      
@@ -302,23 +299,34 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         layout.separator()
 
 class DataStore:
-    value = 0
+    value = 1
     def increment(self):
         self.value +=1   
     def decrement(self):
         self.value -=1   
 test = DataStore()
+
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
-    bl_label = "Add Button"
+    bl_label = "Add Object"
+    bpy.types.Scene.obj1 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj2 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj3 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj4 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj5 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj6 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj7 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj8 = PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.obj9 = PointerProperty(type=bpy.types.Object)
 
     def execute(self, context):
+        
         test.increment()
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
     bl_idname = "scene.remove_button_operator"
-    bl_label = "Remove Button"
+    bl_label = "Remove Object"
 
     def execute(self, context):
         test.decrement()
@@ -339,8 +347,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_label = "Object id #1"
     bl_options = {"DEFAULT_CLOSED"}
-    bpy.types.Scene.object = PointerProperty(type=bpy.types.Object)
-
+    
     @classmethod
     def poll(self,context):
         return context.object is not None
@@ -354,18 +361,20 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         
         layout.prop(mytool, "id_name")
 
-        layout.prop(scene, "object")
         
+
+       
+
+        for item in range(test.value):
+            layout.prop(scene, f"obj{item + 1}")
+            #    self.layout.operator("scene.button_operator", text="Button #"+str(item)).id = item
+
         split = layout.split()
         col = split.column()
         col.operator("scene.add_button_operator")
         col = split.column(align=True)
         
         col.operator("scene.remove_button_operator")
-
-        for item in range(test.value):
-               self.layout.operator("scene.button_operator", text="Button #"+str(item)).id = item
-
         layout.prop(mytool, "enable_physics")
 
         if mytool.enable_physics:
@@ -376,8 +385,6 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_label = "Render Options"
-    bpy.types.Scene.object = PointerProperty(type=bpy.types.Object)
-
     @classmethod
     def poll(self,context):
         return context.object is not None
