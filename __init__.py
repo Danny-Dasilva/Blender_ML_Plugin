@@ -305,6 +305,8 @@ class DataStore:
     value = 0
     def increment(self):
         self.value +=1   
+    def decrement(self):
+        self.value -=1   
 test = DataStore()
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
@@ -312,6 +314,14 @@ class AddButtonOperator(bpy.types.Operator):
 
     def execute(self, context):
         test.increment()
+        return {'FINISHED'}
+
+class RemoveButtonOperator(bpy.types.Operator):
+    bl_idname = "scene.remove_button_operator"
+    bl_label = "Remove Button"
+
+    def execute(self, context):
+        test.decrement()
         return {'FINISHED'}
 
 class ButtonOperator(bpy.types.Operator):
@@ -346,8 +356,13 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
         layout.prop(scene, "object")
         
+        split = layout.split()
+        col = split.column()
+        col.operator("scene.add_button_operator")
+        col = split.column(align=True)
+        
+        col.operator("scene.remove_button_operator")
 
-        self.layout.operator("scene.add_button_operator")
         for item in range(test.value):
                self.layout.operator("scene.button_operator", text="Button #"+str(item)).id = item
 
@@ -384,6 +399,7 @@ classes = (
     OBJECT_PT_CustomPanel2,
     ButtonOperator,
     AddButtonOperator,
+    RemoveButtonOperator,
 
 )
 
