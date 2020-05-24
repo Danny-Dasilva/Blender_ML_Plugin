@@ -306,7 +306,8 @@ class DataStore:
     def decrement(self):
         self.value -=1   
 test = DataStore()
-class SceneItems(bpy.types.PropertyGroup):
+class SceneSettingItem(bpy.types.PropertyGroup):
+    tag = bpy.props.PointerProperty(type=bpy.types.Object)
     value = bpy.props.IntProperty()
 
 class AddButtonOperator(bpy.types.Operator):
@@ -314,8 +315,8 @@ class AddButtonOperator(bpy.types.Operator):
     bl_label = "Add Button"
 
     def execute(self, context):
-        id = len(context.scene.collection)
-        new = context.scene.collection.add()
+        id = len(context.scene.my_collection)
+        new = context.scene.my_collection.add()
         new.name = str(id)
         new.value = id
         return {'FINISHED'}
@@ -344,7 +345,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_label = "Object id #1"
     bl_options = {"DEFAULT_CLOSED"}
 
-    bpy.types.Scene.unlucky = CollectionProperty(type=SceneItems)
+    bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
 
     @classmethod
     def poll(self,context):
@@ -361,13 +362,16 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
         
         
-       
+        #split for button loop
 
-        # for item in range(test.value):
-        #     layout.prop(scene, f"obj{item + 1}")
-        for item in context.scene.fuck:
-               self.layout.operator("scene.button_operator", text="Button #"+item.name).id = item.value
-            #    self.layout.operator("scene.button_operator", text="Button #"+str(item)).id = item
+        self.layout.operator("scene.add_button_operator")
+        for item in context.scene.my_collection:
+            row = self.layout.row(align=True)
+            row.prop(item, "tag")
+            row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
+
+
+        #split for button loop
 
         split = layout.split()
         col = split.column()
@@ -407,7 +411,6 @@ classes = (
     ButtonOperator,
     AddButtonOperator,
     RemoveButtonOperator,
-    SceneItems,
 
 )
 
