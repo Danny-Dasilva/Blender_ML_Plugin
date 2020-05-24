@@ -361,8 +361,9 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         self.layout.operator("scene.add_button_operator")
         for item in context.scene.my_collection:
             row = self.layout.row(align=True)
-            row.prop(item, "tag")
-            row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
+            row.prop(item, "tag", text="add custom title here")
+            # button
+            # row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
 
 
         #split for button loop
