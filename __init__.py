@@ -299,13 +299,8 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         layout.operator("wm.cam_spawn")
         layout.separator()
 
-class DataStore:
-    value = 1
-    def increment(self):
-        self.value +=1   
-    def decrement(self):
-        self.value -=1   
-test = DataStore()
+
+
 class SceneSettingItem(bpy.types.PropertyGroup):
     tag = bpy.props.PointerProperty(type=bpy.types.Object)
     value = bpy.props.IntProperty()
@@ -345,7 +340,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_label = "Object id #1"
     bl_options = {"DEFAULT_CLOSED"}
 
-    bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
+    
 
     @classmethod
     def poll(self,context):
@@ -410,6 +405,7 @@ classes = (
     OBJECT_PT_CustomPanel2,
     ButtonOperator,
     AddButtonOperator,
+    SceneSettingItem,
     RemoveButtonOperator,
 
 )
@@ -419,6 +415,9 @@ def register():
     for cls in classes:
         register_class(cls)
     bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
+
+    #register dynamic creation see if I can place this elsewhere
+    bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
 
 def unregister():
     from bpy.utils import unregister_class
