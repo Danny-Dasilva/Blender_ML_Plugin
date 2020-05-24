@@ -311,6 +311,7 @@ class AddButtonOperator(bpy.types.Operator):
 
     def execute(self, context):
         id = len(context.scene.my_collection)
+        print(id)
         new = context.scene.my_collection.add()
         new.name = str(id)
         new.value = id
@@ -321,7 +322,10 @@ class RemoveButtonOperator(bpy.types.Operator):
     bl_label = "Remove Object"
 
     def execute(self, context):
-        test.decrement()
+        id = len(context.scene.my_collection)
+        print(id, "ahh")
+        id -= 1
+        new = context.scene.my_collection.remove(id)
         return {'FINISHED'}
 
 class ButtonOperator(bpy.types.Operator):
@@ -351,9 +355,6 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-        
-        
-        layout.prop(mytool, "id_name")
 
         
         
