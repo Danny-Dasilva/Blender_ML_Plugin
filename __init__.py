@@ -337,6 +337,21 @@ class ButtonOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class ExecuteOperator(bpy.types.Operator):
+    bl_idname = "scene.execute_operator"
+    bl_label = "Button"
+
+    
+
+    def execute(self, context):
+        mytool = context.scene.my_tool
+        if mytool.enable_physics:#if bool property is true, show rows, else don't
+            print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
+        for item in context.scene.my_collection:
+            print(item)
+        print("Pressed button ")
+        return {'FINISHED'}
+
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_label = "Object id #1"
@@ -358,7 +373,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         
         #split for button loop
 
-        self.layout.operator("scene.add_button_operator")
+        
         for item in context.scene.my_collection:
             row = self.layout.row(align=True)
             row.prop(item, "tag", text="add custom title here")
@@ -375,11 +390,16 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         
         col.operator("scene.remove_button_operator")
         layout.prop(mytool, "enable_physics")
-
+        
         if mytool.enable_physics:
             layout.label(text="Obj Spawn:")
             layout.prop(mytool, "obj_xyz_max")
             layout.prop(mytool, "obj_xyz_min")
+
+        # Big render button
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("scene.execute_operator")
 
 class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -407,6 +427,7 @@ classes = (
     AddButtonOperator,
     SceneSettingItem,
     RemoveButtonOperator,
+    ExecuteOperator,
 
 )
 
