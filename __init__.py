@@ -200,7 +200,13 @@ class MyProperties(PropertyGroup):
         default="",
         maxlen=1024,
         )
-
+    filepath: StringProperty(
+        name="filepath",
+        description=":",
+        default="",
+        maxlen=1024,
+        subtype="DIR_PATH"
+        )
     my_path: StringProperty(
         name = "Directory",
         description="Choose a directory:",
@@ -413,9 +419,12 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
         if mytool.enable_physics:#if bool property is true, show rows, else don't
-            layout.label(text="put frame thing")
-        # add filepath
-
+            layout.label(text="frame advance")
+            layout.prop(mytool, "my_int", text="Integer Property")
+        
+        # filepath
+        layout.prop(mytool, "filepath")
+        
         # Big render button
         row = layout.row()
         row.scale_y = 2.0
