@@ -414,8 +414,17 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         mytool = scene.my_tool
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             layout.label(text="put frame thing")
+        # add filepath
 
-            
+        # Big render button
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("scene.execute_operator")
+
+
+
+
+        
 classes = (
     MyProperties,
     OT_Cam_Spawn,
