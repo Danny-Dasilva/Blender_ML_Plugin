@@ -1,6 +1,11 @@
 
 import bpy
-
+from bpy.types import (Panel,
+                       Menu,
+                       Operator,
+                       PropertyGroup,
+                       )
+                       
 def create_custom_operator(i):
     idname = "object.operator_" + i
     
@@ -59,16 +64,11 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-    bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
-
-    #register dynamic creation see if I can place this elsewhere
-    bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
 
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
-    del bpy.types.Scene.my_tool
 
 
 if __name__ == "__main__":
