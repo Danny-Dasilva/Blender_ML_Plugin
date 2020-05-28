@@ -55,20 +55,20 @@ class ML_Gen():
         
         self.update()
     def randomize_objs(self, scene, objs):
-        for key, obj in objs.items() :
-
-            pi = self.pi
-            roll = uniform(0, 90)
-            pitch = uniform(0, 90)
-            yaw = uniform(0, 90)
-            obj.rotation_mode = 'XYZ'
-            obj.rotation_euler[0] = pitch*(pi/180.0)
-            obj.rotation_euler[1] = roll*(pi/180)
-            obj.rotation_euler[2] = yaw*(pi/180.0)
-            print(self.ob_xyz_min, self.ob_xyz_max)
-            obj.location.x = uniform(self.ob_xyz_min[0], self.ob_xyz_max[0])   
-            obj.location.y = uniform(self.ob_xyz_min[1], self.ob_xyz_max[1])                                                                                                                                       
-            obj.location.z = uniform(self.ob_xyz_min[2], self.ob_xyz_max[2])
+        for key, ob in objs.items() :
+            for obj in ob:
+                pi = self.pi
+                roll = uniform(0, 90)
+                pitch = uniform(0, 90)
+                yaw = uniform(0, 90)
+                obj.rotation_mode = 'XYZ'
+                obj.rotation_euler[0] = pitch*(pi/180.0)
+                obj.rotation_euler[1] = roll*(pi/180)
+                obj.rotation_euler[2] = yaw*(pi/180.0)
+                print(self.ob_xyz_min, self.ob_xyz_max)
+                obj.location.x = uniform(self.ob_xyz_min[0], self.ob_xyz_max[0])   
+                obj.location.y = uniform(self.ob_xyz_min[1], self.ob_xyz_max[1])                                                                                                                                       
+                obj.location.z = uniform(self.ob_xyz_min[2], self.ob_xyz_max[2])
     # run ops
     @staticmethod
     def camera_view_bounds_2d(scene, camera_object, mesh_object):
@@ -396,6 +396,7 @@ class ML_Gen():
 
             # if mytool.enable physics
             if self.enable_physics:
+                
                 self.randomize_objs(scene, ball_dict)
             nearest_ball = self.find_nearest(camera, ball_lst)
             print(nearest_ball, "nearest")
