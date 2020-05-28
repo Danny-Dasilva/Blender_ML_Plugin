@@ -18,7 +18,8 @@
 # id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
 
 # !! check the names and obj ids if I can
-# see if its possible to dubliicate menus
+# add unregister
+
 bl_info = {
     "name" : "Test_addon",
     "author" : "Danny Dasilva",
@@ -125,8 +126,15 @@ def obj_domain(self, context):
 def set_obj_count(self, context):
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
+    create_custom_operators(count)
 
-    create_custom_operator(count)
+def create_custom_operators(count):
+    for i in (number+1 for number in range(9)):
+        if i <= count:
+
+            create_custom_operator(i)
+        else:
+            remove_custom_operator(i)
 
 
 
@@ -158,7 +166,7 @@ class MyProperties(PropertyGroup):
         description="Set values",
         default = 1,
         min = 1,
-        max = 15,
+        max = 9,
         update=set_obj_count
         )
     my_float: FloatProperty(
@@ -294,7 +302,10 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
     bl_idname = "OBJECT_PT_CustomPanel"
    
     bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
+    
+    #to go underneath
 
+    
     @classmethod
     def poll(self,context):
         return context.object is not None
@@ -324,15 +335,22 @@ class SceneSettingItem(bpy.types.PropertyGroup):
     tag = bpy.props.PointerProperty(type=bpy.types.Object)
     value = bpy.props.IntProperty()
 
+obj_collection = {}
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
     bl_label = "Add Object"
 
     def execute(self, context):
-        id = len(context.scene.my_collection)
+        unique = self.bl_description
+        print(unique, "unique", self.bl_idname, self.bl_description, self.bl_description)
+        if unique not in obj_collection.keys():
+            obj_collection[unique] = 1
+        else:
+            obj_collection[unique] += 1
+        id = f'{unique}-{obj_collection[unique]}'
         new = context.scene.my_collection.add()
-        new.name = str(id)
-        new.value = id
+        new.name = id
+        
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
@@ -395,6 +413,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         
         for item in context.scene.my_collection:
             row = self.layout.row(align=True)
+            print(item)
             row.prop(item, "tag", text="add custom title here")
             # button
             # row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
@@ -423,15 +442,11 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
 
         
-
+op_cls = {}
 def create_custom_operator(i):
     idname = f"Object id#{str(i)}"
     bl_parent_id = "OBJECT_PT_CustomPanel"
     
-    
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="Column One:")
 
     nc = type(  'DynOp_' + idname,
                     (OBJECT_PT_CustomPanel1, ),
@@ -439,10 +454,18 @@ def create_custom_operator(i):
                     'bl_label': 'Add a ' + idname,
                     'bl_description': i,
                 })
-    bpy.utils.register_class(nc)
+    
+    print(op_cls.keys())
 
+    if i not in op_cls.keys(): 
+        op_cls[i] = nc
+        bpy.utils.register_class(nc)
+def remove_custom_operator(i):  
 
-
+    if i in op_cls.keys():
+        
+        bpy.utils.unregister_class(op_cls[i])
+        del op_cls[i]
 
 # class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
 #     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -492,9 +515,10 @@ def register():
 
     #register dynamic creation see if I can place this elsewhere
     bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
+    
 
-    create_custom_operator(1)
-
+    # create the initial operator
+    create_custom_operators(1)
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
