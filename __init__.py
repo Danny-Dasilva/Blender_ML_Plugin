@@ -162,7 +162,7 @@ class MyProperties(PropertyGroup):
         max = 100
         )
     image_count: IntProperty(
-        name = "Int Value",
+        name = "image_count",
         description="A integer property",
         default = 1,
         min = 1,
@@ -221,12 +221,25 @@ class MyProperties(PropertyGroup):
         update=obj_domain
         )
 
-    id_name: StringProperty(
+    id_name1: StringProperty(
         name="name",
         description=":",
         default="",
         maxlen=1024,
         )
+    id_name2: StringProperty(
+        name="name",
+        description=":",
+        default="",
+        maxlen=1024,
+        )
+    id_name3: StringProperty(
+        name="name",
+        description=":",
+        default="",
+        maxlen=1024,
+        )
+
     filepath: StringProperty(
         name="filepath",
         description=":",
@@ -311,6 +324,7 @@ class ExecuteOperator(bpy.types.Operator):
         mytool = context.scene.my_tool
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
+            gen.enable_physics = True
         for item in context.scene.my_collection:
             if item.tag:
                 gen.add(item.tag, item.name[0])
@@ -419,7 +433,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
 
         
-        layout.prop(mytool, "id_name")
+        layout.prop(mytool, f"id_name{self.bl_description}")
         #split for button loop
 
         

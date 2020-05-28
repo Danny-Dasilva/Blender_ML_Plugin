@@ -4,7 +4,6 @@ import numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 from bpy_extras.object_utils import world_to_camera_view
-import bpy
 import mathutils
 from random import randint, uniform
 from math import *
@@ -20,7 +19,7 @@ class ML_Gen():
         self.ob_xyz_min  = [0, 0, 0]
         self.pi = 3.14159265
         self.objs = {}
-        
+        self.enable_physics = None
     @staticmethod
     def update():
         dg = bpy.context.evaluated_depsgraph_get() 
@@ -142,8 +141,8 @@ class ML_Gen():
 
         return (min_x, min_y), (max_x, max_y)
 
-    @staticmethod
-    def get_cordinates(scene, camera,  objects, filename):
+
+    def get_cordinates(self, scene, camera,  objects, filename):
         camera_object = camera
         
     
@@ -152,7 +151,7 @@ class ML_Gen():
                 'meshes': {}
             }
         for object in objects:
-            bounding_box = camera_view_bounds_2d(scene, camera_object, object)
+            bounding_box = self.camera_view_bounds_2d(scene, camera_object, object)
             if bounding_box:
                 cordinates['meshes'][object.name] = {
                                 'x1': bounding_box[0][0],
@@ -172,8 +171,8 @@ class ML_Gen():
 
         distance = sqrt((locx)**2 + (locy)**2 + (locz)**2) 
         return distance
-    @staticmethod
-    def center_obj(obj_camera, point):
+
+    def center_obj(self, obj_camera, point):
         loc_camera = obj_camera.matrix_world.to_translation()
 
         direction = point - loc_camera
@@ -182,10 +181,10 @@ class ML_Gen():
         
         # assume we're using euler rotation
         obj_camera.rotation_euler = rot_quat.to_euler()
-        update()
+        self.update()
         eulers = [degrees(a) for a in obj_camera.matrix_world.to_euler()]
         z = eulers[2]
-        distance = measure(point, loc_camera)
+        distance = self.measure(point, loc_camera)
         return distance, z
 
     @staticmethod
@@ -215,8 +214,8 @@ class ML_Gen():
         obj.matrix_world = quat * rollMatrix
         obj.location = loc
 
-    @staticmethod
-    def offset(scene, camera, angle):
+
+    def offset(self, scene, camera, angle):
         
         angle = uniform(-angle, angle)
         height = 480
@@ -298,8 +297,8 @@ class ML_Gen():
         else:
             value = False
         return value, ray_percent 
-    @staticmethod
-    def get_raycast_percentages(scene, cam, objs, cutoff):
+
+    def get_raycast_percentages(self, scene, cam, objs, cutoff):
         objects = []
         for obj in objs:
             # Threshold to test if ray cast corresponds to the original vertex
@@ -341,6 +340,7 @@ class ML_Gen():
             else:
                 value = False
         return objects
+    @staticmethod
     def find_nearest(camera, obj_list):
         nearest = None
         old_dist = 100000000000
@@ -352,6 +352,8 @@ class ML_Gen():
                 old_dist = dist
     
         return nearest
+
+    @staticmethod
     def increment_frames(scene, frames):
         for i in range(frames):
             scene.frame_set(i)
@@ -372,8 +374,11 @@ class ML_Gen():
         while loop_count != scene_setup_steps:
             ball_lst = self.objs['1']
 
-            scene, camera = self.randomize_camera(scene)
-            self.randomize_objs(scene, ball_lst)
+            camera = self.randomize_camera(scene)
+
+            # if mytool.enable physics
+            if self.enable_physics:
+                self.randomize_objs(scene, ball_lst)
             nearest_ball = self.find_nearest(camera, ball_lst)
 
             # read in incement frames in other thing
