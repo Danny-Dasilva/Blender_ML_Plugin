@@ -444,30 +444,19 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 #         row.scale_y = 2.0
 #         row.operator("scene.execute_operator")
 
-class CustomObjectBase(Inherit_Panel, Panel):
-    idname = "object.example_test"
-    bl_parent_id = "OBJECT_PT_CustomPanel"
-    bl_label = 'Add aaaa'
-    
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="Column One:")
         
 
 def create_custom_operator(i):
-    idname = f"object.operator_{str(i)}"
+    idname = f"Object id#{str(i)}"
     bl_parent_id = "OBJECT_PT_CustomPanel"
     
     
     def draw(self, context):
         layout = self.layout
         layout.label(text="Column One:")
-    def func(self, context):
-        print("Hello World", self.bl_idname)
-        return {'FINISHED'}
 
     nc = type(  'DynOp_' + idname,
-                    (CustomObjectBase, ),
+                    (OBJECT_PT_CustomPanel1, ),
                     {'bl_idname': idname,
                     'bl_label': 'Add a ' + idname,
                     'bl_description': 'This adds an ' + idname,
@@ -484,7 +473,7 @@ classes = (
     OT_Draw_Operator,
     OBJECT_PT_CustomPanel,
     OBJECT_PT_CustomPanel1,
-    OBJECT_PT_CustomPanel2,
+    # OBJECT_PT_CustomPanel2,
     ButtonOperator,
     AddButtonOperator,
     SceneSettingItem,
@@ -501,6 +490,8 @@ def register():
 
     #register dynamic creation see if I can place this elsewhere
     bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
+
+    create_custom_operator(1)
 
 def unregister():
     from bpy.utils import unregister_class
