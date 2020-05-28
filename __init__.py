@@ -304,7 +304,9 @@ class ExecuteOperator(bpy.types.Operator):
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
         for item in context.scene.my_collection:
-            print(item, dir(item), "ahhhh")
+            if item.tag:
+                # gen.add()
+                print(item.tag, dir(item)) # item.name else mytool.id_name
         print("Pressed button ")
         return {'FINISHED'}
 
@@ -337,12 +339,6 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         layout = self.layout
         scene = context.scene
         mytool = scene.my_tool
-
-        layout.prop(mytool, "my_bool")
-        layout.prop(mytool, "my_enum", text="") 
-     
-        layout.prop(mytool, "my_path")
-        layout.separator()
 
         layout.label(text="Camera Spawn:")
         layout.prop(mytool, "cam_xyz_max")
@@ -415,7 +411,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
 
         
-        
+        layout.prop(mytool, "id_name")
         #split for button loop
 
         
@@ -478,28 +474,28 @@ def remove_custom_operator(i):
         bpy.utils.unregister_class(op_cls[i])
         del op_cls[i]
 
-# class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
-#     bl_parent_id = "OBJECT_PT_CustomPanel"
-#     bl_label = "Render Options"
-#     @classmethod
-#     def poll(self,context):
-#         return context.object is not None
+class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    bl_label = "Render Options"
+    @classmethod
+    def poll(self,context):
+        return context.object is not None
 
-#     def draw(self, context):
-#         layout = self.layout
-#         scene = context.scene
-#         mytool = scene.my_tool
-#         if mytool.enable_physics:#if bool property is true, show rows, else don't
-#             layout.label(text="frame advance")
-#             layout.prop(mytool, "my_int", text="Integer Property")
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        mytool = scene.my_tool
+        if mytool.enable_physics:#if bool property is true, show rows, else don't
+            layout.label(text="frame advance")
+            layout.prop(mytool, "my_int", text="Integer Property")
         
-#         # filepath
-#         layout.prop(mytool, "filepath")
+        # filepath
+        layout.prop(mytool, "filepath")
         
-#         # Big render button
-#         row = layout.row()
-#         row.scale_y = 2.0
-#         row.operator("scene.execute_operator")
+        # Big render button
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("scene.execute_operator")
 
 
 
@@ -509,7 +505,7 @@ classes = (
     OT_Draw_Operator,
     OBJECT_PT_CustomPanel,
     # OBJECT_PT_CustomPanel1,
-    # OBJECT_PT_CustomPanel2,
+    OBJECT_PT_CustomPanel2,
     OT_Obj_Spawn,
     ButtonOperator,
     AddButtonOperator,
