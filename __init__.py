@@ -339,10 +339,10 @@ obj_collection = {}
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
     bl_label = "Add Object"
-
+    unique = bpy.props.IntProperty()
     def execute(self, context):
-        unique = self.bl_description
-        print(unique, "unique", self.bl_idname, self.bl_description, self.bl_description)
+        unique = self.unique
+        print(unique, "unique",)
         if unique not in obj_collection.keys():
             obj_collection[unique] = 1
         else:
@@ -350,7 +350,6 @@ class AddButtonOperator(bpy.types.Operator):
         id = f'{unique}-{obj_collection[unique]}'
         new = context.scene.my_collection.add()
         new.name = id
-        
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
@@ -423,7 +422,8 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
         split = layout.split()
         col = split.column()
-        col.operator("scene.add_button_operator")
+        op = col.operator("scene.add_button_operator")
+        op.unique = self.bl_description
         col = split.column(align=True)
         
         col.operator("scene.remove_button_operator")
