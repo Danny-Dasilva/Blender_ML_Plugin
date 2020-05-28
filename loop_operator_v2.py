@@ -16,16 +16,7 @@ from bpy.props import (StringProperty,
                        )
 class MyProperties(PropertyGroup):
 
-    my_bool: BoolProperty(
-        name="Enable or Disable",
-        description="A bool property",
-        default = False
-        )
-    enable_physics: BoolProperty(
-        name="Enable Physics",
-        description="A bool property",
-        default = False
-        )
+    
     my_int: IntProperty(
         name = "Int Value",
         description="A integer property",
@@ -111,8 +102,7 @@ class CustomObjectBase(Inherit_Panel, Panel):
         
         
 classes = (
-    CustomPanel,
-    MakeCustomOperators,
+    MyProperties,
 )
 def register():
     from bpy.utils import register_class

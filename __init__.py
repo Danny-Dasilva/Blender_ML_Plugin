@@ -122,6 +122,12 @@ def obj_domain(self, context):
     obj.setxyz(xyz_max, xyz_min)
     obj.run()
 
+def set_obj_count(self, context):
+    scene = bpy.context.scene
+    count = scene.my_tool.obj_num
+
+    print(count)
+    create_custom_operator(count)
 
 
 
@@ -148,7 +154,14 @@ class MyProperties(PropertyGroup):
         min = 10,
         max = 100
         )
-
+    obj_num: IntProperty(
+        name = "Set numbers",
+        description="Set values",
+        default = 1,
+        min = 1,
+        max = 15,
+        update=set_obj_count
+        )
     my_float: FloatProperty(
         name = "Float Value",
         description = "A float property",
@@ -304,6 +317,7 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
 
         layout.operator("wm.cam_spawn")
         layout.separator()
+        layout.prop(mytool, "obj_num")
 
 
 
@@ -407,29 +421,59 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         row.scale_y = 2.0
         row.operator("scene.execute_operator")
 
-class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
-    bl_parent_id = "OBJECT_PT_CustomPanel"
-    bl_label = "Render Options"
-    @classmethod
-    def poll(self,context):
-        return context.object is not None
+# class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
+#     bl_parent_id = "OBJECT_PT_CustomPanel"
+#     bl_label = "Render Options"
+#     @classmethod
+#     def poll(self,context):
+#         return context.object is not None
 
+#     def draw(self, context):
+#         layout = self.layout
+#         scene = context.scene
+#         mytool = scene.my_tool
+#         if mytool.enable_physics:#if bool property is true, show rows, else don't
+#             layout.label(text="frame advance")
+#             layout.prop(mytool, "my_int", text="Integer Property")
+        
+#         # filepath
+#         layout.prop(mytool, "filepath")
+        
+#         # Big render button
+#         row = layout.row()
+#         row.scale_y = 2.0
+#         row.operator("scene.execute_operator")
+
+class CustomObjectBase(Inherit_Panel, Panel):
+    idname = "object.example_test"
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    bl_label = 'Add aaaa'
+    
     def draw(self, context):
         layout = self.layout
-        scene = context.scene
-        mytool = scene.my_tool
-        if mytool.enable_physics:#if bool property is true, show rows, else don't
-            layout.label(text="frame advance")
-            layout.prop(mytool, "my_int", text="Integer Property")
+        layout.label(text="Column One:")
         
-        # filepath
-        layout.prop(mytool, "filepath")
-        
-        # Big render button
-        row = layout.row()
-        row.scale_y = 2.0
-        row.operator("scene.execute_operator")
 
+def create_custom_operator(i):
+    idname = f"object.operator_{str(i)}"
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Column One:")
+    def func(self, context):
+        print("Hello World", self.bl_idname)
+        return {'FINISHED'}
+
+    nc = type(  'DynOp_' + idname,
+                    (CustomObjectBase, ),
+                    {'bl_idname': idname,
+                    'bl_label': 'Add a ' + idname,
+                    'bl_description': 'This adds an ' + idname,
+                })
+    bpy.utils.register_class(nc)
+    print("finishedd creation")
 
 
 
