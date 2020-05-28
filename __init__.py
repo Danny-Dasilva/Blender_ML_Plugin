@@ -263,6 +263,7 @@ class OT_Cam_Spawn(Operator):
         # print the values to the console
         print("Cam_Test")
         
+        
         gen.xyz_max = [val for val in mytool.cam_xyz_max]
         gen.xyz_min = [val for val in mytool.cam_xyz_min]
         gen.randomize_camera(scene)
@@ -281,10 +282,32 @@ class OT_Obj_Spawn(Operator):
         scene = context.scene
         mytool = scene.my_tool
 
-        
+        #for test spawn
 
-
+        gen.ob_xyz_max = [val for val in mytool.obj_xyz_max]
+        gen.ob_xyz_min = [val for val in mytool.obj_xyz_min]
+        for item in context.scene.my_collection:
+            if int(item.name[0]) == 1:
+                obj = item.tag
+                gen.randomize_obj(scene, obj)
+                print("randomzie")
         return {'FINISHED'}
+
+class ExecuteOperator(bpy.types.Operator):
+    bl_idname = "scene.execute_operator"
+    bl_label = "Button"
+
+    
+
+    def execute(self, context):
+        mytool = context.scene.my_tool
+        if mytool.enable_physics:#if bool property is true, show rows, else don't
+            print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
+        for item in context.scene.my_collection:
+            print(item, dir(item), "ahhhh")
+        print("Pressed button ")
+        return {'FINISHED'}
+
 
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
@@ -373,20 +396,6 @@ class ButtonOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ExecuteOperator(bpy.types.Operator):
-    bl_idname = "scene.execute_operator"
-    bl_label = "Button"
-
-    
-
-    def execute(self, context):
-        mytool = context.scene.my_tool
-        if mytool.enable_physics:#if bool property is true, show rows, else don't
-            print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
-        for item in context.scene.my_collection:
-            print(item, dir(item), "ahhhh")
-        print("Pressed button ")
-        return {'FINISHED'}
 
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -439,8 +448,8 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
                 layout.prop(mytool, "obj_xyz_max")
                 layout.prop(mytool, "obj_xyz_min")
 
-        # Big render button
-        layout.operator("scene.execute_operator")
+            # Big render button
+            layout.operator("wm.obj_spawn")
 
 
         
@@ -501,6 +510,7 @@ classes = (
     OBJECT_PT_CustomPanel,
     # OBJECT_PT_CustomPanel1,
     # OBJECT_PT_CustomPanel2,
+    OT_Obj_Spawn,
     ButtonOperator,
     AddButtonOperator,
     SceneSettingItem,
