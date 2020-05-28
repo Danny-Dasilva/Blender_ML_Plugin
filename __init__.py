@@ -384,7 +384,7 @@ class ExecuteOperator(bpy.types.Operator):
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
         for item in context.scene.my_collection:
-            print(item)
+            print(item, dir(item), "ahhhh")
         print("Pressed button ")
         return {'FINISHED'}
 
@@ -411,9 +411,11 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
         
         for item in context.scene.my_collection:
-            row = self.layout.row(align=True)
-            print(item)
-            row.prop(item, "tag", text="add custom title here")
+            
+
+            if int(item.name[0]) == self.bl_description:
+                row = self.layout.row(align=True)
+                row.prop(item, "tag", text="add custom title here")
             # button
             # row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
 
