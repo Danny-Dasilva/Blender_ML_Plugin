@@ -1,6 +1,9 @@
 import bpy
 from random import uniform
-
+import numpy as np
+from mathutils import Vector
+from mathutils.bvhtree import BVHTree
+from bpy_extras.object_utils import world_to_camera_view
 import bpy
 import mathutils
 from random import randint, uniform
@@ -16,6 +19,7 @@ class ML_Gen():
         self.ob_xyz_max  = [0, 0, 0]
         self.ob_xyz_min  = [0, 0, 0]
         self.pi = 3.14159265
+        self.objs = {}
         
     @staticmethod
     def update():
@@ -36,7 +40,7 @@ class ML_Gen():
         self.update()
         return scene.camera
     def randomize_obj(self, scene, obj):
-        pi = 3.1415
+        pi = self.pi
         roll = uniform(0, 90)
         pitch = uniform(0, 90)
         yaw = uniform(0, 90)
@@ -50,9 +54,22 @@ class ML_Gen():
         obj.location.z = uniform(self.ob_xyz_min[2], self.ob_xyz_max[2])
         
         self.update()
-
+    def randomize_objs(self, scene, objs):
+        for obj in objs:
+            pi = self.pi
+            roll = uniform(0, 90)
+            pitch = uniform(0, 90)
+            yaw = uniform(0, 90)
+            obj.rotation_mode = 'XYZ'
+            obj.rotation_euler[0] = pitch*(pi/180.0)
+            obj.rotation_euler[1] = roll*(pi/180)
+            obj.rotation_euler[2] = yaw*(pi/180.0)
+            print(self.ob_xyz_min, self.ob_xyz_max)
+            obj.location.x = uniform(self.ob_xyz_min[0], self.ob_xyz_max[0])   
+            obj.location.y = uniform(self.ob_xyz_min[1], self.ob_xyz_max[1])                                                                                                                                       
+            obj.location.z = uniform(self.ob_xyz_min[2], self.ob_xyz_max[2])
     # run ops
-
+    @staticmethod
     def camera_view_bounds_2d(scene, camera_object, mesh_object):
         """
         Returns camera space bounding box of the mesh object.
@@ -125,4 +142,269 @@ class ML_Gen():
 
         return (min_x, min_y), (max_x, max_y)
 
+    @staticmethod
+    def get_cordinates(scene, camera,  objects, filename):
+        camera_object = camera
+        
     
+        cordinates = {
+                'image': filename,
+                'meshes': {}
+            }
+        for object in objects:
+            bounding_box = camera_view_bounds_2d(scene, camera_object, object)
+            if bounding_box:
+                cordinates['meshes'][object.name] = {
+                                'x1': bounding_box[0][0],
+                                'y1': bounding_box[0][1],
+                                'x2': bounding_box[1][0],
+                                'y2': bounding_box[1][1]
+                            }
+            else:
+                return None
+        return cordinates
+    @staticmethod
+    def measure (first, second):
+
+        locx = second[0] - first[0]
+        locy = second[1] - first[1]
+        locz = second[2] - first[2]
+
+        distance = sqrt((locx)**2 + (locy)**2 + (locz)**2) 
+        return distance
+    @staticmethod
+    def center_obj(obj_camera, point):
+        loc_camera = obj_camera.matrix_world.to_translation()
+
+        direction = point - loc_camera
+        # point the cameras '-Z' and use its 'Y' as up
+        rot_quat = direction.to_track_quat('-Z', 'Y')
+        
+        # assume we're using euler rotation
+        obj_camera.rotation_euler = rot_quat.to_euler()
+        update()
+        eulers = [degrees(a) for a in obj_camera.matrix_world.to_euler()]
+        z = eulers[2]
+        distance = measure(point, loc_camera)
+        return distance, z
+
+    @staticmethod
+    def point_at(obj, target, roll=0):
+        obj = obj.matrix_world.to_translation()
+        """
+        Rotate obj to look at target
+        :arg obj: the object to be rotated. Usually the camera
+        :arg target: the location (3-tuple or Vector) to be looked at
+        :arg roll: The angle of rotation about the axis from obj to target in radians. 
+        Based on: https://blender.stackexchange.com/a/5220/12947 (ideasman42)      
+        """
+        if not isinstance(target, mathutils.Vector):
+            target = mathutils.Vector(target)
+        loc = obj.location
+        # direction points from the object to the target
+        direction = target - loc
+
+        quat = direction.to_track_quat('-Z', 'Y')
+
+        # /usr/share/blender/scripts/addons/add_advanced_objects_menu/arrange_on_curve.py
+        quat = quat.to_matrix().to_4x4()
+        rollMatrix = mathutils.Matrix.Rotation(roll, 4, 'Z')
+
+        # remember the current location, since assigning to obj.matrix_world changes it
+        loc = loc.to_tuple()
+        obj.matrix_world = quat * rollMatrix
+        obj.location = loc
+
+    @staticmethod
+    def offset(scene, camera, angle):
+        
+        angle = uniform(-angle, angle)
+        height = 480
+        width = 640
+            
+        if width > height:    
+            ratio = height / width  
+            desired_x = (50 / 2) * (angle/100) * ratio
+            desired_y = (50 / 2) * (angle/100) 
+        
+        elif height > width:
+            ratio = width / height  
+            desired_x = (50 / 2) * (angle/100)
+            desired_y = (50 / 2) * (angle/100) * ratio
+            
+    
+        scene.camera.rotation_mode = 'XYZ'
+        x = scene.camera.rotation_euler[0]
+        y = scene.camera.rotation_euler[2]
+        
+        change_x = x + (desired_x * (pi / 180.0))
+        change_y = y + (desired_y * (pi / 180.0))
+        scene.camera.rotation_euler[0] = change_x 
+        scene.camera.rotation_euler[2] = change_y 
+        self.update()
+
+    @staticmethod
+    def BVHTreeAndVerticesInWorldFromObj( obj ):
+        mWorld = obj.matrix_world
+        vertsInWorld = [mWorld @ v.co for v in obj.data.vertices]
+
+        bvh = BVHTree.FromPolygons( vertsInWorld, [p.vertices for p in obj.data.polygons] )
+
+        return bvh, vertsInWorld
+
+
+    # Deselect mesh polygons and vertices
+    @staticmethod
+    def DeselectEdgesAndPolygons( obj ):
+        for p in obj.data.polygons:
+            p.select = False
+        for e in obj.data.edges:
+            e.select = False
+
+    def get_raycast_percentage(self, scene, cam, obj, cutoff):
+        # Threshold to test if ray cast corresponds to the original vertex
+        limit = 0.0001
+        viewlayer = bpy.context.view_layer
+        # Deselect mesh elements
+        self.DeselectEdgesAndPolygons( obj )
+
+        # In world coordinates, get a bvh tree and vertices
+        bvh, vertices = self.BVHTreeAndVerticesInWorldFromObj( obj )
+
+
+        same_count = 0 
+        count = 0 
+        for i, v in enumerate( vertices ):
+            count += 1
+            # Get the 2D projection of the vertex
+            co2D = world_to_camera_view( scene, cam, v )
+
+            # By default, deselect it
+            obj.data.vertices[i].select = False
+            
+            # If inside the camera view
+            if 0.0 <= co2D.x <= 1.0 and 0.0 <= co2D.y <= 1.0: 
+                # Try a ray cast, in order to test the vertex visibility from the camera
+                location, normal, index, distance, t, ty = scene.ray_cast(viewlayer, cam.location, (v - cam.location).normalized() )
+                t = (v-normal).length
+                if t < 0.001:
+                    same_count += 1
+            
+
+        del bvh
+        ray_percent = same_count/ count
+        if ray_percent > cutoff/ 100:
+            value = True
+        else:
+            value = False
+        return value, ray_percent 
+    @staticmethod
+    def get_raycast_percentages(scene, cam, objs, cutoff):
+        objects = []
+        for obj in objs:
+            # Threshold to test if ray cast corresponds to the original vertex
+            limit = 0.0001
+            viewlayer = bpy.context.view_layer
+            # Deselect mesh elements
+            self.DeselectEdgesAndPolygons( obj )
+
+            # In world coordinates, get a bvh tree and vertices
+            bvh, vertices = self.BVHTreeAndVerticesInWorldFromObj( obj )
+
+
+            same_count = 0 
+            count = 0 
+            for i, v in enumerate( vertices ):
+                count += 1
+                # Get the 2D projection of the vertex
+                co2D = world_to_camera_view( scene, cam, v )
+
+                # By default, deselect it
+                obj.data.vertices[i].select = False
+                
+                # If inside the camera view
+                if 0.0 <= co2D.x <= 1.0 and 0.0 <= co2D.y <= 1.0: 
+                    # Try a ray cast, in order to test the vertex visibility from the camera
+                    location, normal, index, distance, t, ty = scene.ray_cast(viewlayer, cam.location, (v - cam.location).normalized() )
+                    t = (v-normal).length
+                    if t < 0.001:
+                        same_count += 1
+                
+
+            del bvh
+            ray_percent = same_count/ count
+            print(obj, ray_percent)
+            if ray_percent > cutoff/ 100:
+                value = True
+                objects.append(obj)
+            
+            else:
+                value = False
+        return objects
+    def find_nearest(camera, obj_list):
+        nearest = None
+        old_dist = 100000000000
+        point = camera.location
+        for obj in obj_list:
+            dist = (point - obj.location).length
+            if dist < old_dist:
+                nearest = obj
+                old_dist = dist
+    
+        return nearest
+    def increment_frames(scene, frames):
+        for i in range(frames):
+            scene.frame_set(i)
+
+    def add(self, obj, id):
+        if id in self.objs.keys():
+            self.objs[id].append(obj)
+        else:
+            self.objs[id] = [obj]
+        print(self.objs)
+
+    def batch_render(self, scene, image_count, filepath, file_prefix="render"):
+
+        scene_setup_steps = image_count
+        value = True
+        loop_count = 0
+        labels = []
+        while loop_count != scene_setup_steps:
+            ball_lst = self.objs['1']
+
+            scene, camera = self.randomize_camera(scene)
+            self.randomize_objs(scene, ball_lst)
+            nearest_ball = self.find_nearest(camera, ball_lst)
+
+            # read in incement frames in other thing
+            # self.increment_frames(scene, 50)
+
+            distance, z = self.center_obj(camera, nearest_ball.matrix_world.to_translation())
+
+
+            # add in offset percentage
+            self.offset(scene, camera, 60)
+
+            value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
+            if value == False:
+                loop_count -= 1
+                value = True
+            else:
+                filename = '{}-{}.jpg'.format(str(file_prefix), str(loop_count))
+            
+                bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+                bpy.ops.render.render(write_still=True)
+
+                objects = self.get_raycast_percentages(scene, camera, ball_lst, 40)
+                print(objects)
+                
+                scene_labels = self.get_cordinates(scene, camera, objects, filename)
+    #            
+                labels.append(scene_labels) # Merge lists
+            loop_count += 1
+            print(labels)
+    #        
+
+
+        with open(f'{filepath}/labels.json', 'w+') as f:
+            json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))

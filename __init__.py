@@ -161,6 +161,13 @@ class MyProperties(PropertyGroup):
         min = 10,
         max = 100
         )
+    image_count: IntProperty(
+        name = "Int Value",
+        description="A integer property",
+        default = 1,
+        min = 1,
+        max = 100
+        )
     obj_num: IntProperty(
         name = "Set numbers",
         description="Set values",
@@ -295,19 +302,20 @@ class OT_Obj_Spawn(Operator):
 
 class ExecuteOperator(bpy.types.Operator):
     bl_idname = "scene.execute_operator"
-    bl_label = "Button"
+    bl_label = "Batch Render"
 
     
 
     def execute(self, context):
+        scene = context.scene
         mytool = context.scene.my_tool
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
         for item in context.scene.my_collection:
             if item.tag:
-                # gen.add()
-                print(item.tag, dir(item)) # item.name else mytool.id_name
-        print("Pressed button ")
+                gen.add(item.tag, item.name[0])
+        filepath = str(mytool.filepath)
+        gen.batch_render(scene, int(mytool.image_count), filepath)
         return {'FINISHED'}
 
 
@@ -444,8 +452,8 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
                 layout.prop(mytool, "obj_xyz_max")
                 layout.prop(mytool, "obj_xyz_min")
 
-            # Big render button
-            layout.operator("wm.obj_spawn")
+                # Big render button
+                layout.operator("wm.obj_spawn")
 
 
         
@@ -488,7 +496,7 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             layout.label(text="frame advance")
             layout.prop(mytool, "my_int", text="Integer Property")
-        
+        layout.prop(mytool, "image_count")
         # filepath
         layout.prop(mytool, "filepath")
         
@@ -525,8 +533,8 @@ def register():
     bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
     
 
-    # create the initial operator
-    create_custom_operators(1)
+    # # create the initial operator
+    # create_custom_operators(1)
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
