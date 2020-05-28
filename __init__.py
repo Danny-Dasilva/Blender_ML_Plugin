@@ -126,7 +126,6 @@ def set_obj_count(self, context):
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
 
-    print(count)
     create_custom_operator(count)
 
 
@@ -327,7 +326,7 @@ class SceneSettingItem(bpy.types.PropertyGroup):
 
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
-    bl_label = "Add Button"
+    bl_label = "Add Object"
 
     def execute(self, context):
         id = len(context.scene.my_collection)
@@ -409,17 +408,41 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         col = split.column(align=True)
         
         col.operator("scene.remove_button_operator")
-        layout.prop(mytool, "enable_physics")
-        
-        if mytool.enable_physics:
-            layout.label(text="Obj Spawn:")
-            layout.prop(mytool, "obj_xyz_max")
-            layout.prop(mytool, "obj_xyz_min")
+
+        # ONLY ENABLE PHYSICS IN THE FIRST ITEM
+        if self.bl_description == 1:
+            layout.prop(mytool, "enable_physics")
+      
+            if mytool.enable_physics:
+                layout.label(text="Obj Spawn:")
+                layout.prop(mytool, "obj_xyz_max")
+                layout.prop(mytool, "obj_xyz_min")
 
         # Big render button
-        row = layout.row()
-        row.scale_y = 2.0
-        row.operator("scene.execute_operator")
+        layout.operator("scene.execute_operator")
+
+
+        
+
+def create_custom_operator(i):
+    idname = f"Object id#{str(i)}"
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Column One:")
+
+    nc = type(  'DynOp_' + idname,
+                    (OBJECT_PT_CustomPanel1, ),
+                    {'bl_idname': idname,
+                    'bl_label': 'Add a ' + idname,
+                    'bl_description': i,
+                })
+    bpy.utils.register_class(nc)
+
+
+
 
 # class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
 #     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -444,35 +467,14 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 #         row.scale_y = 2.0
 #         row.operator("scene.execute_operator")
 
-        
-
-def create_custom_operator(i):
-    idname = f"Object id#{str(i)}"
-    bl_parent_id = "OBJECT_PT_CustomPanel"
-    
-    
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="Column One:")
-
-    nc = type(  'DynOp_' + idname,
-                    (OBJECT_PT_CustomPanel1, ),
-                    {'bl_idname': idname,
-                    'bl_label': 'Add a ' + idname,
-                    'bl_description': 'This adds an ' + idname,
-                })
-    bpy.utils.register_class(nc)
-    print("finishedd creation")
 
 
-
-        
 classes = (
     MyProperties,
     OT_Cam_Spawn,
     OT_Draw_Operator,
     OBJECT_PT_CustomPanel,
-    OBJECT_PT_CustomPanel1,
+    # OBJECT_PT_CustomPanel1,
     # OBJECT_PT_CustomPanel2,
     ButtonOperator,
     AddButtonOperator,
