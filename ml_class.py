@@ -20,6 +20,7 @@ class ML_Gen():
         self.pi = 3.14159265
         self.objs = {}
         self.enable_physics = None
+        self.names_dict = {}
     @staticmethod
     def update():
         dg = bpy.context.evaluated_depsgraph_get() 
@@ -54,7 +55,8 @@ class ML_Gen():
         
         self.update()
     def randomize_objs(self, scene, objs):
-        for obj in objs:
+        for key, obj in objs.items() :
+
             pi = self.pi
             roll = uniform(0, 90)
             pitch = uniform(0, 90)
@@ -142,7 +144,7 @@ class ML_Gen():
         return (min_x, min_y), (max_x, max_y)
 
 
-    def get_cordinates(self, scene, camera,  objects, filename):
+    def get_cordinates(self, scene, camera,  objects, names_dict, filename):
         camera_object = camera
         
     
@@ -150,17 +152,22 @@ class ML_Gen():
                 'image': filename,
                 'meshes': {}
             }
-        for object in objects:
-            bounding_box = self.camera_view_bounds_2d(scene, camera_object, object)
-            if bounding_box:
-                cordinates['meshes'][object.name] = {
-                                'x1': bounding_box[0][0],
-                                'y1': bounding_box[0][1],
-                                'x2': bounding_box[1][0],
-                                'y2': bounding_box[1][1]
-                            }
-            else:
-                return None
+        for key, object in objects.items() :
+            name = names_dict[int(key)]
+            print(name, "NAMMMME")
+            cordinates['meshes'][name] = {}
+            for count, obj in enumerate(object):
+                print(count, "count in get cordinates")
+                bounding_box = self.camera_view_bounds_2d(scene, camera_object, obj)
+                if bounding_box:
+                    cordinates['meshes'][name][count] = {
+                                    'x1': bounding_box[0][0],
+                                    'y1': bounding_box[0][1],
+                                    'x2': bounding_box[1][0],
+                                    'y2': bounding_box[1][1]
+                                }
+                else:
+                    return None
         return cordinates
     @staticmethod
     def measure (first, second):
@@ -299,47 +306,54 @@ class ML_Gen():
         return value, ray_percent 
 
     def get_raycast_percentages(self, scene, cam, objs, cutoff):
-        objects = []
-        for obj in objs:
-            # Threshold to test if ray cast corresponds to the original vertex
-            limit = 0.0001
-            viewlayer = bpy.context.view_layer
-            # Deselect mesh elements
-            self.DeselectEdgesAndPolygons( obj )
+        objects = {}
 
-            # In world coordinates, get a bvh tree and vertices
-            bvh, vertices = self.BVHTreeAndVerticesInWorldFromObj( obj )
+        for key, ob in objs.items():
+            for obj in ob:
+                # Threshold to test if ray cast corresponds to the original vertex
+                limit = 0.0001
+                viewlayer = bpy.context.view_layer
+                # Deselect mesh elements
+                print(type(obj), print(obj), print(dir(obj)), "fix here")
+                self.DeselectEdgesAndPolygons( obj )
+
+                # In world coordinates, get a bvh tree and vertices
+                bvh, vertices = self.BVHTreeAndVerticesInWorldFromObj( obj )
 
 
-            same_count = 0 
-            count = 0 
-            for i, v in enumerate( vertices ):
-                count += 1
-                # Get the 2D projection of the vertex
-                co2D = world_to_camera_view( scene, cam, v )
+                same_count = 0 
+                count = 0 
+                for i, v in enumerate( vertices ):
+                    count += 1
+                    # Get the 2D projection of the vertex
+                    co2D = world_to_camera_view( scene, cam, v )
 
-                # By default, deselect it
-                obj.data.vertices[i].select = False
+                    # By default, deselect it
+                    obj.data.vertices[i].select = False
+                    
+                    # If inside the camera view
+                    if 0.0 <= co2D.x <= 1.0 and 0.0 <= co2D.y <= 1.0: 
+                        # Try a ray cast, in order to test the vertex visibility from the camera
+                        location, normal, index, distance, t, ty = scene.ray_cast(viewlayer, cam.location, (v - cam.location).normalized() )
+                        t = (v-normal).length
+                        if t < 0.001:
+                            same_count += 1
+                    
+
+                del bvh
+                ray_percent = same_count/ count
+                print(obj, ray_percent)
+                if ray_percent > cutoff/ 100:
+                    value = True
+        
+                    if key in objects.keys(): 
+                        objects[key].append(obj)
+                    else:
+                        objects[key] = [obj]
                 
-                # If inside the camera view
-                if 0.0 <= co2D.x <= 1.0 and 0.0 <= co2D.y <= 1.0: 
-                    # Try a ray cast, in order to test the vertex visibility from the camera
-                    location, normal, index, distance, t, ty = scene.ray_cast(viewlayer, cam.location, (v - cam.location).normalized() )
-                    t = (v-normal).length
-                    if t < 0.001:
-                        same_count += 1
-                
-
-            del bvh
-            ray_percent = same_count/ count
-            print(obj, ray_percent)
-            if ray_percent > cutoff/ 100:
-                value = True
-                objects.append(obj)
-            
-            else:
-                value = False
-        return objects
+                else:
+                    value = False
+            return objects
     @staticmethod
     def find_nearest(camera, obj_list):
         nearest = None
@@ -367,20 +381,21 @@ class ML_Gen():
 
     def batch_render(self, scene, image_count, filepath, file_prefix="render"):
 
-        scene_setup_steps = image_count
+        scene_setup_steps = int(image_count)
         value = True
         loop_count = 0
         labels = []
+
         while loop_count != scene_setup_steps:
             ball_lst = self.objs['1']
-
+            ball_dict = self.objs
             camera = self.randomize_camera(scene)
 
             # if mytool.enable physics
             if self.enable_physics:
-                self.randomize_objs(scene, ball_lst)
+                self.randomize_objs(scene, ball_dict)
             nearest_ball = self.find_nearest(camera, ball_lst)
-
+            print(nearest_ball, "nearest")
             # read in incement frames in other thing
             # self.increment_frames(scene, 50)
 
@@ -394,22 +409,24 @@ class ML_Gen():
             if value == False:
                 loop_count -= 1
                 value = True
+                print("false", percent)
             else:
+                print(percent, "good")
                 filename = '{}-{}.jpg'.format(str(file_prefix), str(loop_count))
             
                 bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
                 bpy.ops.render.render(write_still=True)
 
-                objects = self.get_raycast_percentages(scene, camera, ball_lst, 40)
+                objects = self.get_raycast_percentages(scene, camera, self.objs, 40)
                 print(objects)
                 
-                scene_labels = self.get_cordinates(scene, camera, objects, filename)
+                scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
     #            
                 labels.append(scene_labels) # Merge lists
             loop_count += 1
-            print(labels)
+           
     #        
 
-
+        print(labels, "labels")
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))

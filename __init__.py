@@ -126,15 +126,15 @@ def obj_domain(self, context):
 def set_obj_count(self, context):
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
-    create_custom_operators(count)
+    create_custom_operators(context, count)
 
-def create_custom_operators(count):
+def create_custom_operators(context, count):
     for i in (number+1 for number in range(9)):
         if i <= count:
 
-            create_custom_operator(i)
+            create_custom_operator(context, i)
         else:
-            remove_custom_operator(i)
+            remove_custom_operator(context, i)
 
 
 
@@ -221,25 +221,6 @@ class MyProperties(PropertyGroup):
         update=obj_domain
         )
 
-    id_name1: StringProperty(
-        name="name",
-        description=":",
-        default="",
-        maxlen=1024,
-        )
-    id_name2: StringProperty(
-        name="name",
-        description=":",
-        default="",
-        maxlen=1024,
-        )
-    id_name3: StringProperty(
-        name="name",
-        description=":",
-        default="",
-        maxlen=1024,
-        )
-
     filepath: StringProperty(
         name="filepath",
         description=":",
@@ -306,6 +287,9 @@ class OT_Obj_Spawn(Operator):
 
         gen.ob_xyz_max = [val for val in mytool.obj_xyz_max]
         gen.ob_xyz_min = [val for val in mytool.obj_xyz_min]
+
+        
+
         for item in context.scene.my_collection:
             if int(item.name[0]) == 1:
                 obj = item.tag
@@ -325,6 +309,9 @@ class ExecuteOperator(bpy.types.Operator):
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
             gen.enable_physics = True
+        for item in context.scene.my_idname:
+            gen.names_dict[item.value + 1] = item.id
+
         for item in context.scene.my_collection:
             if item.tag:
                 gen.add(item.tag, item.name[0])
@@ -376,6 +363,13 @@ class SceneSettingItem(bpy.types.PropertyGroup):
     tag = bpy.props.PointerProperty(type=bpy.types.Object)
     value = bpy.props.IntProperty()
 
+
+class StrSettingItem(bpy.types.PropertyGroup):
+    
+    id = bpy.props.StringProperty()
+    value = bpy.props.IntProperty()
+
+
 obj_collection = {}
 class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
@@ -388,19 +382,29 @@ class AddButtonOperator(bpy.types.Operator):
             obj_collection[unique] = 1
         else:
             obj_collection[unique] += 1
-        id = f'{unique}-{obj_collection[unique]}'
+        id = f'{unique}{obj_collection[unique]}'
         new = context.scene.my_collection.add()
         new.name = id
+        print(id, int(id))
+        new.value = int(id)
+        print(dir(new))
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
     bl_idname = "scene.remove_button_operator"
     bl_label = "Remove Object"
-
+    unique = bpy.props.IntProperty()
     def execute(self, context):
-        id = len(context.scene.my_collection) - 1
+        unique = self.unique
+        id = f'{unique}{obj_collection[unique]}'
+        for count, item in  enumerate(context.scene.my_collection):
+            if item.name == id:
+                context.scene.my_collection.remove(count)
+        
+        
+                obj_collection[unique] -= 1
 
-        context.scene.my_collection.remove(id)
+        
         return {'FINISHED'}
 
 class ButtonOperator(bpy.types.Operator):
@@ -432,8 +436,9 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         mytool = scene.my_tool
 
 
-        
-        layout.prop(mytool, f"id_name{self.bl_description}")
+        for item in context.scene.my_idname:
+            if item.value + 1 == self.bl_description:
+                layout.prop(item, "id", text=f"{self.bl_description}")
         #split for button loop
 
         
@@ -446,7 +451,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
             # button
             # row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
 
-
+        
         #split for button loop
 
         split = layout.split()
@@ -455,8 +460,8 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         op.unique = self.bl_description
         col = split.column(align=True)
         
-        col.operator("scene.remove_button_operator")
-
+        op = col.operator("scene.remove_button_operator")
+        op.unique = self.bl_description
         # ONLY ENABLE PHYSICS IN THE FIRST ITEM
         if self.bl_description == 1:
             layout.prop(mytool, "enable_physics")
@@ -472,7 +477,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
         
 op_cls = {}
-def create_custom_operator(i):
+def create_custom_operator(context, i):
     idname = f"Object id#{str(i)}"
     bl_parent_id = "OBJECT_PT_CustomPanel"
     
@@ -489,12 +494,26 @@ def create_custom_operator(i):
     if i not in op_cls.keys(): 
         op_cls[i] = nc
         bpy.utils.register_class(nc)
-def remove_custom_operator(i):  
+
+
+        #str thing
+        id = len(context.scene.my_idname)
+        new = context.scene.my_idname.add()
+        new.name = str(id)
+        new.value = id
+
+def remove_custom_operator(context, i):  
 
     if i in op_cls.keys():
         
         bpy.utils.unregister_class(op_cls[i])
         del op_cls[i]
+
+
+        #str thing
+        id = len(context.scene.my_idname) - 1
+
+        context.scene.my_idname.remove(id)
 
 class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -534,6 +553,7 @@ classes = (
     SceneSettingItem,
     RemoveButtonOperator,
     ExecuteOperator,
+    StrSettingItem
 
 )
 
@@ -546,6 +566,8 @@ def register():
     #register dynamic creation see if I can place this elsewhere
     bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
     
+
+    bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
 
     # # create the initial operator
     # create_custom_operators(1)

@@ -1,6 +1,11 @@
-enable_p = None
 
-if enable_p:
-    print("a")
-else:
-    print("b")
+wordFreqDic = {
+    "Hello": 56,
+    "at" : 23 ,
+    "test" : 43,
+    "this" : 43
+    }
+
+test = "yeet"
+wordFreqDic.update(test = 'value' )
+print(wordFreqDic)
