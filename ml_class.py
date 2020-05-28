@@ -154,10 +154,11 @@ class ML_Gen():
             }
         for key, object in objects.items() :
             name = names_dict[int(key)]
-            print(name, "NAMMMME")
+       
             cordinates['meshes'][name] = {}
+ 
             for count, obj in enumerate(object):
-                print(count, "count in get cordinates")
+      
                 bounding_box = self.camera_view_bounds_2d(scene, camera_object, obj)
                 if bounding_box:
                     cordinates['meshes'][name][count] = {
@@ -309,12 +310,14 @@ class ML_Gen():
         objects = {}
 
         for key, ob in objs.items():
+            print(key, ob, "fuck fuck fuck")
             for obj in ob:
+                print(obj, "fuck fuck fuck")
                 # Threshold to test if ray cast corresponds to the original vertex
                 limit = 0.0001
                 viewlayer = bpy.context.view_layer
                 # Deselect mesh elements
-                print(type(obj), print(obj), print(dir(obj)), "fix here")
+             
                 self.DeselectEdgesAndPolygons( obj )
 
                 # In world coordinates, get a bvh tree and vertices
@@ -342,7 +345,7 @@ class ML_Gen():
 
                 del bvh
                 ray_percent = same_count/ count
-                print(obj, ray_percent)
+                print(obj, ray_percent, "obj ray percent")
                 if ray_percent > cutoff/ 100:
                     value = True
         
@@ -353,7 +356,7 @@ class ML_Gen():
                 
                 else:
                     value = False
-            return objects
+        return objects
     @staticmethod
     def find_nearest(camera, obj_list):
         nearest = None
@@ -377,7 +380,7 @@ class ML_Gen():
             self.objs[id].append(obj)
         else:
             self.objs[id] = [obj]
-        print(self.objs)
+        print(self.objs, "objs")
 
     def batch_render(self, scene, image_count, filepath, file_prefix="render"):
 
@@ -416,9 +419,9 @@ class ML_Gen():
             
                 bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
                 bpy.ops.render.render(write_still=True)
-
-                objects = self.get_raycast_percentages(scene, camera, self.objs, 40)
-                print(objects)
+                print(self.objs, "self ids")
+                objects = self.get_raycast_percentages(scene, camera, self.objs, 30)
+                print(objects, "objects back ")
                 
                 scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
     #            
@@ -430,3 +433,6 @@ class ML_Gen():
         print(labels, "labels")
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
+
+
+# fix adding items does not update when you change them, added light and it stayed there
