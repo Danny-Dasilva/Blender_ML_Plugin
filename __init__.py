@@ -21,9 +21,9 @@
 # add unregister
 
 bl_info = {
-    "name" : "Test_addon",
+    "name" : "Blender_Ml",
     "author" : "Danny Dasilva",
-    "description" : "Simple test addon",
+    "description" : "Generate Machine learning object detrction data",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
     "location" : "View3D",
@@ -31,7 +31,6 @@ bl_info = {
     "category" : "Generic"
 }
 from .ml_class import ML_Gen
-from . draw_op import OT_Draw_Operator
 import bpy
 
 import bgl
