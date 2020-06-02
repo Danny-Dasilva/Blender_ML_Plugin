@@ -1,6 +1,5 @@
 
 import bpy
-from random import uniform
 import numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
@@ -10,7 +9,6 @@ from random import randint, uniform
 from math import *
 import os
 import json
-from time import sleep
 
 class ML_Gen():
     def __init__(self):
@@ -419,7 +417,6 @@ class ML_Gen():
             if value == False:
                 loop_count -= 1
                 value = True
-                
                 print("false", percent)
             else:
                 print(percent, "good")

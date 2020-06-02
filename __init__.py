@@ -154,12 +154,12 @@ class MyProperties(PropertyGroup):
         description="A bool property",
         default = False
         )
-    my_int: IntProperty(
+    frame_advance: IntProperty(
         name = "Int Value",
         description="A integer property",
-        default = 23,
-        min = 10,
-        max = 100
+        default = 1,
+        min = 1,
+        max = 500
         )
     image_count: IntProperty(
         name = "image_count",
@@ -169,7 +169,7 @@ class MyProperties(PropertyGroup):
         max = 100
         )
     obj_num: IntProperty(
-        name = "Set numbers",
+        name = "Unique Objects",
         description="Set values",
         default = 1,
         min = 1,
@@ -248,6 +248,7 @@ class MyProperties(PropertyGroup):
 
 
 gen = ML_Gen()
+
 # ------------------------------------------------------------------------
 #    Operators
 # ------------------------------------------------------------------------
@@ -351,7 +352,7 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-        layout.label(text="Camera Spawn:")
+        layout.label(text="Camera Spawn Domain:")
         layout.prop(mytool, "cam_xyz_max")
         layout.prop(mytool, "cam_xyz_min")
 
@@ -425,6 +426,7 @@ class ButtonOperator(bpy.types.Operator):
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_label = "Object id #1"
+    bl_description = 1
     bl_options = {"DEFAULT_CLOSED"}
 
     
@@ -482,9 +484,6 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 op_cls = {}
 def create_custom_operator(context, i):
     idname = f"Object id#{str(i)}"
-    bl_parent_id = "OBJECT_PT_CustomPanel"
-    
-
     nc = type(  'DynOp_' + idname,
                     (OBJECT_PT_CustomPanel1, ),
                     {'bl_idname': idname,
@@ -521,6 +520,7 @@ def remove_custom_operator(context, i):
 class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_label = "Render Options"
+    
     @classmethod
     def poll(self,context):
         return context.object is not None
@@ -531,7 +531,7 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         mytool = scene.my_tool
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             layout.label(text="frame advance")
-            layout.prop(mytool, "my_int", text="Integer Property")
+            layout.prop(mytool, "frame_advance", text="Frame Advance")
         layout.prop(mytool, "image_count")
         # filepath
         layout.prop(mytool, "filepath")
@@ -540,6 +540,7 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("scene.execute_operator")
+        
 
 
 
@@ -548,7 +549,6 @@ classes = (
     OT_Cam_Spawn,
     OT_Draw_Operator,
     OBJECT_PT_CustomPanel,
-    # OBJECT_PT_CustomPanel1,
     OBJECT_PT_CustomPanel2,
     OT_Obj_Spawn,
     ButtonOperator,
@@ -556,8 +556,7 @@ classes = (
     SceneSettingItem,
     RemoveButtonOperator,
     ExecuteOperator,
-    StrSettingItem
-
+    StrSettingItem,
 )
 
 def register():
