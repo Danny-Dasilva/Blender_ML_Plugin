@@ -374,8 +374,11 @@ class ML_Gen():
             scene.frame_set(i)
     def clear(self):
         self.objs = {}
-
+    def reset(self):
+        self.clear()
     def add(self, obj, id):
+        
+        print(self.objs, "after clear")
         if id in self.objs.keys():
             self.objs[id].append(obj)
         else:

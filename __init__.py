@@ -306,6 +306,7 @@ class ExecuteOperator(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
+        gen.reset()
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
             gen.enable_physics = True
