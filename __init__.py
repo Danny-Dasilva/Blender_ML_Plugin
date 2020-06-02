@@ -314,7 +314,7 @@ class ExecuteOperator(bpy.types.Operator):
             gen.names_dict[item.value + 1] = item.id
 
         for item in context.scene.my_collection:
-            print(item, "item in context.scene//// should only be one")
+            print(item, "item in context.scene")
             if item.tag:
                 gen.add(item.tag, item.name[0])
         filepath = str(mytool.filepath)
@@ -388,6 +388,8 @@ class AddButtonOperator(bpy.types.Operator):
         new = context.scene.my_collection.add()
         new.name = id
         new.value = int(id)
+        for item in  context.scene.my_collection:
+            print(item)
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
@@ -403,7 +405,8 @@ class RemoveButtonOperator(bpy.types.Operator):
         
         
                 obj_collection[unique] -= 1
-
+        for item in  context.scene.my_collection:
+            print(item)
         
         return {'FINISHED'}
 

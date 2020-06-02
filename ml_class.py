@@ -372,10 +372,12 @@ class ML_Gen():
     def increment_frames(scene, frames):
         for i in range(frames):
             scene.frame_set(i)
-    def clear(self):
+    def clear_dicts(self):
         self.objs = {}
+        self.names_dict = {}
+
     def reset(self):
-        self.clear()
+        self.clear_dicts()
     def add(self, obj, id):
         
         print(self.objs, "after clear")
@@ -417,6 +419,7 @@ class ML_Gen():
             if value == False:
                 loop_count -= 1
                 value = True
+                
                 print("false", percent)
             else:
                 print(percent, "good")
