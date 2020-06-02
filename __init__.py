@@ -18,7 +18,25 @@
 # id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
 
 '''
+fix call object id 1, 
 
+blender plugin - display error popup
+
+rename functions
+
+read image type, 
+
+add in frame advance checkbox when enable physics is clicked
+
+unique object spawn tests
+
+test with physics, 
+
+
+
+
+
+!!!! when you remove object ids it doesnt remove the objects you selected
 '''
 
 
