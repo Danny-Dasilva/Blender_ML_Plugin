@@ -1,3 +1,4 @@
+
 import bpy
 from random import uniform
 import numpy as np
@@ -146,7 +147,7 @@ class ML_Gen():
 
     def get_cordinates(self, scene, camera,  objects, names_dict, filename):
         camera_object = camera
-        
+        print(objects, "objects in get cordinates")
     
         cordinates = {
                 'image': filename,
@@ -180,7 +181,8 @@ class ML_Gen():
         distance = sqrt((locx)**2 + (locy)**2 + (locz)**2) 
         return distance
 
-    def center_obj(self, obj_camera, point):
+    def center_obj(self, obj_camera, obj):
+        point = obj.matrix_world.to_translation()
         loc_camera = obj_camera.matrix_world.to_translation()
 
         direction = point - loc_camera
@@ -190,10 +192,8 @@ class ML_Gen():
         # assume we're using euler rotation
         obj_camera.rotation_euler = rot_quat.to_euler()
         self.update()
-        eulers = [degrees(a) for a in obj_camera.matrix_world.to_euler()]
-        z = eulers[2]
-        distance = self.measure(point, loc_camera)
-        return distance, z
+        
+    
 
     @staticmethod
     def point_at(obj, target, roll=0):
@@ -310,9 +310,7 @@ class ML_Gen():
         objects = {}
 
         for key, ob in objs.items():
-            print(key, ob, "fuck fuck fuck")
             for obj in ob:
-                print(obj, "fuck fuck fuck")
                 # Threshold to test if ray cast corresponds to the original vertex
                 limit = 0.0001
                 viewlayer = bpy.context.view_layer
@@ -374,6 +372,8 @@ class ML_Gen():
     def increment_frames(scene, frames):
         for i in range(frames):
             scene.frame_set(i)
+    def clear(self):
+        self.objs = {}
 
     def add(self, obj, id):
         if id in self.objs.keys():
@@ -400,10 +400,11 @@ class ML_Gen():
                 self.randomize_objs(scene, ball_dict)
             nearest_ball = self.find_nearest(camera, ball_lst)
             print(nearest_ball, "nearest")
+
             # read in incement frames in other thing
             # self.increment_frames(scene, 50)
 
-            distance, z = self.center_obj(camera, nearest_ball.matrix_world.to_translation())
+            self.center_obj(camera, nearest_ball)
 
 
             # add in offset percentage
@@ -416,20 +417,20 @@ class ML_Gen():
                 print("false", percent)
             else:
                 print(percent, "good")
-                filename = '{}-{}.jpg'.format(str(file_prefix), str(loop_count))
+                filename = f'{str(file_prefix)}-{str(loop_count)}.png'
             
-                bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-                bpy.ops.render.render(write_still=True)
+                # bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+                # bpy.ops.render.render(write_still=True)
                 print(self.objs, "self ids")
                 objects = self.get_raycast_percentages(scene, camera, self.objs, 30)
                 print(objects, "objects back ")
                 
                 scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
-    #            
+          
                 labels.append(scene_labels) # Merge lists
             loop_count += 1
            
-    #        
+
 
         print(labels, "labels")
         with open(f'{filepath}/labels.json', 'w+') as f:

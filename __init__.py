@@ -21,9 +21,9 @@
 # add unregister
 
 bl_info = {
-    "name" : "Blender_Ml",
+    "name" : "Test_addon",
     "author" : "Danny Dasilva",
-    "description" : "Generate Machine learning object detrction data",
+    "description" : "Simple test addon",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
     "location" : "View3D",
@@ -31,6 +31,7 @@ bl_info = {
     "category" : "Generic"
 }
 from .ml_class import ML_Gen
+from . draw_op import OT_Draw_Operator
 import bpy
 
 import bgl
@@ -312,6 +313,7 @@ class ExecuteOperator(bpy.types.Operator):
             gen.names_dict[item.value + 1] = item.id
 
         for item in context.scene.my_collection:
+            print(item, "item in context.scene//// should only be one")
             if item.tag:
                 gen.add(item.tag, item.name[0])
         filepath = str(mytool.filepath)
@@ -376,7 +378,7 @@ class AddButtonOperator(bpy.types.Operator):
     unique = bpy.props.IntProperty()
     def execute(self, context):
         unique = self.unique
-        print(unique, "unique",)
+       
         if unique not in obj_collection.keys():
             obj_collection[unique] = 1
         else:
@@ -384,9 +386,7 @@ class AddButtonOperator(bpy.types.Operator):
         id = f'{unique}{obj_collection[unique]}'
         new = context.scene.my_collection.add()
         new.name = id
-        print(id, int(id))
         new.value = int(id)
-        print(dir(new))
         return {'FINISHED'}
 
 class RemoveButtonOperator(bpy.types.Operator):
@@ -581,4 +581,3 @@ if __name__ == "__main__":
 
     register()
     bpy.ops.object.draw_op('INVOKE_DEFAULT')
-
