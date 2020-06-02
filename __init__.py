@@ -133,15 +133,21 @@ def obj_domain(self, context):
 def set_obj_count(self, context):
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
-    create_custom_operators(context, count)
+    create_custom_operators(scene, count)
 
-def create_custom_operators(context, count):
+def init_count():
+    scene = bpy.context.scene
+    count = scene.my_tool.obj_num
+    create_custom_operators(scene, count)
+
+
+def create_custom_operators(scene, count):
     for i in (number+1 for number in range(9)):
         if i <= count:
 
-            create_custom_operator(context, i)
+            create_custom_operator(scene, i)
         else:
-            remove_custom_operator(context, i)
+            remove_custom_operator(scene, i)
 
 
 
@@ -190,8 +196,6 @@ class MyProperties(PropertyGroup):
         min = 0.01,
         max = 30.0
         )
-
-
     cam_xyz_max: FloatVectorProperty(
         name = "XYZ+",
         description="Something",
@@ -242,15 +246,6 @@ class MyProperties(PropertyGroup):
         maxlen=1024,
         subtype='DIR_PATH'
         )
-        
-    my_enum: EnumProperty(
-        name="Dropdown:",
-        description="Apply Data to attribute.",
-        items=[ ('OP1', "Option 1", ""),
-                ('OP2', "Option 2", ""),
-                ('OP3', "Option 3", ""),
-               ]
-        )
 
 
 
@@ -263,7 +258,6 @@ def set_cam_dimensions(dim_min, dim_max):
     gen.xyz_max = [val for val in dim_max]
     gen.xyz_min = [val for val in dim_min]
 
-    print(gen.xyz_max,gen.xyz_min, "in set cam dimmmmmmmmmm mm" )
 
 # ------------------------------------------------------------------------
 #    Operators
@@ -277,7 +271,7 @@ class OT_Cam_Spawn(Operator):
     def execute(self, context):
         scene = context.scene
         mytool = scene.my_tool
-
+        
         # print the values to the console
         print("Cam_Test")
         
@@ -303,7 +297,6 @@ class OT_Obj_Spawn(Operator):
         gen.ob_xyz_max = [val for val in mytool.obj_xyz_max]
         gen.ob_xyz_min = [val for val in mytool.obj_xyz_min]
 
-        
 
         for item in context.scene.my_collection:
             if int(item.name[0]) == 1:
@@ -366,6 +359,8 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
+        
+        
         layout.label(text="Camera Spawn Domain:")
         layout.prop(mytool, "cam_xyz_max")
         layout.prop(mytool, "cam_xyz_min")
@@ -390,6 +385,7 @@ class AddButtonOperator(bpy.types.Operator):
     bl_idname = "scene.add_button_operator"
     bl_label = "Add Object"
     unique = bpy.props.IntProperty()
+    
     def execute(self, context):
         unique = self.unique
        
@@ -436,9 +432,14 @@ class ButtonOperator(bpy.types.Operator):
 
 
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
-    bl_parent_id = "OBJECT_PT_CustomPanel"
-
     
+    i = 1
+    idname = f"Object id#{str(i)}"
+    bl_parent_id = "OBJECT_PT_CustomPanel"
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_idname = idname 
+    bl_label = f'Add a {idname}'
+
 
     @classmethod
     def poll(self,context):
@@ -491,7 +492,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
         
 op_cls = {}
-def create_custom_operator(context, i):
+def create_custom_operator(scene, i):
     idname = f"Object id#{str(i)}"
     nc = type(  'DynOp_' + idname,
                     (OBJECT_PT_CustomPanel1, ),
@@ -508,12 +509,12 @@ def create_custom_operator(context, i):
 
 
         #str thing
-        id = len(context.scene.my_idname)
-        new = context.scene.my_idname.add()
+        id = len(scene.my_idname)
+        new = scene.my_idname.add()
         new.name = str(id)
         new.value = id
 
-def remove_custom_operator(context, i):  
+def remove_custom_operator(scene, i):  
 
     if i in op_cls.keys():
         
@@ -522,9 +523,9 @@ def remove_custom_operator(context, i):
 
 
         #str thing
-        id = len(context.scene.my_idname) - 1
+        id = len(scene.my_idname) - 1
 
-        context.scene.my_idname.remove(id)
+        scene.my_idname.remove(id)
 
 class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -549,6 +550,9 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("scene.execute_operator")
+
+
+        
         
 
 
@@ -565,6 +569,7 @@ classes = (
     RemoveButtonOperator,
     ExecuteOperator,
     StrSettingItem,
+    OBJECT_PT_CustomPanel1,
 )
 
 def register():
@@ -579,8 +584,9 @@ def register():
     #dynamic property for id names
     bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
 
+    
+
     # # create the initial operator
-    # create_custom_operators(1)
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
@@ -593,4 +599,5 @@ def unregister():
 if __name__ == "__main__":
 
     register()
+    
     bpy.ops.object.draw_op('INVOKE_DEFAULT')
