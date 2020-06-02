@@ -17,8 +17,11 @@
 # batch render
 # id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
 
-# !! check the names and obj ids if I can
-# add unregister
+'''
+
+'''
+
+
 
 bl_info = {
     "name" : "Test_addon",
@@ -426,20 +429,59 @@ class ButtonOperator(bpy.types.Operator):
     id = bpy.props.IntProperty()
 
     def execute(self, context):
-        print("Pressed button ", self.id)
+        print("we did it it works correct context or whatever ")
         return {'FINISHED'}
+    def invoke(self, context, event):
+
+        return self.execute(context)
+
+
+op_cls = {}
+def create_custom_operator(scene, i):
+    idname = f"Object id#{str(i)}"
+    nc = type(  'DynOp_' + idname,
+                    (OBJECT_PT_CustomPanel1, ),
+                    {'bl_idname': idname,
+                    'bl_label': 'Add a ' + idname,
+                    'bl_description': i,
+                })
+    
+    print(op_cls.keys())
+
+    if i not in op_cls.keys(): 
+        op_cls[i] = nc
+        bpy.utils.register_class(nc)
+
+
+        #str thing
+        id = len(scene.my_idname)
+        new = scene.my_idname.add()
+        new.name = str(id)
+        new.value = id
+
+
+def remove_custom_operator(scene, i):  
+
+    if i in op_cls.keys():
+        
+        bpy.utils.unregister_class(op_cls[i])
+        del op_cls[i]
+
+
+        #str thing
+        id = len(scene.my_idname) - 1
+
+        scene.my_idname.remove(id)
+
 
 
 
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     
-    i = 1
-    idname = f"Object id#{str(i)}"
+
+    #default
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_options = {"DEFAULT_CLOSED"}
-    bl_idname = idname 
-    bl_label = f'Add a {idname}'
-
 
     @classmethod
     def poll(self,context):
@@ -450,8 +492,8 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-
         for item in context.scene.my_idname:
+            print("item in objjjj", item)
             if item.value + 1 == self.bl_description:
                 layout.prop(item, "id", text=f"{self.bl_description}")
         #split for button loop
@@ -491,41 +533,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
 
 
         
-op_cls = {}
-def create_custom_operator(scene, i):
-    idname = f"Object id#{str(i)}"
-    nc = type(  'DynOp_' + idname,
-                    (OBJECT_PT_CustomPanel1, ),
-                    {'bl_idname': idname,
-                    'bl_label': 'Add a ' + idname,
-                    'bl_description': i,
-                })
-    
-    print(op_cls.keys())
 
-    if i not in op_cls.keys(): 
-        op_cls[i] = nc
-        bpy.utils.register_class(nc)
-
-
-        #str thing
-        id = len(scene.my_idname)
-        new = scene.my_idname.add()
-        new.name = str(id)
-        new.value = id
-
-def remove_custom_operator(scene, i):  
-
-    if i in op_cls.keys():
-        
-        bpy.utils.unregister_class(op_cls[i])
-        del op_cls[i]
-
-
-        #str thing
-        id = len(scene.my_idname) - 1
-
-        scene.my_idname.remove(id)
 
 class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
@@ -550,7 +558,9 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("scene.execute_operator")
-
+        
+        
+        
 
         
         
@@ -569,7 +579,6 @@ classes = (
     RemoveButtonOperator,
     ExecuteOperator,
     StrSettingItem,
-    OBJECT_PT_CustomPanel1,
 )
 
 def register():
@@ -583,7 +592,7 @@ def register():
     
     #dynamic property for id names
     bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
-
+    
     
 
     # # create the initial operator
