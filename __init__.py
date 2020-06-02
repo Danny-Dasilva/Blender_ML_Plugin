@@ -31,7 +31,6 @@ bl_info = {
     "category" : "Generic"
 }
 from .ml_class import ML_Gen
-from . draw_op import OT_Draw_Operator
 import bpy
 
 import bgl
@@ -71,7 +70,7 @@ class DrawBox():
     def unregister(self):
         bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, 'WINDOW')
 
-    def setxyz(self, xyz_max, xyz_min):
+    def setxyz(self, xyz_min, xyz_max):
         print(xyz_min, "in data class")
         x_min = xyz_min[0]
         x_max = xyz_max[0]
@@ -104,10 +103,17 @@ cam = DrawBox(None)
 def cam_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
+
+
+
+    #when domain updates so does the ml section
+    set_cam_dimensions(mytool.cam_xyz_min, mytool.cam_xyz_max)
     
-    xyz_max = [val for val in mytool.cam_xyz_max]
     xyz_min = [val for val in mytool.cam_xyz_min]
-    cam.setxyz(xyz_max, xyz_min)
+    xyz_max = [val for val in mytool.cam_xyz_max]
+    
+
+    cam.setxyz(xyz_min, xyz_max)
     cam.run()
     
     
@@ -118,9 +124,10 @@ def obj_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
     
+ 
     xyz_max = [val for val in mytool.obj_xyz_max]
     xyz_min = [val for val in mytool.obj_xyz_min]
-    obj.setxyz(xyz_max, xyz_min)
+    obj.setxyz(xyz_min, xyz_max)
     obj.run()
 
 def set_obj_count(self, context):
@@ -250,6 +257,15 @@ class MyProperties(PropertyGroup):
 gen = ML_Gen()
 
 # ------------------------------------------------------------------------
+#    Ml Helpers
+# ------------------------------------------------------------------------
+def set_cam_dimensions(dim_min, dim_max):
+    gen.xyz_max = [val for val in dim_max]
+    gen.xyz_min = [val for val in dim_min]
+
+    print(gen.xyz_max,gen.xyz_min, "in set cam dimmmmmmmmmm mm" )
+
+# ------------------------------------------------------------------------
 #    Operators
 # ------------------------------------------------------------------------
 
@@ -265,9 +281,7 @@ class OT_Cam_Spawn(Operator):
         # print the values to the console
         print("Cam_Test")
         
-        
-        gen.xyz_max = [val for val in mytool.cam_xyz_max]
-        gen.xyz_min = [val for val in mytool.cam_xyz_min]
+        set_cam_dimensions(mytool.cam_xyz_min, mytool.cam_xyz_max)
         gen.randomize_camera(scene)
 
         print(gen.xyz_max, gen.xyz_min)
@@ -361,14 +375,12 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         layout.prop(mytool, "obj_num")
 
 
-
 class SceneSettingItem(bpy.types.PropertyGroup):
     tag = bpy.props.PointerProperty(type=bpy.types.Object)
     value = bpy.props.IntProperty()
 
 
 class StrSettingItem(bpy.types.PropertyGroup):
-    
     id = bpy.props.StringProperty()
     value = bpy.props.IntProperty()
 
@@ -425,9 +437,6 @@ class ButtonOperator(bpy.types.Operator):
 
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     bl_parent_id = "OBJECT_PT_CustomPanel"
-    bl_label = "Object id #1"
-    bl_description = 1
-    bl_options = {"DEFAULT_CLOSED"}
 
     
 
@@ -446,7 +455,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
                 layout.prop(item, "id", text=f"{self.bl_description}")
         #split for button loop
 
-        
+
         for item in context.scene.my_collection:
             
 
@@ -547,7 +556,6 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
 classes = (
     MyProperties,
     OT_Cam_Spawn,
-    OT_Draw_Operator,
     OBJECT_PT_CustomPanel,
     OBJECT_PT_CustomPanel2,
     OT_Obj_Spawn,
@@ -565,10 +573,10 @@ def register():
         register_class(cls)
     bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
 
-    #register dynamic creation see if I can place this elsewhere
+    #dynamic property for object selection
     bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
     
-
+    #dynamic property for id names
     bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
 
     # # create the initial operator
@@ -578,6 +586,8 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
     del bpy.types.Scene.my_tool
+    del bpy.types.Scene.my_idname
+    del bpy.types.Scene.my_collection
 
 
 if __name__ == "__main__":
