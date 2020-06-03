@@ -496,7 +496,14 @@ def remove_custom_operator(scene, i):
 
 class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     
-
+    # custom op
+    i = 1
+    idname = f"Object id#{str(i)}"
+    bl_idname = idname
+    bl_label  = f'Add a {idname}' 
+    bl_description = i
+    
+            
     #default
     bl_parent_id = "OBJECT_PT_CustomPanel"
     bl_options = {"DEFAULT_CLOSED"}
@@ -511,7 +518,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         mytool = scene.my_tool
 
         for item in context.scene.my_idname:
-            print("item in objjjj", item)
+            
             if item.value + 1 == self.bl_description:
                 layout.prop(item, "id", text=f"{self.bl_description}")
         #split for button loop
@@ -597,6 +604,7 @@ classes = (
     RemoveButtonOperator,
     ExecuteOperator,
     StrSettingItem,
+    OBJECT_PT_CustomPanel1,
 )
 
 def register():
