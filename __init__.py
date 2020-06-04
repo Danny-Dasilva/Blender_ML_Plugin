@@ -21,9 +21,11 @@
 fix call object id 1, ask devin how to -------
 
 
-blender plugin - display error popup
+
 
 rename functions
+
+add display error popup
 
 read image type, 
 
@@ -38,14 +40,27 @@ test with physics,
 
 
 !!!! when you remove object ids it doesnt remove the objects you selected
+
+
+Naming Conventions 
+category_Location_name
+
+locations
+
+MT for menut
+PT for Panel
+
+OT for operator 
+
+bl_idname = category.name
 '''
 
 
 
 bl_info = {
-    "name" : "Test_addon",
+    "name" : "Blender_ML",
     "author" : "Danny Dasilva",
-    "description" : "Simple test addon",
+    "description" : "Blender Object Detection Data generation",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
     "location" : "View3D",
