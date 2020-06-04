@@ -23,18 +23,26 @@ fix call object id 1, ask devin how to -------
 
 
 
-rename functions
+rename - my_tool my_idname my_collection
+
+
+
+read image type, 
+
 
 add display error popup
 
-read image type, 
+warning path is default
+error no objects selected
+
+
+
 
 add in frame advance checkbox when enable physics is clicked
 
 unique object spawn tests
 
 test with physics, 
-
 
 
 
@@ -88,14 +96,117 @@ from bpy.types import (Panel,
                        Operator,
                        PropertyGroup,
                        )
+
+
 # ------------------------------------------------------------------------
-#    Update functions
+#    Generative helper functions
+# ------------------------------------------------------------------------
+def create_custom_operator(scene, i):
+    idname = f"Object id#{str(i)}"
+    nc = type(  'DynOp_' + idname,
+                    (OBJECT_PT_Spawn_Ids, ),
+                    {'bl_idname': idname,
+                    'bl_label': 'Add a ' + idname,
+                    'bl_description': i,
+                })
+    
+    if i not in op_cls.keys(): 
+        op_cls[i] = nc
+        bpy.utils.register_class(nc)
+
+
+        #str thing
+        id = len(scene.my_idname)
+        new = scene.my_idname.add()
+        new.name = str(id)
+        new.value = id
+
+
+def remove_custom_operator(scene, i):  
+    if i in op_cls.keys():
+
+        bpy.utils.unregister_class(op_cls[i])
+        del op_cls[i]
+
+
+        #str thing
+        id = len(scene.my_idname) - 1
+        scene.my_idname.remove(id)
+
+def create_custom_operators(scene, count):
+    for i in (number+1 for number in range(9)):
+        if i <= count:
+            create_custom_operator(scene, i)
+        else:
+            remove_custom_operator(scene, i)
+
+def set_obj_count(self, context):
+    scene = bpy.context.scene
+    count = scene.my_tool.obj_num
+    create_custom_operators(scene, count)
+
+def init_count():
+    scene = bpy.context.scene
+    count = scene.my_tool.obj_num
+    create_custom_operators(scene, count)
+
+
+
+# ------------------------------------------------------------------------
+#    Generator Operators
+# ------------------------------------------------------------------------
+
+class OT_Add_Obj(Operator):
+    bl_idname = "scene.add_obj"
+    bl_label = "Add Object"
+    unique = bpy.props.IntProperty()
+    
+    def execute(self, context):
+        unique = self.unique
+       
+        if unique not in obj_collection.keys():
+            obj_collection[unique] = 1
+        else:
+            obj_collection[unique] += 1
+        id = f'{unique}{obj_collection[unique]}'
+        new = context.scene.my_collection.add()
+        new.name = id
+        new.value = int(id)
+        for item in  context.scene.my_collection:
+            print(item)
+        return {'FINISHED'}
+
+class OT_Remove_Obj(Operator):
+    bl_idname = "scene.remove_obj"
+    bl_label = "Remove Object"
+    unique = bpy.props.IntProperty()
+    def execute(self, context):
+        unique = self.unique
+        id = f'{unique}{obj_collection[unique]}'
+
+        for count, item in  enumerate(context.scene.my_collection):
+            if item.name == id:
+                context.scene.my_collection.remove(count)
+        
+        
+                obj_collection[unique] -= 1
+
+
+        
+        for item in  context.scene.my_collection:
+            print(item)
+        
+        return {'FINISHED'}
+
+# ------------------------------------------------------------------------
+#    Draw functions
 # ------------------------------------------------------------------------
 
 class DrawBox():
 
     draw_handle = None
     vertices = None
+
     def __init__(self, set_cam):
         self.set_cam = set_cam
     def register(self):
@@ -135,13 +246,11 @@ class DrawBox():
             self.shader.uniform_float("color", (1, 0, 0, 1))
         self.batch.draw(self.shader)
 
-cam = DrawBox(None)
+
 
 def cam_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
-
-
 
     #when domain updates so does the ml section
     set_cam_dimensions(mytool.cam_xyz_min, mytool.cam_xyz_max)
@@ -149,14 +258,11 @@ def cam_domain(self, context):
     xyz_min = [val for val in mytool.cam_xyz_min]
     xyz_max = [val for val in mytool.cam_xyz_max]
     
-
     cam.setxyz(xyz_min, xyz_max)
     cam.run()
     
     
     
-   
-obj = DrawBox(1)
 def obj_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
@@ -167,39 +273,24 @@ def obj_domain(self, context):
     obj.setxyz(xyz_min, xyz_max)
     obj.run()
 
-def set_obj_count(self, context):
-    
-    scene = bpy.context.scene
-    count = scene.my_tool.obj_num
-    create_custom_operators(scene, count)
 
-def init_count():
-    scene = bpy.context.scene
-    count = scene.my_tool.obj_num
-    create_custom_operators(scene, count)
-
-
-def create_custom_operators(scene, count):
-    for i in (number+1 for number in range(9)):
-        if i <= count:
-
-            create_custom_operator(scene, i)
-        else:
-            remove_custom_operator(scene, i)
 
 
 
 # ------------------------------------------------------------------------
-#    Scene Properties
+#    Property Groups
 # ------------------------------------------------------------------------
+class SceneSettingItem(PropertyGroup):
+    tag = bpy.props.PointerProperty(type=bpy.types.Object)
+    value = bpy.props.IntProperty()
+
+
+class StrSettingItem(PropertyGroup):
+    id = bpy.props.StringProperty()
+    value = bpy.props.IntProperty()
 
 class MyProperties(PropertyGroup):
 
-    my_bool: BoolProperty(
-        name="Enable or Disable",
-        description="A bool property",
-        default = False
-        )
     enable_physics: BoolProperty(
         name="Enable Physics",
         description="A bool property",
@@ -226,13 +317,6 @@ class MyProperties(PropertyGroup):
         min = 1,
         max = 9,
         update=set_obj_count
-        )
-    my_float: FloatProperty(
-        name = "Float Value",
-        description = "A float property",
-        default = 23.7,
-        min = 0.01,
-        max = 30.0
         )
     cam_xyz_max: FloatVectorProperty(
         name = "XYZ+",
@@ -287,7 +371,7 @@ class MyProperties(PropertyGroup):
 
 
 
-gen = ML_Gen()
+
 
 # ------------------------------------------------------------------------
 #    Ml Helpers
@@ -304,7 +388,7 @@ def set_cam_dimensions(dim_min, dim_max):
 
 class OT_Cam_Spawn(Operator):
     bl_label = "Cam_Spawn"
-    bl_idname = "wm.cam_spawn"
+    bl_idname = "scene.cam_spawn"
 
     def execute(self, context):
         scene = context.scene
@@ -324,7 +408,7 @@ class OT_Cam_Spawn(Operator):
 
 class OT_Obj_Spawn(Operator):
     bl_label = "Obj_Spawn"
-    bl_idname = "wm.obj_spawn"
+    bl_idname = "scene.obj_spawn"
 
     def execute(self, context):
         scene = context.scene
@@ -343,7 +427,7 @@ class OT_Obj_Spawn(Operator):
                 print("randomzie")
         return {'FINISHED'}
 
-class ExecuteOperator(bpy.types.Operator):
+class OT_Execute(Operator):
     bl_idname = "scene.execute_operator"
     bl_label = "Batch Render"
 
@@ -353,7 +437,6 @@ class ExecuteOperator(bpy.types.Operator):
         scene = context.scene
         mytool = context.scene.my_tool
         gen.reset()
-
 
         # check values
 
@@ -381,12 +464,11 @@ class ExecuteOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SpawnOp(bpy.types.Operator):
+class OT_Spawn(bpy.types.Operator):
     bl_idname = "scene.spawn_first"
     bl_label = "Test Button"
 
     
-
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
@@ -408,17 +490,14 @@ class Inherit_Panel:
     bl_category = "Blender ML"
     bl_context = "objectmode"   
     
-
-
-class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
+class OBJECT_PT_Camera_Settings(Inherit_Panel, Panel):
     bl_label = "My Panel"
-    bl_idname = "OBJECT_PT_CustomPanel"
+    bl_idname = "OBJECT_PT_Camera_Settings"
    
     bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
     
     #to go underneath
 
-    
     @classmethod
     def poll(self,context):
         return context.object is not None
@@ -428,121 +507,19 @@ class OBJECT_PT_CustomPanel(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-        
-        
         layout.label(text="Camera Spawn Domain:")
         layout.prop(mytool, "cam_xyz_max")
         layout.prop(mytool, "cam_xyz_min")
 
-        layout.operator("wm.cam_spawn")
+        layout.operator("scene.cam_spawn")
         layout.separator()
         layout.prop(mytool, "obj_num")
 
 
-class SceneSettingItem(bpy.types.PropertyGroup):
-    tag = bpy.props.PointerProperty(type=bpy.types.Object)
-    value = bpy.props.IntProperty()
-
-
-class StrSettingItem(bpy.types.PropertyGroup):
-    id = bpy.props.StringProperty()
-    value = bpy.props.IntProperty()
-
-
-obj_collection = {}
-class AddButtonOperator(bpy.types.Operator):
-    bl_idname = "scene.add_button_operator"
-    bl_label = "Add Object"
-    unique = bpy.props.IntProperty()
-    
-    def execute(self, context):
-        unique = self.unique
-       
-        if unique not in obj_collection.keys():
-            obj_collection[unique] = 1
-        else:
-            obj_collection[unique] += 1
-        id = f'{unique}{obj_collection[unique]}'
-        new = context.scene.my_collection.add()
-        new.name = id
-        new.value = int(id)
-        for item in  context.scene.my_collection:
-            print(item)
-        return {'FINISHED'}
-
-class RemoveButtonOperator(bpy.types.Operator):
-    bl_idname = "scene.remove_button_operator"
-    bl_label = "Remove Object"
-    unique = bpy.props.IntProperty()
-    def execute(self, context):
-        unique = self.unique
-        id = f'{unique}{obj_collection[unique]}'
-        for count, item in  enumerate(context.scene.my_collection):
-            if item.name == id:
-                context.scene.my_collection.remove(count)
-        
-        
-                obj_collection[unique] -= 1
-        for item in  context.scene.my_collection:
-            print(item)
-        
-        return {'FINISHED'}
-
-class ButtonOperator(bpy.types.Operator):
-    bl_idname = "scene.button_operator"
-    bl_label = "Button"
-
-    id = bpy.props.IntProperty()
-
-    def execute(self, context):
-        print("we did it it works correct context or whatever ")
-        return {'FINISHED'}
-    def invoke(self, context, event):
-
-        return self.execute(context)
-
-
-op_cls = {}
-def create_custom_operator(scene, i):
-    idname = f"Object id#{str(i)}"
-    nc = type(  'DynOp_' + idname,
-                    (OBJECT_PT_CustomPanel1, ),
-                    {'bl_idname': idname,
-                    'bl_label': 'Add a ' + idname,
-                    'bl_description': i,
-                })
-    
-    print(op_cls.keys())
-
-    if i not in op_cls.keys(): 
-        op_cls[i] = nc
-        bpy.utils.register_class(nc)
-
-
-        #str thing
-        id = len(scene.my_idname)
-        new = scene.my_idname.add()
-        new.name = str(id)
-        new.value = id
-
-
-def remove_custom_operator(scene, i):  
-
-    if i in op_cls.keys():
-        
-        bpy.utils.unregister_class(op_cls[i])
-        del op_cls[i]
-
-
-        #str thing
-        id = len(scene.my_idname) - 1
-
-        scene.my_idname.remove(id)
 
 
 
-
-class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
+class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
     
     # custom op
     i = 1
@@ -553,7 +530,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
     
             
     #default
-    bl_parent_id = "OBJECT_PT_CustomPanel"
+    bl_parent_id = "OBJECT_PT_Camera_Settings"
     bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
@@ -565,34 +542,32 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-
+        #str loop
         for item in context.scene.my_idname:
             
             if item.value + 1 == self.bl_description:
                 layout.prop(item, "id", text=f"{self.bl_description}")
-        #split for button loop
+        
+        
 
-
+        #obj loop
         for item in context.scene.my_collection:
-            
-
             if int(item.name[0]) == self.bl_description:
                 row = self.layout.row(align=True)
                 row.prop(item, "tag", text="add custom title here")
-            # button
-            # row.operator("scene.button_operator", text="Button #"+item.name).id = item.value
 
-        
-        #split for button loop
+
 
         split = layout.split()
         col = split.column()
-        op = col.operator("scene.add_button_operator")
+        op = col.operator("scene.add_obj")
         op.unique = self.bl_description
         col = split.column(align=True)
         
-        op = col.operator("scene.remove_button_operator")
+        op = col.operator("scene.remove_obj")
         op.unique = self.bl_description
+
+
         # ONLY ENABLE PHYSICS IN THE FIRST ITEM
         if self.bl_description == 1:
             layout.prop(mytool, "enable_physics")
@@ -603,14 +578,11 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
                 layout.prop(mytool, "obj_xyz_min")
 
                 # Big render button
-                layout.operator("wm.obj_spawn")
+                layout.operator("scene.obj_spawn")
 
 
-        
-
-
-class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
-    bl_parent_id = "OBJECT_PT_CustomPanel"
+class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
+    bl_parent_id = "OBJECT_PT_Camera_Settings"
     bl_label = "Render Options"
     
     @classmethod
@@ -635,24 +607,31 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         layout.operator("scene.spawn_first")
         
         
-        
+# ------------------------------------------------------------------------
+#    Class Inits
+# ------------------------------------------------------------------------
 
+op_cls = {}
+obj_collection = {}
+
+gen = ML_Gen()
+cam = DrawBox(None)    
+obj = DrawBox(1)
 
 
 
 classes = (
     MyProperties,
     OT_Cam_Spawn,
-    OBJECT_PT_CustomPanel,
-    OBJECT_PT_CustomPanel2,
+    OBJECT_PT_Camera_Settings,
+    OBJECT_PT_Render_Settings,
     OT_Obj_Spawn,
-    ButtonOperator,
-    AddButtonOperator,
+    OT_Add_Obj,
+    OT_Remove_Obj,
     SceneSettingItem,
-    RemoveButtonOperator,
-    ExecuteOperator,
+    OT_Execute,
     StrSettingItem,
-    SpawnOp,
+    OT_Spawn,
 )
 
 def register():
@@ -667,13 +646,12 @@ def register():
     #dynamic property for id names
     bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
     
-    
 
-    # # create the initial operator
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
+
     del bpy.types.Scene.my_tool
     del bpy.types.Scene.my_idname
     del bpy.types.Scene.my_collection
