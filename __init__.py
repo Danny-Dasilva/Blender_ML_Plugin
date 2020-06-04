@@ -256,8 +256,8 @@ class MyProperties(PropertyGroup):
         )
 
     filepath: StringProperty(
-        name="filepath",
-        description=":",
+        name="Output",
+        description="Directory to save images to",
         default="",
         maxlen=1024,
         subtype="DIR_PATH"
