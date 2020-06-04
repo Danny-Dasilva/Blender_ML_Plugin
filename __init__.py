@@ -277,10 +277,9 @@ def obj_domain(self, context):
 
 
 def frame_advance(self, context):
-    scene = bpy.context.scene
-    mytool = scene.my_tool
+    mytool = context.scene.my_tool
     frames = mytool.frame_advance
-    gen.set_frame_advance()
+    gen.frames  = frames
 
 # ------------------------------------------------------------------------
 #    Property Groups
@@ -306,7 +305,7 @@ class MyProperties(PropertyGroup):
         description="A integer property",
         default = 1,
         min = 1,
-        max = 500
+        max = 500,
         update=frame_advance
         )
     image_count: IntProperty(
@@ -481,7 +480,7 @@ class OT_Execute(Operator):
         else:
             filepath = bpy.data.scenes[0].render.filepath
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
-       
+        print("ahhhhhhhhhhhhhh", gen.frames)
         # file_format = scene.render.image_settings.file_format
         # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}

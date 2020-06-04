@@ -367,8 +367,7 @@ class ML_Gen():
     
         return nearest
     
-    def set_frame_advance(frames):
-        self.frames = frames
+    
 
     def increment_frames(self, scene):
         
@@ -410,7 +409,7 @@ class ML_Gen():
                 self.increment_frames(scene)
 
 
-                
+
             nearest_ball = self.find_nearest(camera, ball_lst)
             print(nearest_ball, "nearest")
 
