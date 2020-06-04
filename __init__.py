@@ -18,7 +18,8 @@
 # id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
 
 '''
-fix call object id 1, 
+fix call object id 1, ask devin how to -------
+
 
 blender plugin - display error popup
 
@@ -152,6 +153,7 @@ def obj_domain(self, context):
     obj.run()
 
 def set_obj_count(self, context):
+    
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
     create_custom_operators(scene, count)
@@ -336,6 +338,14 @@ class ExecuteOperator(bpy.types.Operator):
         scene = context.scene
         mytool = context.scene.my_tool
         gen.reset()
+
+
+        # check values
+
+        # self.report({"ERROR"}, "Something isn't right")
+        # self.report({"WARNING"}, "Something isn't right")
+
+
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
             gen.enable_physics = True
