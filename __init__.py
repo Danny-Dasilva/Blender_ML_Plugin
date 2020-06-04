@@ -165,7 +165,7 @@ def init_count():
 class OT_Add_Obj(Operator):
     bl_idname = "scene.add_obj"
     bl_label = "Add Object"
-    unique = bpy.props.IntProperty()
+    unique: bpy.props.IntProperty()
     
     def execute(self, context):
         unique = self.unique
@@ -185,7 +185,7 @@ class OT_Add_Obj(Operator):
 class OT_Remove_Obj(Operator):
     bl_idname = "scene.remove_obj"
     bl_label = "Remove Object"
-    unique = bpy.props.IntProperty()
+    unique: bpy.props.IntProperty()
     def execute(self, context):
         unique = self.unique
         id = f'{unique}{obj_collection[unique]}'
@@ -287,13 +287,13 @@ def obj_domain(self, context):
 #    Property Groups
 # ------------------------------------------------------------------------
 class SceneSettingItem(PropertyGroup):
-    tag = bpy.props.PointerProperty(type=bpy.types.Object)
-    value = bpy.props.IntProperty()
+    tag: bpy.props.PointerProperty(type=bpy.types.Object)
+    value: bpy.props.IntProperty()
 
 
 class StrSettingItem(PropertyGroup):
-    id = bpy.props.StringProperty()
-    value = bpy.props.IntProperty()
+    id: bpy.props.StringProperty()
+    value: bpy.props.IntProperty()
 
 class MyProperties(PropertyGroup):
 
