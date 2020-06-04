@@ -12,8 +12,8 @@ import json
 
 class ML_Gen():
     def __init__(self):
-        self.xyz_max = [0, 0, 0]
-        self.xyz_min = [0, 0, 0]
+        self.xyz_max = None
+        self.xyz_min = None
         self.ob_xyz_max  = [0, 0, 0]
         self.ob_xyz_min  = [0, 0, 0]
         self.pi = 3.14159265
@@ -385,7 +385,7 @@ class ML_Gen():
             self.objs[id] = [obj]
         print(self.objs, "objs")
 
-    def batch_render(self, scene, image_count, filepath, file_prefix="render"):
+    def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render"):
 
         scene_setup_steps = int(image_count)
         value = True
@@ -420,13 +420,12 @@ class ML_Gen():
                 print("false", percent)
             else:
                 print(percent, "good")
-                filename = f'{str(file_prefix)}-{str(loop_count)}.png'
+                filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
             
-                # bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-                # bpy.ops.render.render(write_still=True)
-                print(self.objs, "self ids")
+                bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+                bpy.ops.render.render(write_still=True)
+
                 objects = self.get_raycast_percentages(scene, camera, self.objs, 30)
-                print(objects, "objects back ")
                 
                 scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
           

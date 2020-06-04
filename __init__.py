@@ -27,7 +27,7 @@ rename - my_tool my_idname my_collection
 
 
 
-read image type, 
+
 
 
 add display error popup
@@ -48,6 +48,15 @@ test with physics,
 
 
 !!!! when you remove object ids it doesnt remove the objects you selected
+
+
+
+for later --
+advanced options
+
+toggle cutoff
+
+
 
 
 Naming Conventions 
@@ -439,6 +448,10 @@ class OT_Execute(Operator):
         gen.reset()
 
         # check values
+        if not gen.xyz_max or gen.xyz_min:
+            self.report({"ERROR"}, "Camera Domain Not Set")
+            return {'FINISHED'}
+
 
         # self.report({"ERROR"}, "Something isn't right")
         # self.report({"WARNING"}, "Something isn't right")
@@ -447,20 +460,24 @@ class OT_Execute(Operator):
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled", mytool.obj_xyz_max, mytool.obj_xyz_min)
             gen.enable_physics = True
+        
         for item in context.scene.my_idname:
             gen.names_dict[item.value + 1] = item.id
 
         for item in context.scene.my_collection:
-            print(item, "item in context.scene")
             if item.tag:
                 gen.add(item.tag, item.name[0])
         
         
         # filepath if in plugin else default
-
-        filepath = str(mytool.filepath) if mytool.filepath else bpy.data.scenes[0].render.filepath
-        
-        gen.batch_render(scene, int(mytool.image_count), filepath)
+        if mytool.filepath:
+            filepath = str(mytool.filepath)
+        else:
+            filepath = bpy.data.scenes[0].render.filepath
+            self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
+        print("last line")
+        # file_format = scene.render.image_settings.file_format
+        # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 
@@ -475,6 +492,7 @@ class OT_Spawn(bpy.types.Operator):
         # gen.reset()
         # init_count()
         print(bpy.data.scenes[0].render.filepath)
+        print(scene.render.image_settings.file_format)
 
         
         return {'FINISHED'}

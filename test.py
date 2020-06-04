@@ -1,8 +1,6 @@
 
-
-var = "aaaa"
-
-
-attr = var if var else "yeeet"
-
-print(attr)
+x = None
+y = None
+z = None
+if not x or y:
+    print("yyy")
