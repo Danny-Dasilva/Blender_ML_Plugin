@@ -351,6 +351,22 @@ class ExecuteOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class SpawnOp(bpy.types.Operator):
+    bl_idname = "scene.spawn_first"
+    bl_label = "Spawn First"
+
+    
+
+    def execute(self, context):
+        scene = context.scene
+        mytool = context.scene.my_tool
+        gen.reset()
+        init_count()
+        
+        return {'FINISHED'}
+
+
+
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
 # ------------------------------------------------------------------------
@@ -517,6 +533,7 @@ class OBJECT_PT_CustomPanel1(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
+
         for item in context.scene.my_idname:
             
             if item.value + 1 == self.bl_description:
@@ -583,12 +600,11 @@ class OBJECT_PT_CustomPanel2(Inherit_Panel, Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("scene.execute_operator")
+        layout.operator("scene.spawn_first")
         
         
         
 
-        
-        
 
 
 
@@ -604,7 +620,7 @@ classes = (
     RemoveButtonOperator,
     ExecuteOperator,
     StrSettingItem,
-    OBJECT_PT_CustomPanel1,
+    SpawnOp,
 )
 
 def register():
