@@ -356,22 +356,29 @@ class ExecuteOperator(bpy.types.Operator):
             print(item, "item in context.scene")
             if item.tag:
                 gen.add(item.tag, item.name[0])
-        filepath = str(mytool.filepath)
+        
+        
+        # filepath if in plugin else default
+
+        filepath = str(mytool.filepath) if mytool.filepath else bpy.data.scenes[0].render.filepath
+        
         gen.batch_render(scene, int(mytool.image_count), filepath)
         return {'FINISHED'}
 
 
 class SpawnOp(bpy.types.Operator):
     bl_idname = "scene.spawn_first"
-    bl_label = "Spawn First"
+    bl_label = "Test Button"
 
     
 
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        gen.reset()
-        init_count()
+        # gen.reset()
+        # init_count()
+        print(bpy.data.scenes[0].render.filepath)
+
         
         return {'FINISHED'}
 
