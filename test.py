@@ -1,6 +1,6 @@
 
-x = None
-y = None
+x = 2
+y = 2
 z = None
-if not x or y:
+if not(x and y):
     print("yyy")

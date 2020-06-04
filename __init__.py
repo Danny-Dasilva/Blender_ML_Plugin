@@ -27,13 +27,10 @@ rename - my_tool my_idname my_collection
 
 
 
+error for if domain is 0 0 0 
 
 
 
-add display error popup
-
-warning path is default
-error no objects selected
 
 
 
@@ -447,11 +444,16 @@ class OT_Execute(Operator):
         mytool = context.scene.my_tool
         gen.reset()
 
-        # check values
-        if not gen.xyz_max or gen.xyz_min:
+        print(gen.xyz_min, gen.xyz_max, "callllllll")
+        # Check if camera domain Exists
+            
+        if not(gen.xyz_min and gen.xyz_max):
             self.report({"ERROR"}, "Camera Domain Not Set")
             return {'FINISHED'}
-
+        # Check if objects are selected Exists
+        if len(context.scene.my_collection) == 0:
+            self.report({"ERROR"}, "No object selected")
+            return {'FINISHED'}
 
         # self.report({"ERROR"}, "Something isn't right")
         # self.report({"WARNING"}, "Something isn't right")
@@ -464,6 +466,10 @@ class OT_Execute(Operator):
         for item in context.scene.my_idname:
             gen.names_dict[item.value + 1] = item.id
 
+
+        
+
+
         for item in context.scene.my_collection:
             if item.tag:
                 gen.add(item.tag, item.name[0])
@@ -475,7 +481,7 @@ class OT_Execute(Operator):
         else:
             filepath = bpy.data.scenes[0].render.filepath
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
-        print("last line")
+       
         # file_format = scene.render.image_settings.file_format
         # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
@@ -489,8 +495,8 @@ class OT_Spawn(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        # gen.reset()
-        # init_count()
+        gen.reset()
+        init_count()
         print(bpy.data.scenes[0].render.filepath)
         print(scene.render.image_settings.file_format)
 
