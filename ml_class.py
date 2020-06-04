@@ -20,6 +20,7 @@ class ML_Gen():
         self.objs = {}
         self.enable_physics = None
         self.names_dict = {}
+        self.frames = None
     @staticmethod
     def update():
         dg = bpy.context.evaluated_depsgraph_get() 
@@ -365,11 +366,15 @@ class ML_Gen():
                 old_dist = dist
     
         return nearest
+    
+    def set_frame_advance(frames):
+        self.frames = frames
 
-    @staticmethod
-    def increment_frames(scene, frames):
-        for i in range(frames):
+    def increment_frames(self, scene):
+        
+        for i in range(self.frames):
             scene.frame_set(i)
+    
     def clear_dicts(self):
         self.objs = {}
         self.names_dict = {}
@@ -399,8 +404,13 @@ class ML_Gen():
 
             # if mytool.enable physics
             if self.enable_physics:
-                
                 self.randomize_objs(scene, ball_dict)
+            
+            if self.frames:
+                self.increment_frames(scene)
+
+
+                
             nearest_ball = self.find_nearest(camera, ball_lst)
             print(nearest_ball, "nearest")
 

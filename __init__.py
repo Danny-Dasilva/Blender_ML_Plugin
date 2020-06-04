@@ -120,7 +120,6 @@ def create_custom_operator(scene, i):
         op_cls[i] = nc
         bpy.utils.register_class(nc)
 
-
         #str thing
         id = len(scene.my_idname)
         new = scene.my_idname.add()
@@ -193,11 +192,7 @@ class OT_Remove_Obj(Operator):
         for count, item in  enumerate(context.scene.my_collection):
             if item.name == id:
                 context.scene.my_collection.remove(count)
-        
-        
                 obj_collection[unique] -= 1
-
-
         
         for item in  context.scene.my_collection:
             print(item)
@@ -281,7 +276,11 @@ def obj_domain(self, context):
 
 
 
-
+def frame_advance(self, context):
+    scene = bpy.context.scene
+    mytool = scene.my_tool
+    frames = mytool.frame_advance
+    gen.set_frame_advance()
 
 # ------------------------------------------------------------------------
 #    Property Groups
@@ -303,11 +302,12 @@ class MyProperties(PropertyGroup):
         default = False
         )
     frame_advance: IntProperty(
-        name = "Int Value",
+        name = "frame advance",
         description="A integer property",
         default = 1,
         min = 1,
         max = 500
+        update=frame_advance
         )
     image_count: IntProperty(
         name = "image_count",
@@ -587,7 +587,7 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
         op = col.operator("scene.add_obj")
         op.unique = self.bl_description
         col = split.column(align=True)
-        
+
         op = col.operator("scene.remove_obj")
         op.unique = self.bl_description
 
@@ -620,6 +620,8 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             layout.label(text="frame advance")
             layout.prop(mytool, "frame_advance", text="Frame Advance")
+
+
         layout.prop(mytool, "image_count")
         # filepath
         layout.prop(mytool, "filepath")
