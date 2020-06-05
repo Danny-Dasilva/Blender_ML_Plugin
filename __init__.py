@@ -30,7 +30,9 @@ rename - my_tool my_idname my_collection
 error for if domain is 0 0 0 
 
 
+-------------------------------
 
+test object spawn  with render
 
 
 unique object spawn tests
@@ -128,7 +130,6 @@ def remove_custom_operator(scene, i):
 
         bpy.utils.unregister_class(op_cls[i])
         del op_cls[i]
-
 
         #str thing
         id = len(scene.my_idname) - 1
@@ -238,9 +239,11 @@ class DrawBox():
         bgl.glLineWidth(3)
         self.shader.bind()
         if self.set_cam != None:
-            self.shader.uniform_float("color", (0, 1, 1, 1))
-        else:
+            
             self.shader.uniform_float("color", (1, 0, 0, 1))
+
+        else:
+            self.shader.uniform_float("color", (0, 1, 1, 1))
         self.batch.draw(self.shader)
 
 
@@ -477,8 +480,8 @@ class OT_Execute(Operator):
             filepath = bpy.data.scenes[0].render.filepath
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
-        # file_format = scene.render.image_settings.file_format
-        # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
+        file_format = scene.render.image_settings.file_format
+        gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 
@@ -636,8 +639,8 @@ op_cls = {}
 obj_collection = {}
 
 gen = ML_Gen()
-cam = DrawBox(None)    
-obj = DrawBox(1)
+cam = DrawBox(1)    
+obj = DrawBox(None)
 
 
 
