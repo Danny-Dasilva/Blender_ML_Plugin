@@ -33,10 +33,6 @@ error for if domain is 0 0 0
 
 
 
-
-
-add in frame advance checkbox when enable physics is clicked
-
 unique object spawn tests
 
 test with physics, 
@@ -480,7 +476,7 @@ class OT_Execute(Operator):
         else:
             filepath = bpy.data.scenes[0].render.filepath
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
-        print("ahhhhhhhhhhhhhh", gen.frames)
+
         # file_format = scene.render.image_settings.file_format
         # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
