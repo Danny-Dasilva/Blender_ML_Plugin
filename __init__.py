@@ -155,21 +155,11 @@ def remove_custom_operator(scene, i):
         del op_cls[i]
 
 
-        col = scene.my_collection
-        #remove id from my_collection
-        for count in range(len(col)):
-            try:
-                n = col[count].name
-                print(n, "len col", len(col))
-            except:
-                
-                print(len(col))
-            
-            # if n.startswith(str(i)):
-            #     print(n, "removed")
-            #     scene.my_collection.remove(count)
-            # else:
-            #     print(len(item.name), item.name)
+        # god this is awful please fix
+        for count, item in  reversed(list(enumerate(scene.my_collection))):
+            if item.name.startswith(str(i)):
+                scene.my_collection.remove(count)
+        
 
         # delete from dictr
         if i in obj_collection:
@@ -231,7 +221,8 @@ class OT_Remove_Obj(Operator):
         unique = self.unique
         id = f'{unique}{obj_collection[unique]}'
 
-        for count, item in  enumerate(context.scene.my_collection):
+
+        for count, item in  reversed(list(enumerate(context.scene.my_collection))):
             if item.name == id:
                 context.scene.my_collection.remove(count)
                 obj_collection[unique] -= 1
