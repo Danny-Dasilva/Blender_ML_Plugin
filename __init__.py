@@ -477,20 +477,23 @@ class OT_Obj_Spawn(Operator):
     bl_label = "Obj_Spawn"
     bl_idname = "scene.obj_spawn"
 
+    unique: bpy.props.IntProperty()
+    
     def execute(self, context):
+        unique = self.unique
         scene = context.scene
         mytool = scene.my_tool
 
         #for test spawn
-        set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
+        # set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
         
+        print(unique, "obj spawn")
 
-
-        for item in context.scene.my_collection:
-            if int(item.name[0]) == 1:
-                obj = item.tag
-                gen.randomize_obj(scene, obj)
-                print("randomzie")
+        # for item in context.scene.my_collection:
+        #     if int(item.name[0]) == 1:
+        #         obj = item.tag
+        #         gen.randomize_obj(scene, obj)
+        #         print("randomzie")
         return {'FINISHED'}
 
 class OT_Execute(Operator):
@@ -650,7 +653,8 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
                 if item.enable_physics:
                     layout.prop(item, "obj_xyz_min", text=f"{self.bl_description}")
                     layout.prop(item, "obj_xyz_max", text=f"{self.bl_description}")
-                    layout.operator("scene.obj_spawn")
+                    op = layout.operator("scene.obj_spawn")
+                    op.unique = self.bl_description
 
        
 
