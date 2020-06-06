@@ -39,7 +39,7 @@ class ML_Gen():
         # #call update
         self.update()
         return scene.camera
-    def randomize_obj(self, scene, obj):
+    def randomize_obj(self, scene, obj, xyz_min, xyz_max):
         pi = self.pi
         roll = uniform(0, 90)
         pitch = uniform(0, 90)
@@ -48,10 +48,11 @@ class ML_Gen():
         obj.rotation_euler[0] = pitch*(pi/180.0)
         obj.rotation_euler[1] = roll*(pi/180)
         obj.rotation_euler[2] = yaw*(pi/180.0)
-        print(self.ob_xyz_min, self.ob_xyz_max)
-        obj.location.x = uniform(self.ob_xyz_min[0], self.ob_xyz_max[0])   
-        obj.location.y = uniform(self.ob_xyz_min[1], self.ob_xyz_max[1])                                                                                                                                       
-        obj.location.z = uniform(self.ob_xyz_min[2], self.ob_xyz_max[2])
+
+
+        obj.location.x = uniform(xyz_min[0], xyz_max[0])   
+        obj.location.y = uniform(xyz_min[1], xyz_max[1])                                                                                                                                       
+        obj.location.z = uniform(xyz_min[2], xyz_max[2])
         
         self.update()
     def randomize_objs(self, scene, objs):

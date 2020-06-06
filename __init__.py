@@ -302,7 +302,6 @@ def cam_domain(self, context):
     
     
 def obj_domain(self, context):
-    scene = bpy.context.scene
 
     xyz_min = [val for val in self.obj_xyz_min]
     xyz_max = [val for val in self.obj_xyz_max]
@@ -431,6 +430,8 @@ def set_obj_dimensions(dim_min, dim_max):
     mxx = [val for val in dim_max]
     mnn = [val for val in dim_min]
     print(mxx, mnn, "coords")
+    return mnn, mxx
+    
     # gen.ob_xyz_max = [val for val in dim_max]
     # gen.ob_xyz_min = [val for val in dim_min]
 # ------------------------------------------------------------------------
@@ -467,20 +468,20 @@ class OT_Obj_Spawn(Operator):
     def execute(self, context):
         unique = self.unique
         scene = context.scene
-
+        print(self.unique)
         #for test spawn
         for item in scene.my_idname:
-            
-            if item.value + 1 ==unique:
-                set_obj_dimensions(item.obj_xyz_min, item.obj_xyz_max)
-        
-        print(unique, "obj spawn")
+            print(item.value, type(item.value), "item val unique ", unique)
+            if item.value + 1 == unique:
+                print("condition met")
+                xyz_min, xyz_max = set_obj_dimensions(item.obj_xyz_min, item.obj_xyz_max)
 
-        # for item in context.scene.my_collection:
-        #     if int(item.name[0]) == 1:
-        #         obj = item.tag
-        #         gen.randomize_obj(scene, obj)
-        #         print("randomzie")
+
+        for item in context.scene.my_collection:
+            if int(item.name[0]) == unique:
+                obj = item.tag
+                gen.randomize_obj(scene, obj, xyz_min, xyz_max)
+                print("randomzie")
         return {'FINISHED'}
 
 class OT_Execute(Operator):
