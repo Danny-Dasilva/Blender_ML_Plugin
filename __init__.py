@@ -77,6 +77,8 @@ toggle cutoff
 
 
 
+fix rever list enumerate garbage
+----
 Naming Conventions 
 category_Location_name
 
@@ -216,7 +218,7 @@ class OT_Add_Obj(Operator):
 class OT_Remove_Obj(Operator):
     bl_idname = "scene.remove_obj"
     bl_label = "Remove Object"
-    unique: bpy.props.IntProperty()
+    unique: IntProperty()
     def execute(self, context):
         unique = self.unique
         id = f'{unique}{obj_collection[unique]}'
@@ -321,12 +323,35 @@ def frame_advance(self, context):
 # ------------------------------------------------------------------------
 class SceneSettingItem(PropertyGroup):
     tag: bpy.props.PointerProperty(type=bpy.types.Object)
-    value: bpy.props.IntProperty()
+    value: IntProperty()
 
 
 class StrSettingItem(PropertyGroup):
     id: bpy.props.StringProperty()
-    value: bpy.props.IntProperty()
+    value: IntProperty()
+
+    obj_xyz_max: FloatVectorProperty(
+        name = "XYZ+",
+        description="Something",
+        default=(0.0, 0.0, 0.0), 
+        min= -10000.0,
+        max = 10000.0,
+        update=obj_domain
+        ) 
+
+    obj_xyz_min: FloatVectorProperty(
+        name = "XYZ-",
+        description="Something",
+        default=(0.0, 0.0, 0.0), 
+        min= -10000.0, 
+        max = 10000.0,
+        update=obj_domain
+        )
+    enable_physics: BoolProperty(
+        name="Enable Physics",
+        description="A bool property",
+        default = False
+        )
 
 class MyProperties(PropertyGroup):
 
@@ -616,19 +641,31 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
 
         op = col.operator("scene.remove_obj")
         op.unique = self.bl_description
+        # spawn obj loop
+        for item in context.scene.my_idname:
+            
+            if item.value + 1 == self.bl_description:
+                layout.prop(item, "enable_physics")
+
+                if item.enable_physics:
+                    layout.prop(item, "obj_xyz_min", text=f"{self.bl_description}")
+                    layout.prop(item, "obj_xyz_max", text=f"{self.bl_description}")
+                    layout.operator("scene.obj_spawn")
+
+       
 
 
         # ONLY ENABLE PHYSICS IN THE FIRST ITEM
-        if self.bl_description == 1:
-            layout.prop(mytool, "enable_physics")
+        # if self.bl_description == 1:
+        #     layout.prop(mytool, "enable_physics")
       
-            if mytool.enable_physics:
-                layout.label(text="Obj Spawn:")
-                layout.prop(mytool, "obj_xyz_max")
-                layout.prop(mytool, "obj_xyz_min")
+        #     if mytool.enable_physics:
+        #         layout.label(text="Obj Spawn:")
+        #         layout.prop(mytool, "obj_xyz_max")
+        #         layout.prop(mytool, "obj_xyz_min")
 
-                # Big render button
-                layout.operator("scene.obj_spawn")
+        #         # Big render button
+        #         layout.operator("scene.obj_spawn")
 
 
 class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
