@@ -39,9 +39,6 @@ test button - for seeying how the spawn works spawns
 -
 
 
-test different info types
-
-
 
 
 
@@ -70,6 +67,10 @@ turn off displays
 
 for later --
 advanced options
+
+
+info out
+
 
 toggle cutoff
 
@@ -149,10 +150,31 @@ def create_custom_operator(scene, i):
 
 def remove_custom_operator(scene, i):  
     if i in op_cls.keys():
-
+        #unregister classes
         bpy.utils.unregister_class(op_cls[i])
         del op_cls[i]
 
+
+        col = scene.my_collection
+        #remove id from my_collection
+        for count in range(len(col)):
+            try:
+                n = col[count].name
+                print(n, "len col", len(col))
+            except:
+                
+                print(len(col))
+            
+            # if n.startswith(str(i)):
+            #     print(n, "removed")
+            #     scene.my_collection.remove(count)
+            # else:
+            #     print(len(item.name), item.name)
+
+        # delete from dictr
+        if i in obj_collection:
+            del obj_collection[i]
+        print(obj, "collection")
         #str thing
         id = len(scene.my_idname) - 1
         scene.my_idname.remove(id)
@@ -193,6 +215,7 @@ class OT_Add_Obj(Operator):
         else:
             obj_collection[unique] += 1
         id = f'{unique}{obj_collection[unique]}'
+        
         new = context.scene.my_collection.add()
         new.name = id
         new.value = int(id)
@@ -517,12 +540,7 @@ class OT_Spawn(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        gen.reset()
-        init_count()
-        print(bpy.data.scenes[0].render.filepath)
-        print(scene.render.image_settings.file_format)
-
-        
+        self.report({"DEBUG"}, "Camera Domain Not Set")
         return {'FINISHED'}
 
 
