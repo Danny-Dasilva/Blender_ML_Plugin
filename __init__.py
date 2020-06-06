@@ -303,11 +303,11 @@ def cam_domain(self, context):
     
 def obj_domain(self, context):
     scene = bpy.context.scene
-    mytool = scene.my_tool
-    
- 
-    xyz_max = [val for val in mytool.obj_xyz_max]
-    xyz_min = [val for val in mytool.obj_xyz_min]
+
+    xyz_min = [val for val in self.obj_xyz_min]
+    xyz_max = [val for val in self.obj_xyz_max]
+
+
     obj.setxyz(xyz_min, xyz_max)
     obj.run()
 
@@ -400,24 +400,6 @@ class MyProperties(PropertyGroup):
         max = 10000.0,
         update=cam_domain
         )
-        # this is dumb fix this with less code
-    obj_xyz_max: FloatVectorProperty(
-        name = "XYZ+",
-        description="Something",
-        default=(0.0, 0.0, 0.0), 
-        min= -10000.0, # float
-        max = 10000.0,
-        update=obj_domain
-        ) 
-
-    obj_xyz_min: FloatVectorProperty(
-        name = "XYZ-",
-        description="Something",
-        default=(0.0, 0.0, 0.0), 
-        min= -10000.0, # float
-        max = 10000.0,
-        update=obj_domain
-        )
 
     filepath: StringProperty(
         name="Output",
@@ -446,8 +428,11 @@ def set_cam_dimensions(dim_min, dim_max):
     gen.xyz_min = [val for val in dim_min]
 
 def set_obj_dimensions(dim_min, dim_max):
-    gen.ob_xyz_max = [val for val in dim_max]
-    gen.ob_xyz_min = [val for val in dim_min]
+    mxx = [val for val in dim_max]
+    mnn = [val for val in dim_min]
+    print(mxx, mnn, "coords")
+    # gen.ob_xyz_max = [val for val in dim_max]
+    # gen.ob_xyz_min = [val for val in dim_min]
 # ------------------------------------------------------------------------
 #    Operators
 # ------------------------------------------------------------------------
@@ -482,10 +467,12 @@ class OT_Obj_Spawn(Operator):
     def execute(self, context):
         unique = self.unique
         scene = context.scene
-        mytool = scene.my_tool
 
         #for test spawn
-        # set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
+        for item in scene.my_idname:
+            
+            if item.value + 1 ==unique:
+                set_obj_dimensions(item.obj_xyz_min, item.obj_xyz_max)
         
         print(unique, "obj spawn")
 
@@ -644,6 +631,7 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
 
         op = col.operator("scene.remove_obj")
         op.unique = self.bl_description
+
         # spawn obj loop
         for item in context.scene.my_idname:
             
