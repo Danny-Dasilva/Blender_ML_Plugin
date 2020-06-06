@@ -166,7 +166,6 @@ def remove_custom_operator(scene, i):
         # delete from dictr
         if i in obj_collection:
             del obj_collection[i]
-        print(obj, "collection")
         #str thing
         id = len(scene.my_idname) - 1
         scene.my_idname.remove(id)
@@ -245,6 +244,7 @@ class DrawBox():
 
     def __init__(self, set_cam):
         self.set_cam = set_cam
+
     def register(self):
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
         self.batch = batch_for_shader(self.shader, 'LINE_STRIP', {'pos': self.vertices})
@@ -276,10 +276,8 @@ class DrawBox():
     def draw_callback_px(self):
         bgl.glLineWidth(3)
         self.shader.bind()
-        if self.set_cam != None:
-            
+        if self.set_cam == None:
             self.shader.uniform_float("color", (1, 0, 0, 1))
-
         else:
             self.shader.uniform_float("color", (0, 1, 1, 1))
         self.batch.draw(self.shader)
@@ -306,6 +304,8 @@ def obj_domain(self, context):
     xyz_min = [val for val in self.obj_xyz_min]
     xyz_max = [val for val in self.obj_xyz_max]
 
+
+    obj = objs[self.value]
 
     obj.setxyz(xyz_min, xyz_max)
     obj.run()
@@ -427,10 +427,10 @@ def set_cam_dimensions(dim_min, dim_max):
     gen.xyz_min = [val for val in dim_min]
 
 def set_obj_dimensions(dim_min, dim_max):
-    mxx = [val for val in dim_max]
-    mnn = [val for val in dim_min]
-    print(mxx, mnn, "coords")
-    return mnn, mxx
+    xyz_max = [val for val in dim_max]
+    xyz_min = [val for val in dim_min]
+
+    return xyz_min, xyz_max
     
     # gen.ob_xyz_max = [val for val in dim_max]
     # gen.ob_xyz_min = [val for val in dim_min]
@@ -468,12 +468,10 @@ class OT_Obj_Spawn(Operator):
     def execute(self, context):
         unique = self.unique
         scene = context.scene
-        print(self.unique)
+
         #for test spawn
         for item in scene.my_idname:
-            print(item.value, type(item.value), "item val unique ", unique)
             if item.value + 1 == unique:
-                print("condition met")
                 xyz_min, xyz_max = set_obj_dimensions(item.obj_xyz_min, item.obj_xyz_max)
 
 
@@ -481,7 +479,7 @@ class OT_Obj_Spawn(Operator):
             if int(item.name[0]) == unique:
                 obj = item.tag
                 gen.randomize_obj(scene, obj, xyz_min, xyz_max)
-                print("randomzie")
+
         return {'FINISHED'}
 
 class OT_Execute(Operator):
@@ -512,7 +510,7 @@ class OT_Execute(Operator):
 
         if mytool.enable_physics:#if bool property is true, show rows, else don't
             print("enabled",gen.ob_xyz_max, gen.ob_xyz_min)
-            set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
+            # set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
             gen.enable_physics = True
         
         for item in context.scene.my_idname:
@@ -693,9 +691,11 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 op_cls = {}
 obj_collection = {}
 
+objs = [DrawBox(i) for i in range(8)]
+
 gen = ML_Gen()
-cam = DrawBox(1)    
-obj = DrawBox(None)
+cam = DrawBox(None)    
+
 
 
 
