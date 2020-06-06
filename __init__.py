@@ -32,12 +32,36 @@ error for if domain is 0 0 0
 
 -------------------------------
 
-test object spawn  with render
+test object spawn  with render / vakues dont update and are not called in batch render
+
+test button - for seeying how the spawn works spawns
+
+
+
+
+
+
+test different info types
+
+
+
 
 
 unique object spawn tests
 
+
+toggle off spawn object removes class
+
+
+
 test with physics, 
+
+
+
+check cutoff for too many loops- warning
+
+
+turn off displays
 
 
 
