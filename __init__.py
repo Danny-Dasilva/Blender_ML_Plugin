@@ -36,16 +36,8 @@ test button - for seeying how the spawn works spawns
 
 
 
-
-
-
-
-
-unique color dictionary for each box spawn
-
--
-
-dynamic objs list generation for classes, more memory efficient and clears the panel
+fix !!!!!
+if mytool.enable_physics:#if bool property is true, show rows, else don't
 
 
 reset to 0, 0, 0 when objs toggled off:
@@ -56,7 +48,7 @@ reset to 0, 0, 0 when objs toggled off:
 
 test with physics, 
 
-
+dynamic objs list generation for classes, more memory efficient and clears the panel
 
 check cutoff for too many loops- warning
 
@@ -87,7 +79,8 @@ toggle cutoff
 
 
 
-fix rever list enumerate garbage
+fix reverse list enumerate garbage
+fix DRAWBOX normalize function 
 ----
 Naming Conventions 
 category_Location_name
@@ -254,6 +247,7 @@ class DrawBox():
 
     def __init__(self, set_cam):
         self.set_cam = set_cam
+        self.registered = False
         self.col = [
             [255, 128, 0, 1],
             [255, 255, 0, 1],
@@ -282,10 +276,17 @@ class DrawBox():
             self.draw_callback_px, (), "WINDOW", "POST_VIEW"
             )
     def unregister(self):
-        bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, 'WINDOW')
 
+        bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, 'WINDOW')
+    def clear(self):
+        self.unregister()
+        self.registered = False
+        
+        print("unregistered")
+        
+        
     def setxyz(self, xyz_min, xyz_max):
-        print(xyz_min, "in data class")
+        
         x_min = xyz_min[0]
         x_max = xyz_max[0]
         y_min = xyz_min[1]
@@ -298,10 +299,12 @@ class DrawBox():
 
 
     def run(self):
-        if self.draw_handle != None:
+        if self.registered == True:
             self.unregister()
+        
 
         self.register()
+        self.registered = True
         
     def draw_callback_px(self):
         bgl.glLineWidth(3)
@@ -350,6 +353,16 @@ def frame_advance(self, context):
     frames = mytool.frame_advance
     gen.frames  = frames
 
+def enable_physics(self, context):
+    obj = objs[self.value]
+
+    if self.enable_physics == False:
+        
+        print("false")
+        obj.clear()
+    else:
+        obj.run()
+    
 # ------------------------------------------------------------------------
 #    Property Groups
 # ------------------------------------------------------------------------
@@ -382,7 +395,8 @@ class StrSettingItem(PropertyGroup):
     enable_physics: BoolProperty(
         name="Enable Physics",
         description="A bool property",
-        default = False
+        default = False,
+        update=enable_physics
         )
 
 class MyProperties(PropertyGroup):
@@ -390,7 +404,7 @@ class MyProperties(PropertyGroup):
     enable_physics: BoolProperty(
         name="Enable Physics",
         description="A bool property",
-        default = False
+        default = False,
         )
     frame_advance: IntProperty(
         name = "frame advance",
