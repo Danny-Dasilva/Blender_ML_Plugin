@@ -36,16 +36,21 @@ test button - for seeying how the spawn works spawns
 
 
 
+
+
+
+
+
+unique color dictionary for each box spawn
+
 -
 
+dynamic objs list generation for classes, more memory efficient and clears the panel
 
 
+reset to 0, 0, 0 when objs toggled off:
 
 
-unique object spawn tests
-
-
-toggle off spawn object removes class
 
 
 
@@ -66,6 +71,11 @@ turn off displays
 
 
 for later --
+
+start with 0 instead of 1 for choose object ids
+
+
+
 advanced options
 
 
@@ -244,6 +254,26 @@ class DrawBox():
 
     def __init__(self, set_cam):
         self.set_cam = set_cam
+        self.col = [
+            [255, 128, 0, 1],
+            [255, 255, 0, 1],
+            [0, 255, 0, 1],
+            [0, 255, 128, 1],
+            [0, 255, 255, 1],
+            [0, 128, 255, 1],
+            [0, 0, 255, 1],
+            [127, 0, 255, 1],
+            [255, 0, 127, 1],
+        ]
+        self.color = self.normalize(self.col)
+    @staticmethod
+    def normalize(a):
+        amin, amax = 0, 255
+        for count, v in enumerate(a):
+            for i, val in enumerate(v):
+                a[count][i] = (val-amin) / (amax-amin)
+
+        return a
 
     def register(self):
         self.shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
@@ -277,9 +307,12 @@ class DrawBox():
         bgl.glLineWidth(3)
         self.shader.bind()
         if self.set_cam == None:
-            self.shader.uniform_float("color", (1, 0, 0, 1))
+            self.shader.uniform_float("color", (0, 0, 1, 1))
+            
         else:
-            self.shader.uniform_float("color", (0, 1, 1, 1))
+            
+            
+            self.shader.uniform_float("color", self.color[self.set_cam])
         self.batch.draw(self.shader)
 
 

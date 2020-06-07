@@ -19,11 +19,16 @@ class DrawingClass:
     def remove_handle(self):
          bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
 
-#context = bpy.context             
-#dns = bpy.app.driver_namespace
-#dns["dc"] = DrawingClass(context, "Draw This On Screen")
+# context = bpy.context             
+# dns = bpy.app.driver_namespace
+# dns["dc"] = DrawingClass(context, "Draw This On Screen")
 
 
 dns = bpy.app.driver_namespace
 dc = dns.get("dc")
 dc.remove_handle()
+
+
+dns = bpy.app.driver_namespace
+cam = dns.get("dc")
+ca.remove_handle()
