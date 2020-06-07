@@ -32,16 +32,20 @@ error for if domain is 0 0 0
 
 -------------------------------
 
-test button - for seeying how the spawn works spawns
+test button - for seeying how the camera works spawns
 
 
 
-fix !!!!!
+
+--
+
+toggle main display with same method
+turn off displays
+
+
+check if any of the physics things are toggled instead 
+
 if mytool.enable_physics:#if bool property is true, show rows, else don't
-
-
-reset to 0, 0, 0 when objs toggled off:
-
 
 
 
@@ -282,7 +286,6 @@ class DrawBox():
         self.unregister()
         self.registered = False
         
-        print("unregistered")
         
         
     def setxyz(self, xyz_min, xyz_max):
@@ -309,6 +312,7 @@ class DrawBox():
     def draw_callback_px(self):
         bgl.glLineWidth(3)
         self.shader.bind()
+
         if self.set_cam == None:
             self.shader.uniform_float("color", (0, 0, 1, 1))
             
@@ -355,10 +359,7 @@ def frame_advance(self, context):
 
 def enable_physics(self, context):
     obj = objs[self.value]
-
     if self.enable_physics == False:
-        
-        print("false")
         obj.clear()
     else:
         obj.run()
@@ -715,9 +716,12 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         layout = self.layout
         scene = context.scene
         mytool = scene.my_tool
-        if mytool.enable_physics:#if bool property is true, show rows, else don't
-            layout.label(text="frame advance")
-            layout.prop(mytool, "frame_advance", text="Frame Advance")
+
+        # FIXX
+        # for item in objs:
+        #     if item.registered:
+        #         layout.label(text="frame advance")
+        #         layout.prop(mytool, "frame_advance", text="Frame Advance")
 
 
         layout.prop(mytool, "image_count")
