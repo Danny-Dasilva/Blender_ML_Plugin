@@ -39,6 +39,9 @@ test button - for seeying how the camera works spawns
 
 --
 
+my_idname classes not clearing because they all get added !!!!!!!!!!!
+
+
 toggle display does the same for objects
 
 
@@ -101,7 +104,7 @@ bl_info = {
 }
 from .ml_class import ML_Gen
 import bpy
-
+from bpy.app.handlers import persistent
 import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
@@ -193,8 +196,7 @@ def set_obj_count(self, context):
     count = scene.my_tool.obj_num
     create_custom_operators(scene, count)
 
-def init_count():
-    scene = bpy.context.scene
+def init_count(scene):
     count = scene.my_tool.obj_num
     create_custom_operators(scene, count)
 
@@ -291,8 +293,9 @@ class DrawBox():
     def reset_verts(self):
         self.vertices = [(0, 0, 0)]
     def clear(self):
-        self.unregister()
-        self.registered = False
+        if self.registered == True:
+            self.unregister()
+            self.registered = False
         
     def erase(self):
         self.reset_verts()
@@ -794,7 +797,20 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         row.operator("scene.execute_operator")
         layout.operator("scene.spawn_first")
         
-        
+# ------------------------------------------------------------------------
+#    Set defaults
+# ------------------------------------------------------------------------
+
+
+@persistent
+def addon_search(scene):
+    print("hello")
+    init_count(scene)
+    bpy.app.handlers.depsgraph_update_post.remove(addon_search)
+    handler_removed = True
+
+
+
 # ------------------------------------------------------------------------
 #    Class Inits
 # ------------------------------------------------------------------------
@@ -806,9 +822,7 @@ objs = [DrawBox(i) for i in range(10)]
 
 gen = ML_Gen()
 cam = DrawBox(None)    
-
-
-
+handler_removed = False
 
 classes = (
     MyProperties,
@@ -835,16 +849,31 @@ def register():
     
     #dynamic property for id names
     bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
+
+    bpy.app.handlers.depsgraph_update_post.append(addon_search)
     
 
 def unregister():
     from bpy.utils import unregister_class
+    # clear gpu
+    cam.clear()
+
+
+    for count, cls in enumerate(op_cls.values()):
+        print(count, objs, len(objs))
+        objs[count].clear()
+        unregister_class(cls)
+
     for cls in reversed(classes):
         unregister_class(cls)
 
+    
+
     del bpy.types.Scene.my_tool
-    del bpy.types.Scene.my_idname
     del bpy.types.Scene.my_collection
+    del bpy.types.Scene.my_idname
+    if handler_removed == True:
+        bpy.app.handlers.depsgraph_update_post.remove(addon_search)
 
 
 if __name__ == "__main__":
