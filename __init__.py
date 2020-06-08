@@ -337,7 +337,7 @@ class DrawBox():
         self.shader.bind()
 
         if self.set_cam == None:
-            self.shader.uniform_float("color", (0, 0, 1, 1))
+            self.shader.uniform_float("color", (1, 0, 0, 1))
             
         else:
             
@@ -386,7 +386,12 @@ def enable_physics(self, context):
         obj.clear()
     else:
         obj.run()
+def toggle_cam(self, context):
     
+    if self.toggle_cam_domain == False:
+        cam.clear()
+    else:
+        cam.run()
 # ------------------------------------------------------------------------
 #    Property Groups
 # ------------------------------------------------------------------------
@@ -429,6 +434,12 @@ class MyProperties(PropertyGroup):
         name="Enable Physics",
         description="A bool property",
         default = False,
+        )
+    toggle_cam_domain: BoolProperty(
+        name="Display",
+        description="Visual display for camera domain",
+        default = True,
+        update=toggle_cam
         )
     frame_advance: IntProperty(
         name = "frame advance",
@@ -511,7 +522,7 @@ def set_obj_dimensions(dim_min, dim_max):
 
 
 class OT_Cam_Spawn(Operator):
-    bl_label = "Cam_Spawn"
+    bl_label = "Cam Spawn"
     bl_idname = "scene.cam_spawn"
 
     def execute(self, context):
@@ -649,7 +660,11 @@ class OBJECT_PT_Camera_Settings(Inherit_Panel, Panel):
         layout.prop(mytool, "cam_xyz_max")
         layout.prop(mytool, "cam_xyz_min")
 
-        layout.operator("scene.cam_spawn")
+        # test spawn and toggle display
+        row = layout.row()
+        row.operator("scene.cam_spawn")
+        row.prop(mytool, "toggle_cam_domain")
+
         layout.separator()
         layout.prop(mytool, "obj_num")
 
