@@ -55,21 +55,22 @@ class ML_Gen():
         obj.location.z = uniform(xyz_min[2], xyz_max[2])
         
         self.update()
-    def randomize_objs(self, scene, objs):
+    def randomize_objs(self, scene):
+        objs = self.objs
+        print("function called")
+        
         for key, ob in objs.items() :
-            for obj in ob:
-                pi = self.pi
-                roll = uniform(0, 90)
-                pitch = uniform(0, 90)
-                yaw = uniform(0, 90)
-                obj.rotation_mode = 'XYZ'
-                obj.rotation_euler[0] = pitch*(pi/180.0)
-                obj.rotation_euler[1] = roll*(pi/180)
-                obj.rotation_euler[2] = yaw*(pi/180.0)
-                print(self.ob_xyz_min, self.ob_xyz_max)
-                obj.location.x = uniform(self.ob_xyz_min[0], self.ob_xyz_max[0])   
-                obj.location.y = uniform(self.ob_xyz_min[1], self.ob_xyz_max[1])                                                                                                                                       
-                obj.location.z = uniform(self.ob_xyz_min[2], self.ob_xyz_max[2])
+         
+            xyz_min = self.names_dict[key]['xyz_min']
+            xyz_max = self.names_dict[key]['xyz_max']
+
+            if xyz_min and xyz_max:
+                for obj in ob:
+                    self.randomize_obj(scene, obj, xyz_min, xyz_max)
+
+
+    def set_obj_domain(self, ob_xyz_min, ob_xyz_max):
+        pass
     # run ops
     @staticmethod
     def camera_view_bounds_2d(scene, camera_object, mesh_object):
@@ -154,7 +155,8 @@ class ML_Gen():
                 'meshes': {}
             }
         for key, object in objects.items() :
-            name = names_dict[int(key)]
+
+            name = self.names_dict[key]['name']
        
             cordinates['meshes'][name] = {}
  
@@ -365,7 +367,7 @@ class ML_Gen():
             if dist < old_dist:
                 nearest = obj
                 old_dist = dist
-    
+
         return nearest
     
     
@@ -400,11 +402,12 @@ class ML_Gen():
         while loop_count != scene_setup_steps:
             ball_lst = self.objs['1']
             ball_dict = self.objs
+            print(ball_dict, "self.objs")
             camera = self.randomize_camera(scene)
 
             # if mytool.enable physics
             if self.enable_physics:
-                self.randomize_objs(scene, ball_dict)
+                self.randomize_objs(scene)
             
             if self.frames:
                 self.increment_frames(scene)
@@ -447,6 +450,7 @@ class ML_Gen():
         print(labels, "labels")
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
+    
 
 
 # fix adding items does not update when you change them, added light and it stayed there

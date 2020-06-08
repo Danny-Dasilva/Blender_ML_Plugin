@@ -126,7 +126,7 @@ from bpy.types import (Panel,
 #    Generative helper functions
 # ------------------------------------------------------------------------
 def create_custom_operator(scene, i):
-    idname = f"Object id#{str(i)}"
+    idname = f"Object id#{str(i + 1)}"
     nc = type(  'DynOp_' + idname,
                     (OBJECT_PT_Spawn_Ids, ),
                     {'bl_idname': idname,
@@ -139,20 +139,19 @@ def create_custom_operator(scene, i):
         bpy.utils.register_class(nc)
 
         #str thing
-        id = len(scene.my_idname)
+        
         new = scene.my_idname.add()
-        new.name = str(id)
-        new.value = id
-
+        new.name = str(i)
+        new.value = i
+    print(op_cls.keys())
 
 def remove_custom_operator(scene, i):  
     
     if i in op_cls.keys():
 
         # remove drawing
-        r = i - 1
-        print(i, r,  "i to be removed")
-        obj = objs[r]
+     
+        obj = objs[i]
         if obj.registered == True:
             obj.erase()
 
@@ -165,25 +164,30 @@ def remove_custom_operator(scene, i):
         for count, item in  reversed(list(enumerate(scene.my_collection))):
             if item.name.startswith(str(i)):
                 scene.my_collection.remove(count)
-        
+
+        for count, item in  reversed(list(enumerate(scene.my_idname))):
+            if item.value == i:
+
+                scene.my_idname.remove(count)
 
         # delete from dictr
         if i in obj_collection:
             del obj_collection[i]
 
-        #str thing
-        id = len(scene.my_idname) - 1
-        scene.my_idname.remove(id)
         for items in scene.my_idname:
-            print(items)
+            print(items, "items in scene")
+
+        
 
 def create_custom_operators(scene, count):
-    for i in (number+1 for number in range(9)):
-        if i <= count:
+    for i in range(10):
+        if i < count:
             create_custom_operator(scene, i)
         else:
             remove_custom_operator(scene, i)
 
+           
+    print(op_cls.keys())
 def set_obj_count(self, context):
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
@@ -263,6 +267,7 @@ class DrawBox():
             [0, 0, 255, 1],
             [127, 0, 255, 1],
             [255, 0, 127, 1],
+            [255, 0, 255, 1],
         ]
         self.color = self.normalize(self.col)
     @staticmethod
@@ -293,6 +298,7 @@ class DrawBox():
         self.reset_verts()
         self.unregister()
         self.registered = False
+        print(f"zeroed our {self.set_cam}")
         
     def setxyz(self, xyz_min, xyz_max):
         
@@ -354,7 +360,7 @@ def obj_domain(self, context):
     xyz_min = [val for val in self.obj_xyz_min]
     xyz_max = [val for val in self.obj_xyz_max]
 
-
+    
     obj = objs[self.value]
 
     obj.setxyz(xyz_min, xyz_max)
@@ -415,6 +421,8 @@ class StrSettingItem(PropertyGroup):
         update=enable_physics
         )
 
+
+
 class MyProperties(PropertyGroup):
 
     enable_physics: BoolProperty(
@@ -448,7 +456,7 @@ class MyProperties(PropertyGroup):
         description="Set values",
         default = 1,
         min = 1,
-        max = 9,
+        max = 10,
         update=set_obj_count
         )
     cam_xyz_max: FloatVectorProperty(
@@ -495,7 +503,7 @@ def set_cam_dimensions(dim_min, dim_max):
     gen.xyz_max = [val for val in dim_max]
     gen.xyz_min = [val for val in dim_min]
 
-def set_obj_dimensions(dim_min, dim_max):
+def unpack_dim(dim_min, dim_max):
     xyz_max = [val for val in dim_max]
     xyz_min = [val for val in dim_min]
 
@@ -503,6 +511,8 @@ def set_obj_dimensions(dim_min, dim_max):
     
     # gen.ob_xyz_max = [val for val in dim_max]
     # gen.ob_xyz_min = [val for val in dim_min]
+
+
 
 # ------------------------------------------------------------------------
 #    Operators
@@ -541,8 +551,8 @@ class OT_Obj_Spawn(Operator):
 
         #for test spawn
         for item in scene.my_idname:
-            if item.value + 1 == unique:
-                xyz_min, xyz_max = set_obj_dimensions(item.obj_xyz_min, item.obj_xyz_max)
+            if item.value == unique:
+                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
 
 
         for item in context.scene.my_collection:
@@ -568,7 +578,6 @@ class OT_Execute(Operator):
         mytool = context.scene.my_tool
         gen.reset()
 
-        print(gen.xyz_min, gen.xyz_max, "callllllll")
         # Check if camera domain Exists
             
         if not(gen.xyz_min and gen.xyz_max):
@@ -588,8 +597,16 @@ class OT_Execute(Operator):
             # set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
             gen.enable_physics = True
         
+
+
+        ### ficxing this
         for item in context.scene.my_idname:
-            gen.names_dict[item.value + 1] = item.id
+            xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+
+            if item.enable_physics:
+                gen.names_dict[item.value] = [xyz_min, xyz_max, item.id]
+            else:
+                gen.names_dict[item.value] = None
 
 
         
@@ -621,6 +638,25 @@ class OT_Spawn(bpy.types.Operator):
         scene = context.scene
         mytool = context.scene.my_tool
         self.report({"DEBUG"}, "Camera Domain Not Set")
+        for item in context.scene.my_idname:
+
+            if item.enable_physics:
+                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+
+                gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+            else:
+                gen.names_dict[item.value] = {"name" : item.id}
+            print(item.value)
+            
+        
+
+        for items in scene.my_idname:
+            print(items, "items in scene")
+        # for item in context.scene.my_collection:
+        #     if item.tag:
+        #         gen.add(item.tag, item.name[0])
+        # gen.randomize_objs(context.scene)
+        # print(gen.names_dict, "namess")
         return {'FINISHED'}
 
 
@@ -688,7 +724,7 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
         #str loop
         for item in context.scene.my_idname:
             
-            if item.value + 1 == self.bl_description:
+            if item.value == self.bl_description:
                 layout.prop(item, "id", text=f"{self.bl_description}")
         
         
@@ -713,7 +749,7 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
         # spawn obj loop
         for item in context.scene.my_idname:
             
-            if item.value + 1 == self.bl_description:
+            if item.value == self.bl_description:
                 layout.prop(item, "enable_physics")
 
                 if item.enable_physics:
@@ -766,7 +802,7 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 op_cls = {}
 obj_collection = {}
 
-objs = [DrawBox(i) for i in range(9)]
+objs = [DrawBox(i) for i in range(10)]
 
 gen = ML_Gen()
 cam = DrawBox(None)    
