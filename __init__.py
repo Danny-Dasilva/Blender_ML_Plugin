@@ -805,6 +805,10 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 @persistent
 def addon_search(scene):
     print("hello")
+    if scene.my_idname:
+        scene.my_idname.clear()
+    if scene.my_idname:
+        scene.my_idname.clear()
     init_count(scene)
     bpy.app.handlers.depsgraph_update_post.remove(addon_search)
     handler_removed = True
@@ -860,13 +864,13 @@ def unregister():
 
 
     for count, cls in enumerate(op_cls.values()):
-        print(count, objs, len(objs))
+   
         objs[count].clear()
         unregister_class(cls)
 
     for cls in reversed(classes):
         unregister_class(cls)
-
+    # bpy.types.Scene.my_idname.clear()
     
 
     del bpy.types.Scene.my_tool
