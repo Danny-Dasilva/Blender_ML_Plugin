@@ -85,6 +85,7 @@ toggle cutoff
 
 fix reverse list enumerate garbage
 fix DRAWBOX normalize function 
+fix bad loop practice
 ----
 Naming Conventions 
 category_Location_name
@@ -158,7 +159,16 @@ def create_custom_operator(scene, i):
 
 
 def remove_custom_operator(scene, i):  
+    
     if i in op_cls.keys():
+
+        # remove drawing
+        r = i - 1
+        print(i, r,  "i to be removed")
+        obj = objs[r]
+        if obj.registered == True:
+            obj.erase()
+
         #unregister classes
         bpy.utils.unregister_class(op_cls[i])
         del op_cls[i]
@@ -173,9 +183,12 @@ def remove_custom_operator(scene, i):
         # delete from dictr
         if i in obj_collection:
             del obj_collection[i]
+
         #str thing
         id = len(scene.my_idname) - 1
         scene.my_idname.remove(id)
+        for items in scene.my_idname:
+            print(items)
 
 def create_custom_operators(scene, count):
     for i in (number+1 for number in range(9)):
@@ -249,6 +262,7 @@ class DrawBox():
     draw_handle = None
     vertices = None
 
+
     def __init__(self, set_cam):
         self.set_cam = set_cam
         self.registered = False
@@ -282,11 +296,16 @@ class DrawBox():
     def unregister(self):
 
         bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, 'WINDOW')
+    def reset_verts(self):
+        self.vertices = [(0, 0, 0)]
     def clear(self):
         self.unregister()
         self.registered = False
         
-        
+    def erase(self):
+        self.reset_verts()
+        self.unregister()
+        self.registered = False
         
     def setxyz(self, xyz_min, xyz_max):
         
@@ -303,11 +322,15 @@ class DrawBox():
 
     def run(self):
         if self.registered == True:
-            self.unregister()
+            try:
+                self.unregister()
         
-
-        self.register()
-        self.registered = True
+            except:
+                print("weird error")
+        
+        if self.vertices:
+            self.register()
+            self.registered = True
         
     def draw_callback_px(self):
         bgl.glLineWidth(3)
@@ -717,11 +740,15 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         scene = context.scene
         mytool = scene.my_tool
 
-        # FIXX
-        # for item in objs:
-        #     if item.registered:
-        #         layout.label(text="frame advance")
-        #         layout.prop(mytool, "frame_advance", text="Frame Advance")
+       
+
+
+        # bad loop practice
+        for obj in objs:
+            if obj.registered == True:
+                layout.label(text="frame advance")
+                layout.prop(mytool, "frame_advance", text="Frame Advance")
+                break
 
 
         layout.prop(mytool, "image_count")
@@ -742,7 +769,7 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 op_cls = {}
 obj_collection = {}
 
-objs = [DrawBox(i) for i in range(8)]
+objs = [DrawBox(i) for i in range(9)]
 
 gen = ML_Gen()
 cam = DrawBox(None)    
