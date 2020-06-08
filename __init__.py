@@ -39,7 +39,6 @@ test button - for seeying how the camera works spawns
 
 --
 
-my_idname classes not clearing because they all get added !!!!!!!!!!!
 
 
 toggle display does the same for objects
@@ -382,12 +381,18 @@ def enable_physics(self, context):
         obj.clear()
     else:
         obj.run()
-def toggle_cam(self, context):
-    
-    if self.toggle_cam_domain == False:
+def toggle_domain(self, context):
+    for obj in objs:
+        obj.clear()
+    if self.toggle_domain == False:
         cam.clear()
+        for obj in objs:
+            obj.clear()
     else:
         cam.run()
+        for obj in objs:
+            obj.run()
+
 # ------------------------------------------------------------------------
 #    Property Groups
 # ------------------------------------------------------------------------
@@ -433,11 +438,11 @@ class MyProperties(PropertyGroup):
         description="A bool property",
         default = False,
         )
-    toggle_cam_domain: BoolProperty(
+    toggle_domain: BoolProperty(
         name="Display",
         description="Visual display for camera domain",
         default = True,
-        update=toggle_cam
+        update=toggle_domain
         )
     frame_advance: IntProperty(
         name = "frame advance",
@@ -695,7 +700,7 @@ class OBJECT_PT_Camera_Settings(Inherit_Panel, Panel):
         # test spawn and toggle display
         row = layout.row()
         row.operator("scene.cam_spawn")
-        row.prop(mytool, "toggle_cam_domain")
+        row.prop(mytool, "toggle_domain")
 
         layout.separator()
         layout.prop(mytool, "obj_num")
@@ -777,16 +782,22 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         mytool = scene.my_tool
 
        
-
+        registered = False
 
         # bad loop practice
         for obj in objs:
             if obj.registered == True:
-                layout.label(text="frame advance")
-                layout.prop(mytool, "frame_advance", text="Frame Advance")
+                registered = True
                 break
+        #kinda bad
+      
 
+        layout.label(text="frame advance")
+        row = layout.row(align=True)
+        row.enabled = registered
+        row.prop(mytool, "frame_advance", text="Frame Advance")
 
+        layout.label(text="Choose the number of images to render")
         layout.prop(mytool, "image_count")
         # filepath
         layout.prop(mytool, "filepath")
@@ -876,6 +887,7 @@ def unregister():
     del bpy.types.Scene.my_tool
     del bpy.types.Scene.my_collection
     del bpy.types.Scene.my_idname
+    
     if handler_removed == True:
         bpy.app.handlers.depsgraph_update_post.remove(addon_search)
 
