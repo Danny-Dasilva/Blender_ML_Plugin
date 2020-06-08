@@ -39,25 +39,14 @@ test button - for seeying how the camera works spawns
 
 --
 
-toggle main display with same method
-turn off displays
 
-
-check if any of the physics things are toggled instead 
-
-if mytool.enable_physics:#if bool property is true, show rows, else don't
 
 
 
 
 test with physics, 
 
-dynamic objs list generation for classes, more memory efficient and clears the panel
 
-check cutoff for too many loops- warning
-
-
-turn off displays
 
 
 
@@ -80,7 +69,9 @@ info out
 
 toggle cutoff
 
+dynamic objs list generation for classes, more memory efficient and clears the panel
 
+check cutoff for too many loops- warning
 
 
 fix reverse list enumerate garbage
@@ -516,6 +507,7 @@ def set_obj_dimensions(dim_min, dim_max):
     
     # gen.ob_xyz_max = [val for val in dim_max]
     # gen.ob_xyz_min = [val for val in dim_min]
+
 # ------------------------------------------------------------------------
 #    Operators
 # ------------------------------------------------------------------------
@@ -558,9 +550,15 @@ class OT_Obj_Spawn(Operator):
 
 
         for item in context.scene.my_collection:
+            print(item, item.name)
+
             if int(item.name[0]) == unique:
                 obj = item.tag
-                gen.randomize_obj(scene, obj, xyz_min, xyz_max)
+                if obj:
+                    gen.randomize_obj(scene, obj, xyz_min, xyz_max)
+                else:
+                    self.report({"WARNING"}, "No object selected")
+                    
 
         return {'FINISHED'}
 
@@ -732,17 +730,6 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
        
 
 
-        # ONLY ENABLE PHYSICS IN THE FIRST ITEM
-        # if self.bl_description == 1:
-        #     layout.prop(mytool, "enable_physics")
-      
-        #     if mytool.enable_physics:
-        #         layout.label(text="Obj Spawn:")
-        #         layout.prop(mytool, "obj_xyz_max")
-        #         layout.prop(mytool, "obj_xyz_min")
-
-        #         # Big render button
-        #         layout.operator("scene.obj_spawn")
 
 
 class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
