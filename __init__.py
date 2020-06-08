@@ -39,19 +39,15 @@ test button - for seeying how the camera works spawns
 
 --
 
+toggle display does the same for objects
+
+
+# add unique domains for each obj spawn
 
 
 
 
 
-test with physics, 
-
-
-
-
-
-
-!!!! when you remove object ids it doesnt remove the objects you selected
 
 
 
@@ -550,7 +546,6 @@ class OT_Obj_Spawn(Operator):
 
 
         for item in context.scene.my_collection:
-            print(item, item.name)
 
             if int(item.name[0]) == unique:
                 obj = item.tag
