@@ -41,11 +41,10 @@ test button - for seeying how the camera works spawns
 
 
 
-toggle display does the same for objects
 
 
-# add unique domains for each obj spawn
-
+# add unique domains for each obj spawn !!! for renders / its in the dict
+in render loop
 
 
 
@@ -74,7 +73,7 @@ check cutoff for too many loops- warning
 
 fix reverse list enumerate garbage
 fix DRAWBOX normalize function 
-fix bad loop practice
+
 ----
 Naming Conventions 
 category_Location_name
