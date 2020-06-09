@@ -645,7 +645,13 @@ class OT_Spawn(bpy.types.Operator):
         scene = context.scene
         mytool = context.scene.my_tool
         self.report({"DEBUG"}, "Camera Domain Not Set")
-        for item in context.scene.my_idname:
+        for item in context.scene.my_collection:
+            if item.tag:
+                gen.add(item.tag, item.name[0])
+
+
+        for item in scene.my_idname:
+            
 
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
@@ -653,15 +659,14 @@ class OT_Spawn(bpy.types.Operator):
                 gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
             else:
                 gen.names_dict[item.value] = {"name" : item.id}
-            print(item.value)
             
+
+            print(gen.names_dict, "nanms dict")
+        gen.randomize_objs(scene)
         
 
-        for items in scene.my_idname:
-            print(items, "items in scene")
-        # for item in context.scene.my_collection:
-        #     if item.tag:
-        #         gen.add(item.tag, item.name[0])
+        
+        
         # gen.randomize_objs(context.scene)
         # print(gen.names_dict, "namess")
         return {'FINISHED'}
@@ -815,8 +820,6 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 @persistent
 def addon_search(scene):
     print("hello")
-    if scene.my_idname:
-        scene.my_idname.clear()
     if scene.my_idname:
         scene.my_idname.clear()
     init_count(scene)

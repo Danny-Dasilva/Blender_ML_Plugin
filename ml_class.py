@@ -58,14 +58,17 @@ class ML_Gen():
     def randomize_objs(self, scene):
         objs = self.objs
         print("function called")
-        
+        print(objs)
+        print(self.names_dict, "names dict")
         for key, ob in objs.items() :
+            
          
-            xyz_min = self.names_dict[key]['xyz_min']
-            xyz_max = self.names_dict[key]['xyz_max']
+            xyz_min = self.names_dict[int(key)]['xyz_min']
+            xyz_max = self.names_dict[int(key)]['xyz_max']
 
             if xyz_min and xyz_max:
                 for obj in ob:
+                    print(obj, "randomzie")
                     self.randomize_obj(scene, obj, xyz_min, xyz_max)
 
 
