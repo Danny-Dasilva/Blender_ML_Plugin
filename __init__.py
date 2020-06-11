@@ -54,11 +54,20 @@ in render loop
 
 for later --
 
+
+advanced options ---
+
+toggle rotate on randomize objs
+change percent cutoff
+
+
+------
+
 start with 0 instead of 1 for choose object ids
 
 
 
-advanced options
+
 
 
 info out
