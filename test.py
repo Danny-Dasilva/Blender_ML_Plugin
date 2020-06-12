@@ -54,6 +54,23 @@
 # #     b.append(val)
 # # print(objs)
  
-r = {0: {'name': 'cube', 'xyz_min': [0.0, 0.0, 0.0], 'xyz_max': [0.0, 0.0, 0.0], 'cutoff': [0.0, 0.0, 0.0]}, '0': {'objects': ["retarderd"]}}
+# remove drawing
+     
 
-print(r[0])
+
+# god this is awful please fix
+for count, item in  reversed(list(enumerate(scene.my_collection))):
+    if item.name.startswith(str(i)):
+        scene.my_collection.remove(count)
+
+for count, item in  reversed(list(enumerate(scene.my_idname))):
+    if item.value == i:
+
+        scene.my_idname.remove(count)
+
+# delete from dictr
+if i in obj_collection:
+    del obj_collection[i]
+
+for items in scene.my_idname:
+    print(items, "items in scene")

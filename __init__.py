@@ -735,7 +735,7 @@ class OT_Read(bpy.types.Operator):
         
         output = gen.test_render(scene)
         self.report({"INFO"}, str(output))
-
+        print(obj_collection, "obj collection tesssst")
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
@@ -956,17 +956,37 @@ def unregister():
     from bpy.utils import unregister_class
     # clear gpu
     cam.clear()
+    gen.reset()
 
 
-    for count, cls in enumerate(op_cls.values()):
-   
-        objs[count].clear()
-        unregister_class(cls)
+    
+    
+    for count, item in  reversed(list(enumerate(op_cls.values()))):
+        obj = objs[count]
+        if obj.registered == True:
+            obj.erase()
+        unregister_class(op_cls[count])
+        del op_cls[count]
+
+    
+        
+    
 
     for cls in reversed(classes):
         unregister_class(cls)
     # bpy.types.Scene.my_idname.clear()
     
+    for item in bpy.types.Scene.my_idname:
+        if hasattr(item, 'clear'):
+            item.clear()
+            
+            del item
+
+    for item in bpy.types.Scene.my_collection:
+        if hasattr(item, 'clear'):
+            item.clear()
+            del item
+            
 
     del bpy.types.Scene.my_tool
     del bpy.types.Scene.my_collection

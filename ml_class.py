@@ -314,8 +314,8 @@ class ML_Gen():
         objects = {}
         data = {}
         print(objs, "objs")
-        for key, object in objs.items():
-            for obj in object['objects']:
+        for key, ob in objs.items():
+            for obj in ob['objects']:
                 value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
                
                 data[obj.name] = ray_percent
