@@ -27,12 +27,11 @@ print(r)
 ############## append list 
 
 
-d = {'b': ['a']}
+d = {'a': {'b': ['a']}}
 
 val = 32
 
-
-b = d.setdefault('b', [])
+b = d['a'].setdefault('b', [])
 
 if val not in b:
     b.append(val)
