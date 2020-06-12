@@ -92,6 +92,31 @@ from bpy.types import (Panel,
                        )
 
 
+
+# ------------------------------------------------------------------------
+#    Set objs and helper
+# ------------------------------------------------------------------------
+
+def nested_set(dic, keys, value):
+    if value is not None:
+        for key in keys[:-1]:
+            dic = dic.setdefault(key, {})
+        dic[keys[-1]] = value
+
+
+def set_objs(d, key, name=None, objects=None, xyz_min=None, xyz_max=None, cutoff=None,):
+   
+    nested_set(d, [key, "name"], name)
+   
+    
+    nested_set(d, [key,"objects"], objects)
+
+    nested_set(d, [key, "xyz_min"], xyz_max)
+    nested_set(d, [key, "xyz_max"], xyz_max)
+    nested_set(d, [key, "cutoff"], xyz_max)
+    return d
+
+
 # ------------------------------------------------------------------------
 #    Generative helper functions
 # ------------------------------------------------------------------------
@@ -577,14 +602,13 @@ class OT_Execute(Operator):
             
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-
-                gen.objs[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                set_objs(objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
                 gen.enable_physics = True
             else:
-                gen.objs[item.value] = {"name" : item.id}
+                set_objs(objs, item.value, name=item.id)
             
 
-            print(gen.objs, "nanms dict")
+        print(gen.objs, "nanms dict")
 
 
         
@@ -592,8 +616,13 @@ class OT_Execute(Operator):
 
         for item in context.scene.my_collection:
             if item.tag:
+                id = item.name[0]
+                name = item.tag
                 gen.add(item.tag, item.name[0])
-        
+
+                set_objs(objs, id, objects=[objects])
+               
+                    
         
         # filepath if in plugin else default
         if mytool.filepath:
