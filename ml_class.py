@@ -314,15 +314,16 @@ class ML_Gen():
     def get_raycast_percentages(self, scene, cam, objs, cutoff):
         objects = {}
         data = {}
-        for key, ob in objs.items():
-            for obj in ob:
-                value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
-                data[obj] = ray_percent
-                if value:
-                    if key in objects.keys(): 
-                        objects[key].append(obj)
-                    else:
-                        objects[key] = [obj]
+        print(objs, "objs")
+        # for key, ob in objs.items():
+        #     for obj in ob:
+                # value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
+                # data[obj] = ray_percent
+                # if value:
+                #     if key in objects.keys(): 
+                #         objects[key].append(obj)
+                #     else:
+                #         objects[key] = [obj]
         return objects, data
     @staticmethod
     def find_nearest(camera, obj_list):
@@ -349,14 +350,15 @@ class ML_Gen():
 
     def reset(self):
         self.clear_dicts()
-    def add(self, obj, id):
+
+    # def add(self, obj, id):
         
-        print(self.objs, "after clear")
-        if id in self.objs.keys():
-            self.objs[id].append(obj)
-        else:
-            self.objs[id] = [obj]
-        print(self.objs, "objs")
+    #     print(self.objs, "after clear")
+    #     if id in self.objs.keys():
+    #         self.objs[id].append(obj)
+    #     else:
+    #         self.objs[id] = [obj]
+    #     print(self.objs, "objs")
 
     def test_render(self, scene):
         camera = scene.camera
@@ -412,7 +414,7 @@ class ML_Gen():
                 bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
                 bpy.ops.render.render(write_still=True)
 
-                objects = self.get_raycast_percentages(scene, camera, self.objs, 30)
+                objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
                 
                 scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
           

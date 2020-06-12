@@ -99,15 +99,26 @@ from bpy.types import (Panel,
 
 def nested_set(dic, keys, value):
     if value is not None:
+        
         for key in keys[:-1]:
-            if key["objects"]
+            
+            print(dic, "dic weirds")
             dic = dic.setdefault(key, {})
-        dic[keys[-1]] = value
+
+        #check for objs set
+        if keys[-1] == "objects":
+            b = dic.setdefault('objects', [])
+            if value not in b:
+                b.append(value)
+        
+        else:
+            dic[keys[-1]] = value
 
         
 
 def set_objs(d, key, name=None, objects=None, xyz_min=None, xyz_max=None, cutoff=None,):
    
+    print(key, type(key), "keeeeey")
     nested_set(d, [key, "name"], name)
    
 
@@ -599,7 +610,6 @@ class OT_Execute(Operator):
         # self.report({"WARNING"}, "Something isn't right")
 
 
-        def set_objs(value, name, xyz_min=None, xyz_max=None, )
         for item in scene.my_idname:
             
             if item.enable_physics:
@@ -619,12 +629,9 @@ class OT_Execute(Operator):
         for item in context.scene.my_collection:
             if item.tag:
                 id = item.name[0]
-                name = item.tag
-                gen.add(item.tag, item.name[0])
-
-                set_objs(objs, id, objects=[objects])
+                set_objs(objs, id, objects=item.tag)
                
-                    
+        print(objs)   
         
         # filepath if in plugin else default
         if mytool.filepath:
@@ -633,8 +640,8 @@ class OT_Execute(Operator):
             filepath = bpy.data.scenes[0].render.filepath
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
-        file_format = scene.render.image_settings.file_format
-        gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
+        # file_format = scene.render.image_settings.file_format
+        # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 
