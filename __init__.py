@@ -43,13 +43,16 @@ test button - for seeying how the camera works spawns
 
 
 
-# add unique domains for each obj spawn !!! for renders / its in the dict
-in render loop
 
 
 
 
 
+
+## icons for plugin 
+
+#fix initial class spawn
+ 
 
 
 for later --
@@ -99,7 +102,7 @@ bl_idname = category.name
 
 
 bl_info = {
-    "name" : "Blender_ML",
+    "name" : "Blender_ML_Plugin",
     "author" : "Danny Dasilva",
     "description" : "Blender Object Detection Data generation",
     "blender" : (2, 80, 0),
@@ -235,7 +238,7 @@ class OT_Add_Obj(Operator):
 
 class OT_Remove_Obj(Operator):
     bl_idname = "scene.remove_obj"
-    bl_label = "Remove Object"
+    bl_label = "Delete Object"
     unique: IntProperty()
     def execute(self, context):
         unique = self.unique
@@ -353,6 +356,10 @@ def cam_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
 
+
+    # do this once
+    init_count(scene)
+
     #when domain updates so does the ml section
     set_cam_dimensions(mytool.cam_xyz_min, mytool.cam_xyz_max)
     
@@ -446,7 +453,7 @@ class MyProperties(PropertyGroup):
         default = False,
         )
     toggle_domain: BoolProperty(
-        name="Display",
+        name="",
         description="Visual display for camera domain",
         default = True,
         update=toggle_domain
@@ -607,21 +614,19 @@ class OT_Execute(Operator):
         # self.report({"WARNING"}, "Something isn't right")
 
 
-        if mytool.enable_physics:#if bool property is true, show rows, else don't
-            print("enabled",gen.ob_xyz_max, gen.ob_xyz_min)
-            # set_obj_dimensions(mytool.obj_xyz_min, mytool.obj_xyz_max)
-            gen.enable_physics = True
-        
 
-
-        ### ficxing this
-        for item in context.scene.my_idname:
-            xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-
+        for item in scene.my_idname:
+            
             if item.enable_physics:
-                gen.names_dict[item.value] = [xyz_min, xyz_max, item.id]
+                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+
+                gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                gen.enable_physics = True
             else:
-                gen.names_dict[item.value] = None
+                gen.names_dict[item.value] = {"name" : item.id}
+            
+
+            print(gen.names_dict, "nanms dict")
 
 
         
@@ -645,7 +650,7 @@ class OT_Execute(Operator):
 
 
 class OT_Spawn(bpy.types.Operator):
-    bl_idname = "scene.spawn_first"
+    bl_idname = "scene.test_spawn"
     bl_label = "Test Button"
 
     
@@ -679,7 +684,40 @@ class OT_Spawn(bpy.types.Operator):
         # print(gen.names_dict, "namess")
         return {'FINISHED'}
 
+class OT_Read(bpy.types.Operator):
+    bl_idname = "scene.test_read"
+    bl_label = "Test Button"
 
+    
+    def execute(self, context):
+        scene = context.scene
+        mytool = context.scene.my_tool
+        self.report({"DEBUG"}, "Camera Domain Not Set")
+        for item in context.scene.my_collection:
+            if item.tag:
+                gen.add(item.tag, item.name[0])
+
+
+        for item in scene.my_idname:
+            
+
+            if item.enable_physics:
+                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+
+                gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+            else:
+                gen.names_dict[item.value] = {"name" : item.id}
+            
+
+            print(gen.names_dict, "nanms dict")
+        gen.randomize_objs(scene)
+        
+
+        
+        
+        # gen.randomize_objs(context.scene)
+        # print(gen.names_dict, "namess")
+        return {'FINISHED'}
 
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
@@ -710,9 +748,18 @@ class OBJECT_PT_Camera_Settings(Inherit_Panel, Panel):
         layout.prop(mytool, "cam_xyz_min")
 
         # test spawn and toggle display
-        row = layout.row()
-        row.operator("scene.cam_spawn")
+        row = layout.row(align = True)
+        row.operator("scene.cam_spawn", icon="OUTLINER_OB_CAMERA")
+        
+
         row.prop(mytool, "toggle_domain")
+
+        if mytool.toggle_domain == True:
+            row.label(text="Display", icon='HIDE_OFF')
+        else:
+            row.label(text="Display", icon='HIDE_ON')
+
+        
 
         layout.separator()
         layout.prop(mytool, "obj_num")
@@ -759,11 +806,11 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
 
         split = layout.split()
         col = split.column()
-        op = col.operator("scene.add_obj")
+        op = col.operator("scene.add_obj", icon="PLUS")
         op.unique = self.bl_description
         col = split.column(align=True)
 
-        op = col.operator("scene.remove_obj")
+        op = col.operator("scene.remove_obj", icon="TRASH")
         op.unique = self.bl_description
 
         # spawn obj loop
@@ -809,8 +856,8 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         row.enabled = registered
         row.prop(mytool, "frame_advance", text="Frame Advance")
 
-        layout.label(text="Choose the number of images to render")
-        layout.prop(mytool, "image_count")
+        layout.label(text="Choose the # of images to render")
+        layout.prop(mytool, "image_count", icon="IMAGE_DATA")
         # filepath
         layout.prop(mytool, "filepath")
         
@@ -818,7 +865,12 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("scene.execute_operator")
-        layout.operator("scene.spawn_first")
+
+
+        row = layout.row(align=True)
+        
+        row.operator("scene.test_spawn")
+        row.operator("scene.test_read")
         
 # ------------------------------------------------------------------------
 #    Set defaults
@@ -831,8 +883,10 @@ def addon_search(scene):
     if scene.my_idname:
         scene.my_idname.clear()
     init_count(scene)
-    bpy.app.handlers.depsgraph_update_post.remove(addon_search)
-    handler_removed = True
+
+    #addon search handler
+    # bpy.app.handlers.depsgraph_update_post.remove(addon_search)
+    # handler_removed = True
 
 
 
@@ -847,7 +901,7 @@ objs = [DrawBox(i) for i in range(10)]
 
 gen = ML_Gen()
 cam = DrawBox(None)    
-handler_removed = False
+# handler_removed = False
 
 classes = (
     MyProperties,
@@ -861,6 +915,7 @@ classes = (
     OT_Execute,
     StrSettingItem,
     OT_Spawn,
+    OT_Read,
 )
 
 def register():
@@ -875,7 +930,7 @@ def register():
     #dynamic property for id names
     bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
 
-    bpy.app.handlers.depsgraph_update_post.append(addon_search)
+    # bpy.app.handlers.depsgraph_update_post.append(addon_search)
     
 
 def unregister():
@@ -898,8 +953,8 @@ def unregister():
     del bpy.types.Scene.my_collection
     del bpy.types.Scene.my_idname
     
-    if handler_removed == True:
-        bpy.app.handlers.depsgraph_update_post.remove(addon_search)
+    # if handler_removed == True:
+    #     bpy.app.handlers.depsgraph_update_post.remove(addon_search)
 
 
 if __name__ == "__main__":

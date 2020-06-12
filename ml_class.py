@@ -158,8 +158,8 @@ class ML_Gen():
                 'meshes': {}
             }
         for key, object in objects.items() :
-
-            name = self.names_dict[key]['name']
+            print(self.names_dict)
+            name = self.names_dict[int(key)]['name']
        
             cordinates['meshes'][name] = {}
  
@@ -405,7 +405,7 @@ class ML_Gen():
         while loop_count != scene_setup_steps:
             ball_lst = self.objs['1']
             ball_dict = self.objs
-            print(ball_dict, "self.objs")
+            
             camera = self.randomize_camera(scene)
 
             # if mytool.enable physics
@@ -418,8 +418,7 @@ class ML_Gen():
 
 
             nearest_ball = self.find_nearest(camera, ball_lst)
-            print(nearest_ball, "nearest")
-
+      
             # read in incement frames in other thing
             # self.increment_frames(scene, 50)
 
@@ -433,7 +432,6 @@ class ML_Gen():
             if value == False:
                 loop_count -= 1
                 value = True
-                print("false", percent)
             else:
                 print(percent, "good")
                 filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
