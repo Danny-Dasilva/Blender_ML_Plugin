@@ -2,15 +2,31 @@ objs = {}
 
 def nested_set(dic, keys, value):
     if value is not None:
+        
         for key in keys[:-1]:
+            
+            
             dic = dic.setdefault(key, {})
-        dic[keys[-1]] = value
 
-def set_objs(d, value, name=None, xyz_min=None, xyz_max=None):
+        #check for objs set
+        if keys[-1] == "objects":
+            b = dic.setdefault('objects', [])
+            if value not in b:
+                b.append(value)
+        
+        else:
+            dic[keys[-1]] = value
+
+def set_objs(d, key, name=None, objects=None, xyz_min=None, xyz_max=None, cutoff=None,):
    
-    nested_set(d, [value, "name"], name)
-    nested_set(d, [value,"xyz_min"], xyz_min)
-    nested_set(d, [value, "xyz_max"], xyz_max)
+    nested_set(d, [key, "name"], name)
+   
+
+    nested_set(d, [key,"objects"], objects)
+
+    nested_set(d, [key, "xyz_min"], xyz_max)
+    nested_set(d, [key, "xyz_max"], xyz_max)
+    nested_set(d, [key, "cutoff"], xyz_max)
     return d
 
 r = set_objs(objs, 0, name="ahh", xyz_min=[0, 3, 2], xyz_max=[0, 4, 5])
@@ -19,21 +35,22 @@ r = set_objs(objs, 1, xyz_min=[0, 3, 2], xyz_max=[0, 4, 5])
 print(r)
 r = set_objs(objs, 0, xyz_min=[0, 3, 2], xyz_max=[0, 4, 2])
 
+r = set_objs(objs, 0, objects="yee")
 print(r)
+r = set_objs(objs, 0, objects="yaw")
+
+
+
+        
 
 
 
 
-############## append list 
 
 
-d = {'a': {'b': ['a']}}
+# b = objs[0].setdefault('objects', [])
 
-val = 32
-
-b = d['a'].setdefault('b', [])
-
-if val not in b:
-    b.append(val)
-print(d)
+# if val not in b:
+#     b.append(val)
+# print(objs)
  

@@ -100,15 +100,17 @@ from bpy.types import (Panel,
 def nested_set(dic, keys, value):
     if value is not None:
         for key in keys[:-1]:
+            if key["objects"]
             dic = dic.setdefault(key, {})
         dic[keys[-1]] = value
 
+        
 
 def set_objs(d, key, name=None, objects=None, xyz_min=None, xyz_max=None, cutoff=None,):
    
     nested_set(d, [key, "name"], name)
    
-    
+
     nested_set(d, [key,"objects"], objects)
 
     nested_set(d, [key, "xyz_min"], xyz_max)
