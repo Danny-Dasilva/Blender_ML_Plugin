@@ -62,18 +62,17 @@ change percent cutoff
 
 
 ------
-
-start with 0 instead of 1 for choose object ids
-
-
-
+advanced options
 
 
 
 info out
 
-
 toggle cutoff
+toggle rotation 
+
+
+---
 
 dynamic objs list generation for classes, more memory efficient and clears the panel
 
