@@ -124,9 +124,9 @@ def set_objs(d, key, name=None, objects=None, xyz_min=None, xyz_max=None, cutoff
 
     nested_set(d, [key,"objects"], objects)
 
-    nested_set(d, [key, "xyz_min"], xyz_max)
+    nested_set(d, [key, "xyz_min"], xyz_min)
     nested_set(d, [key, "xyz_max"], xyz_max)
-    nested_set(d, [key, "cutoff"], xyz_max)
+    nested_set(d, [key, "cutoff"], cutoff)
     return d
 
 
@@ -615,6 +615,7 @@ class OT_Execute(Operator):
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
                 set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
+                print(xyz_min, xyz_max, "min max ")
                 gen.enable_physics = True
             else:
                 set_objs(gen.objs, item.value, name=item.id)
@@ -624,7 +625,7 @@ class OT_Execute(Operator):
         for item in context.scene.my_collection:
             if item.tag:
                 id = item.name[0]
-                set_objs(gen.objs, id, objects=item.tag)
+                set_objs(gen.objs, int(id), objects=item.tag)
         
         # filepath if in plugin else default
         if mytool.filepath:
@@ -633,8 +634,8 @@ class OT_Execute(Operator):
             filepath = bpy.data.scenes[0].render.filepath
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
-        # file_format = scene.render.image_settings.file_format
-        # gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
+        file_format = scene.render.image_settings.file_format
+        gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 
@@ -720,6 +721,7 @@ class OT_Read(bpy.types.Operator):
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
                 set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
+                print(xyz_min, xyz_max, "min max ")
                 gen.enable_physics = True
             else:
                 set_objs(gen.objs, item.value, name=item.id)

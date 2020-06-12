@@ -58,17 +58,16 @@ class ML_Gen():
     def randomize_objs(self, scene):
         objs = self.objs
         print("function called")
-        print(objs)
-        print(self.names_dict, "names dict")
+        print(self.objs, "objs")
         for key, ob in objs.items() :
             
-         
-            xyz_min = self.names_dict[int(key)]['xyz_min']
-            xyz_max = self.names_dict[int(key)]['xyz_max']
+            
+            xyz_min = self.objs[int(key)]['xyz_min']
+            xyz_max = self.objs[int(key)]['xyz_max']
 
             if xyz_min and xyz_max:
-                for obj in ob:
-                    print(obj, "randomzie")
+                for obj in ob['objects']:
+                    print(obj, "randomzie", xyz_min, xyz_max)
                     self.randomize_obj(scene, obj, xyz_min, xyz_max)
 
 
@@ -157,9 +156,9 @@ class ML_Gen():
                 'image': filename,
                 'meshes': {}
             }
-        for key, object in objects.items() :
-            print(self.names_dict)
-            name = self.names_dict[int(key)]['name']
+        for key, object in objects.items():
+
+            name = self.objs[key]['name']
        
             cordinates['meshes'][name] = {}
  
@@ -379,7 +378,8 @@ class ML_Gen():
         labels = []
 
         while loop_count != scene_setup_steps:
-            ball_lst = self.objs['1']
+            print(self.objs, "objs object")
+            ball_lst = self.objs[0]["objects"]
             ball_dict = self.objs
             
             camera = self.randomize_camera(scene)
@@ -395,8 +395,6 @@ class ML_Gen():
 
             nearest_ball = self.find_nearest(camera, ball_lst)
       
-            # read in incement frames in other thing
-            # self.increment_frames(scene, 50)
 
             self.center_obj(camera, nearest_ball)
 
