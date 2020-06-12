@@ -313,53 +313,17 @@ class ML_Gen():
 
     def get_raycast_percentages(self, scene, cam, objs, cutoff):
         objects = {}
-
+        data = {}
         for key, ob in objs.items():
             for obj in ob:
-                # Threshold to test if ray cast corresponds to the original vertex
-                limit = 0.0001
-                viewlayer = bpy.context.view_layer
-                # Deselect mesh elements
-             
-                self.DeselectEdgesAndPolygons( obj )
-
-                # In world coordinates, get a bvh tree and vertices
-                bvh, vertices = self.BVHTreeAndVerticesInWorldFromObj( obj )
-
-
-                same_count = 0 
-                count = 0 
-                for i, v in enumerate( vertices ):
-                    count += 1
-                    # Get the 2D projection of the vertex
-                    co2D = world_to_camera_view( scene, cam, v )
-
-                    # By default, deselect it
-                    obj.data.vertices[i].select = False
-                    
-                    # If inside the camera view
-                    if 0.0 <= co2D.x <= 1.0 and 0.0 <= co2D.y <= 1.0: 
-                        # Try a ray cast, in order to test the vertex visibility from the camera
-                        location, normal, index, distance, t, ty = scene.ray_cast(viewlayer, cam.location, (v - cam.location).normalized() )
-                        t = (v-normal).length
-                        if t < 0.001:
-                            same_count += 1
-                    
-
-                del bvh
-                ray_percent = same_count/ count
-                print(obj, ray_percent, "obj ray percent")
-                if ray_percent > cutoff/ 100:
-                    value = True
-        
+                value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
+                data[obj] = ray_percent
+                if value:
                     if key in objects.keys(): 
                         objects[key].append(obj)
                     else:
                         objects[key] = [obj]
-                
-                else:
-                    value = False
-        return objects
+        return objects, data
     @staticmethod
     def find_nearest(camera, obj_list):
         nearest = None
@@ -394,6 +358,16 @@ class ML_Gen():
         else:
             self.objs[id] = [obj]
         print(self.objs, "objs")
+
+    def test_render(self, scene):
+        camera = scene.camera
+
+        obj_list = self.objs
+
+        objects, data = self.get_raycast_percentages(scene, camera, obj_list, 30)
+        
+        return data
+
 
     def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render"):
 

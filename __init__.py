@@ -1,61 +1,19 @@
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-# to do
-# cube draw 
-# panel for object select
-# display pabel for obj spawn and cube draw
-# batch render
-# id name, obj, enable physics, xyz spawn, add another id, outer frame advance and add another id
-
 '''
 fix call object id 1, ask devin how to -------
 
 
-
-
 rename - my_tool my_idname my_collection
-
-
 
 error for if domain is 0 0 0 
 
 
 -------------------------------
 
-test button - for seeying how the camera works spawns
 
-
-
-
---
-
-
-
-
-
-
-
-
-
-
-
-## icons for plugin 
-
-#fix initial class spawn
+!!!!!
  
-
-
-for later --
+! 1 datatype dictionary
+dict {name, [objlist], spawnmax, spawnmin, cutoff}
 
 
 advanced options ---
@@ -657,32 +615,52 @@ class OT_Spawn(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        self.report({"DEBUG"}, "Camera Domain Not Set")
-        for item in context.scene.my_collection:
-            if item.tag:
-                gen.add(item.tag, item.name[0])
+        gen.reset()
+
+        # Check if camera domain Exists
+            
+        if not(gen.xyz_min and gen.xyz_max):
+            self.report({"ERROR"}, "Camera Domain Not Set")
+            return {'FINISHED'}
+        # Check if objects are selected Exists
+        if len(context.scene.my_collection) == 0:
+            self.report({"ERROR"}, "No object selected")
+            return {'FINISHED'}
+
+        # self.report({"ERROR"}, "Something isn't right")
+        # self.report({"WARNING"}, "Something isn't right")
+
 
 
         for item in scene.my_idname:
             
-
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
 
                 gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                gen.enable_physics = True
             else:
                 gen.names_dict[item.value] = {"name" : item.id}
-            
 
-            print(gen.names_dict, "nanms dict")
-        gen.randomize_objs(scene)
-        
 
+        for item in context.scene.my_collection:
+            if item.tag:
+                gen.add(item.tag, item.name[0])
         
         
-        # gen.randomize_objs(context.scene)
-        # print(gen.names_dict, "namess")
+        # filepath if in plugin else default
+        if mytool.filepath:
+            filepath = str(mytool.filepath)
+        else:
+            filepath = bpy.data.scenes[0].render.filepath
+            self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
+
+        file_format = scene.render.image_settings.file_format
+
+        gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
+
         return {'FINISHED'}
+
 
 class OT_Read(bpy.types.Operator):
     bl_idname = "scene.test_read"
@@ -692,31 +670,39 @@ class OT_Read(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        self.report({"DEBUG"}, "Camera Domain Not Set")
-        for item in context.scene.my_collection:
-            if item.tag:
-                gen.add(item.tag, item.name[0])
+        gen.reset()
+
+        # Check if camera domain Exists
+            
+        if not(gen.xyz_min and gen.xyz_max):
+            self.report({"ERROR"}, "Camera Domain Not Set")
+            return {'FINISHED'}
+
+        # Check if objects are selected Exists
+        if len(context.scene.my_collection) == 0:
+            self.report({"ERROR"}, "No object selected")
+            return {'FINISHED'}
+
+
 
 
         for item in scene.my_idname:
-            
-
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-
                 gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                gen.enable_physics = True
             else:
                 gen.names_dict[item.value] = {"name" : item.id}
-            
-
-            print(gen.names_dict, "nanms dict")
-        gen.randomize_objs(scene)
         
 
+
+        for item in context.scene.my_collection:
+            if item.tag:
+                gen.add(item.tag, item.name[0])
         
-        
-        # gen.randomize_objs(context.scene)
-        # print(gen.names_dict, "namess")
+        output = gen.test_render(scene)
+        self.report({"INFO"}, str(output))
+
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
