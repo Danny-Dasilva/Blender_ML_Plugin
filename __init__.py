@@ -751,14 +751,14 @@ class OBJECT_PT_Camera_Settings(Inherit_Panel, Panel):
         row = layout.row(align = True)
         row.operator("scene.cam_spawn", icon="OUTLINER_OB_CAMERA")
         
-
-        row.prop(mytool, "toggle_domain")
-
         if mytool.toggle_domain == True:
-            row.label(text="Display", icon='HIDE_OFF')
+            icon='HIDE_OFF'
         else:
-            row.label(text="Display", icon='HIDE_ON')
+            icon='HIDE_ON'
 
+        
+        row.prop(mytool, "toggle_domain", icon=icon, text="Display", emboss=False)
+        
         
 
         layout.separator()
