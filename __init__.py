@@ -618,20 +618,13 @@ class OT_Execute(Operator):
                 gen.enable_physics = True
             else:
                 set_objs(gen.objs, item.value, name=item.id)
-            
-
-        print(gen.objs, "nanms dict")
-
-
-        
+                    
 
 
         for item in context.scene.my_collection:
             if item.tag:
                 id = item.name[0]
                 set_objs(gen.objs, id, objects=item.tag)
-               
-        print(objs)   
         
         # filepath if in plugin else default
         if mytool.filepath:
@@ -722,8 +715,6 @@ class OT_Read(bpy.types.Operator):
             return {'FINISHED'}
 
 
-
-
         for item in scene.my_idname:
             
             if item.enable_physics:
@@ -732,20 +723,13 @@ class OT_Read(bpy.types.Operator):
                 gen.enable_physics = True
             else:
                 set_objs(gen.objs, item.value, name=item.id)
-            
-
-        print(gen.objs, "nanms dict")
-
-
-        
+                    
 
 
         for item in context.scene.my_collection:
             if item.tag:
                 id = item.name[0]
-                set_objs(gen.objs, id, objects=item.tag)
-               
-        print(objs)   
+                set_objs(gen.objs, int(id), objects=item.tag)
         
         output = gen.test_render(scene)
         self.report({"INFO"}, str(output))

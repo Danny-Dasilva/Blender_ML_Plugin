@@ -315,15 +315,16 @@ class ML_Gen():
         objects = {}
         data = {}
         print(objs, "objs")
-        # for key, ob in objs.items():
-        #     for obj in ob:
-                # value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
-                # data[obj] = ray_percent
-                # if value:
-                #     if key in objects.keys(): 
-                #         objects[key].append(obj)
-                #     else:
-                #         objects[key] = [obj]
+        for key, object in objs.items():
+            for obj in object['objects']:
+                value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
+               
+                data[obj.name] = ray_percent
+                if value:
+                    if key in objects.keys(): 
+                        objects[key].append(obj)
+                    else:
+                        objects[key] = [obj]
         return objects, data
     @staticmethod
     def find_nearest(camera, obj_list):
