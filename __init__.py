@@ -614,10 +614,10 @@ class OT_Execute(Operator):
             
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-                set_objs(objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
+                set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
                 gen.enable_physics = True
             else:
-                set_objs(objs, item.value, name=item.id)
+                set_objs(gen.objs, item.value, name=item.id)
             
 
         print(gen.objs, "nanms dict")
@@ -629,7 +629,7 @@ class OT_Execute(Operator):
         for item in context.scene.my_collection:
             if item.tag:
                 id = item.name[0]
-                set_objs(objs, id, objects=item.tag)
+                set_objs(gen.objs, id, objects=item.tag)
                
         print(objs)   
         
@@ -725,18 +725,27 @@ class OT_Read(bpy.types.Operator):
 
 
         for item in scene.my_idname:
+            
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-                gen.objs[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
                 gen.enable_physics = True
             else:
-                gen.objs[item.value] = {"name" : item.id}
+                set_objs(gen.objs, item.value, name=item.id)
+            
+
+        print(gen.objs, "nanms dict")
+
+
         
 
 
         for item in context.scene.my_collection:
             if item.tag:
-                gen.add(item.tag, item.name[0])
+                id = item.name[0]
+                set_objs(gen.objs, id, objects=item.tag)
+               
+        print(objs)   
         
         output = gen.test_render(scene)
         self.report({"INFO"}, str(output))
