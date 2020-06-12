@@ -651,7 +651,7 @@ class OT_Execute(Operator):
 
 class OT_Spawn(bpy.types.Operator):
     bl_idname = "scene.test_spawn"
-    bl_label = "Test Button"
+    bl_label = "Spawn Test"
 
     
     def execute(self, context):
@@ -686,7 +686,7 @@ class OT_Spawn(bpy.types.Operator):
 
 class OT_Read(bpy.types.Operator):
     bl_idname = "scene.test_read"
-    bl_label = "Test Button"
+    bl_label = "Read Test"
 
     
     def execute(self, context):
