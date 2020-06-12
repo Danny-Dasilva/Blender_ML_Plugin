@@ -346,7 +346,6 @@ class ML_Gen():
     
     def clear_dicts(self):
         self.objs = {}
-        self.names_dict = {}
 
     def reset(self):
         self.clear_dicts()

@@ -572,19 +572,19 @@ class OT_Execute(Operator):
         # self.report({"WARNING"}, "Something isn't right")
 
 
-
+        def set_objs(value, name, xyz_min=None, xyz_max=None, )
         for item in scene.my_idname:
             
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
 
-                gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                gen.objs[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
                 gen.enable_physics = True
             else:
-                gen.names_dict[item.value] = {"name" : item.id}
+                gen.objs[item.value] = {"name" : item.id}
             
 
-            print(gen.names_dict, "nanms dict")
+            print(gen.objs, "nanms dict")
 
 
         
@@ -637,10 +637,10 @@ class OT_Spawn(bpy.types.Operator):
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
 
-                gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                gen.objs[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
                 gen.enable_physics = True
             else:
-                gen.names_dict[item.value] = {"name" : item.id}
+                gen.objs[item.value] = {"name" : item.id}
 
 
         for item in context.scene.my_collection:
@@ -689,10 +689,10 @@ class OT_Read(bpy.types.Operator):
         for item in scene.my_idname:
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-                gen.names_dict[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
+                gen.objs[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
                 gen.enable_physics = True
             else:
-                gen.names_dict[item.value] = {"name" : item.id}
+                gen.objs[item.value] = {"name" : item.id}
         
 
 
