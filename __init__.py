@@ -10,7 +10,10 @@ error for if domain is 0 0 0
 -------------------------------
 
 
-!!!!!
+!!!!! FIX MEMORY CLEAR
+CHECK FULL FUNCTIONALITY
+
+batch render generator function
  
 ! 1 datatype dictionary
 dict {name, [objlist], spawnmax, spawnmin, cutoff}
@@ -21,16 +24,6 @@ advanced options ---
 toggle rotate on randomize objs
 change percent cutoff
 
-
-------
-advanced options
-
-
-
-info out
-
-toggle cutoff
-toggle rotation 
 
 
 ---
