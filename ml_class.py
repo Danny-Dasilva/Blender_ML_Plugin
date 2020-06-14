@@ -426,6 +426,10 @@ class ML_Gen():
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
     def test_call(self, scene, image_count, filepath, file_format):
+        #maybe
+        labels = list(self.batch_render_test(scene, image_count, filepath, file_format))
+        with open(f'{filepath}/labels.json', 'w+') as f:
+            json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
         
     def batch_render_test(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
     

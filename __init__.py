@@ -628,7 +628,7 @@ class OT_Execute(Operator):
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
         file_format = scene.render.image_settings.file_format
-        gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
+        gen.test_call(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 
