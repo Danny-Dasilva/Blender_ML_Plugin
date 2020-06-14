@@ -56,21 +56,48 @@
  
 # remove drawing
      
+def batch_render_test(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
+    
+    scene_setup_steps = int(image_count)
+    value = True
+    ball_lst = self.objs[0]["objects"]
+    ball_dict = self.objs
 
+    while loop_count != image_count:
 
-# god this is awful please fix
-for count, item in  reversed(list(enumerate(scene.my_collection))):
-    if item.name.startswith(str(i)):
-        scene.my_collection.remove(count)
+        camera = self.randomize_camera(scene)
+        if self.enable_physics:
+            self.randomize_objs(scene)
+            
+        if self.frames:
+            self.increment_frames(scene)
 
-for count, item in  reversed(list(enumerate(scene.my_idname))):
-    if item.value == i:
+        nearest_ball = self.find_nearest(camera, ball_lst)
+      
 
-        scene.my_idname.remove(count)
+        self.center_obj(camera, nearest_ball)
 
-# delete from dictr
-if i in obj_collection:
-    del obj_collection[i]
+        # add in offset percentage
+        # self.offset(scene, camera, 50)
+        value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
+        if value == False:
+                loop_count -= 1
+                value = True
+        else:
+                
+                filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
+            
+                bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+                bpy.ops.render.render(write_still=True)
 
-for items in scene.my_idname:
-    print(items, "items in scene")
+                objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
+                
+                scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
+          
+                
+                yield scene_labels
+
+        loop_count += 1
+
+for item in self.batch_render_test(image_count=6):
+    print(item)
