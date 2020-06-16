@@ -11,15 +11,11 @@ error for if domain is 0 0 0
 
 
 !!!!! FIX MEMORY CLEAR
-CHECK FULL FUNCTIONALITY
 
-
-
-rename ml class funtions
  
-! 1 datatype dictionary
-dict {name, [objlist], spawnmax, spawnmin, cutoff}
 
+
+next swap to linux and pull offset function
 
 advanced options ---
 
@@ -39,6 +35,10 @@ fix reverse list enumerate garbage
 fix DRAWBOX normalize function 
 
 ----
+
+! 1 datatype dictionary
+dict {name, [objlist], spawnmax, spawnmin, cutoff}
+
 Naming Conventions 
 category_Location_name
 
