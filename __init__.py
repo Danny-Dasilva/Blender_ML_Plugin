@@ -13,7 +13,9 @@ error for if domain is 0 0 0
 !!!!! FIX MEMORY CLEAR
 CHECK FULL FUNCTIONALITY
 
-batch render generator function
+
+
+rename ml class funtions
  
 ! 1 datatype dictionary
 dict {name, [objlist], spawnmax, spawnmin, cutoff}
@@ -628,7 +630,7 @@ class OT_Execute(Operator):
             self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
         file_format = scene.render.image_settings.file_format
-        gen.test_call(scene, int(mytool.image_count), filepath, file_format)
+        gen.run(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 

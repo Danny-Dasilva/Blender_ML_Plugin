@@ -325,6 +325,7 @@ class ML_Gen():
                     else:
                         objects[key] = [obj]
         return objects, data
+
     @staticmethod
     def find_nearest(camera, obj_list):
         nearest = None
@@ -335,7 +336,6 @@ class ML_Gen():
             if dist < old_dist:
                 nearest = obj
                 old_dist = dist
-
         return nearest
     
     
@@ -351,15 +351,6 @@ class ML_Gen():
     def reset(self):
         self.clear_dicts()
 
-    # def add(self, obj, id):
-        
-    #     print(self.objs, "after clear")
-    #     if id in self.objs.keys():
-    #         self.objs[id].append(obj)
-    #     else:
-    #         self.objs[id] = [obj]
-    #     print(self.objs, "objs")
-
     def test_render(self, scene):
         camera = scene.camera
 
@@ -370,68 +361,73 @@ class ML_Gen():
         return data
 
 
-    def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render"):
+    # def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render"):
 
-        scene_setup_steps = int(image_count)
-        value = True
-        loop_count = 0
-        labels = []
+    #     scene_setup_steps = int(image_count)
+    #     value = True
+    #     loop_count = 0
+    #     labels = []
 
-        while loop_count != scene_setup_steps:
-            print(self.objs, "objs object")
-            ball_lst = self.objs[0]["objects"]
-            ball_dict = self.objs
+    #     while loop_count != scene_setup_steps:
+    #         print(self.objs, "objs object")
+    #         ball_lst = self.objs[0]["objects"]
+    #         ball_dict = self.objs
             
-            camera = self.randomize_camera(scene)
+    #         camera = self.randomize_camera(scene)
 
-            # if mytool.enable physics
-            if self.enable_physics:
-                self.randomize_objs(scene)
+    #         # if mytool.enable physics
+    #         if self.enable_physics:
+    #             self.randomize_objs(scene)
             
-            if self.frames:
-                self.increment_frames(scene)
+    #         if self.frames:
+    #             self.increment_frames(scene)
 
 
 
-            nearest_ball = self.find_nearest(camera, ball_lst)
+    #         nearest_ball = self.find_nearest(camera, ball_lst)
       
 
-            self.center_obj(camera, nearest_ball)
+    #         self.center_obj(camera, nearest_ball)
 
 
-            # add in offset percentage
-            self.offset(scene, camera, 60)
+    #         # add in offset percentage
+    #         self.offset(scene, camera, 60)
 
-            value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
-            if value == False:
-                loop_count -= 1
-                value = True
-            else:
-                print(percent, "good")
-                filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
+    #         value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
+    #         if value == False:
+    #             loop_count -= 1
+    #             value = True
+    #         else:
+    #             print(percent, "good")
+    #             filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
             
-                bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-                bpy.ops.render.render(write_still=True)
+    #             bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+    #             bpy.ops.render.render(write_still=True)
 
-                objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
+    #             objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
                 
-                scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
+    #             scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
           
-                labels.append(scene_labels) # Merge lists
-            loop_count += 1
+    #             labels.append(scene_labels) # Merge lists
+    #         loop_count += 1
            
 
 
-        print(labels, "labels")
-        with open(f'{filepath}/labels.json', 'w+') as f:
-            json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
-    def test_call(self, scene, image_count, filepath, file_format):
+    #     print(labels, "labels")
+    #     with open(f'{filepath}/labels.json', 'w+') as f:
+    #         json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
+
+
+
+    def run(self, scene, image_count, filepath, file_format):
         #maybe
-        labels = list(self.batch_render_test(scene, image_count, filepath, file_format))
+        labels = list(self.batch_render(scene, image_count, filepath, file_format))
+
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
         
-    def batch_render_test(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
+
+    def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
     
         scene_setup_steps = int(image_count)
         value = True
