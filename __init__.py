@@ -386,6 +386,11 @@ def enable_physics(self, context):
         obj.clear()
     else:
         obj.run()
+
+def toggle_rotate(self, context):
+    pass
+def change_cutoff(self, context):
+    pass
 def toggle_domain(self, context):
     for obj in objs:
         obj.clear()
@@ -433,16 +438,29 @@ class StrSettingItem(PropertyGroup):
         default = False,
         update=enable_physics
         )
+    advanced_options: BoolProperty(
+        name="Advanced Options",
+        description="A bool property",
+        default = False,
+        )
+    toggle_rotate: BoolProperty(
+        name="Enable Physics",
+        description="A bool property",
+        default = False,
+        update=toggle_rotate
+        )
+    change_cutoff: BoolProperty(
+        name="Enable Physics",
+        description="A bool property",
+        default = False,
+        update=change_cutoff
+        )
+       
 
 
 
 class MyProperties(PropertyGroup):
 
-    enable_physics: BoolProperty(
-        name="Enable Physics",
-        description="A bool property",
-        default = False,
-        )
     toggle_domain: BoolProperty(
         name="",
         description="Visual display for camera domain",
@@ -833,12 +851,17 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
             if item.value == self.bl_description:
                 layout.prop(item, "enable_physics")
 
+                layout.prop(item, "advanced_options")
+
                 if item.enable_physics:
                     layout.prop(item, "obj_xyz_min", text=f"{self.bl_description}")
                     layout.prop(item, "obj_xyz_max", text=f"{self.bl_description}")
                     op = layout.operator("scene.obj_spawn")
                     op.unique = self.bl_description
-
+                if item.advanced_options:
+                    layout.prop(item, "toggle_rotate", text=f"{self.bl_description}")
+                    layout.prop(item, "change_cutoff", text=f"{self.bl_description}")
+                    
        
 
 
