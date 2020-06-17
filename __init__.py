@@ -440,18 +440,18 @@ class StrSettingItem(PropertyGroup):
         )
     advanced_options: BoolProperty(
         name="Advanced Options",
-        description="A bool property",
+        description="Advanced Options",
         default = False,
         )
     toggle_rotate: BoolProperty(
         name="Enable Physics",
-        description="A bool property",
+        description="toggle rotate",
         default = False,
         update=toggle_rotate
         )
     change_cutoff: BoolProperty(
         name="Enable Physics",
-        description="A bool property",
+        description="change cutoff",
         default = False,
         update=change_cutoff
         )
@@ -849,9 +849,10 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
         for item in context.scene.my_idname:
             
             if item.value == self.bl_description:
-                layout.prop(item, "enable_physics")
+                row = layout.row()
+                row.prop(item, "enable_physics")
 
-                layout.prop(item, "advanced_options")
+                row.prop(item, "advanced_options")
 
                 if item.enable_physics:
                     layout.prop(item, "obj_xyz_min", text=f"{self.bl_description}")
@@ -859,8 +860,8 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
                     op = layout.operator("scene.obj_spawn")
                     op.unique = self.bl_description
                 if item.advanced_options:
-                    layout.prop(item, "toggle_rotate", text=f"{self.bl_description}")
-                    layout.prop(item, "change_cutoff", text=f"{self.bl_description}")
+                    layout.prop(item, "toggle_rotate")
+                    layout.prop(item, "change_cutoff")
                     
        
 
