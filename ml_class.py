@@ -19,7 +19,6 @@ class ML_Gen():
         self.pi = 3.14159265
         self.objs = {}
         self.enable_physics = None
-        self.names_dict = {}
         self.frames = None
     @staticmethod
     def update():
@@ -148,7 +147,7 @@ class ML_Gen():
         return (min_x, min_y), (max_x, max_y)
 
 
-    def get_cordinates(self, scene, camera,  objects, names_dict, filename):
+    def get_cordinates(self, scene, camera,  objects, filename):
         camera_object = camera
         print(objects, "objects in get cordinates")
     
@@ -463,7 +462,7 @@ class ML_Gen():
 
                     objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
                     
-                    scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
+                    scene_labels = self.get_cordinates(scene, camera, objects, filename)
             
                     
                     yield scene_labels
