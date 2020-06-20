@@ -449,6 +449,7 @@ class ML_Gen():
 
             # add in offset percentage
             # self.offset(scene, camera, 50)
+            
             value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
             if value == False:
                     loop_count -= 1

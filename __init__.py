@@ -444,15 +444,14 @@ class StrSettingItem(PropertyGroup):
         default = False,
         )
     toggle_rotate: BoolProperty(
-        name="Enable Physics",
-        description="toggle rotate",
-        default = False,
+        name="Rotate Object",
+        description="Turn off rotation on random Spawn",
+        default = True,
         update=toggle_rotate
         )
-    change_cutoff: BoolProperty(
-        name="Enable Physics",
-        description="change cutoff",
-        default = False,
+    change_cutoff: FloatProperty(
+        name="Cutoff",
+        description="Percent necessary to count the object in frame, test with Read Test",
         update=change_cutoff
         )
        
@@ -860,8 +859,9 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
                     op = layout.operator("scene.obj_spawn")
                     op.unique = self.bl_description
                 if item.advanced_options:
-                    layout.prop(item, "toggle_rotate")
-                    layout.prop(item, "change_cutoff")
+                    row = layout.row()
+                    row.prop(item, "toggle_rotate")
+                    row.prop(item, "change_cutoff")
                     
        
 
