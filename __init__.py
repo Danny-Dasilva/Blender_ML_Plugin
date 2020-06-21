@@ -468,7 +468,7 @@ class MyProperties(PropertyGroup):
         )
     frame_advance: IntProperty(
         name = "frame advance",
-        description="A integer property",
+        description="Choose the number of frames to advance vefore the camera positions itself",
         default = 1,
         min = 1,
         max = 500,
@@ -476,14 +476,14 @@ class MyProperties(PropertyGroup):
         )
     image_count: IntProperty(
         name = "image_count",
-        description="A integer property",
+        description="The number of Images you want rendered",
         default = 1,
         min = 1,
         max = 100
         )
     obj_num: IntProperty(
         name = "Unique Objects",
-        description="Set values",
+        description="Val for unique ids",
         default = 1,
         min = 1,
         max = 10,
@@ -539,8 +539,6 @@ def unpack_dim(dim_min, dim_max):
 
     return xyz_min, xyz_max
     
-    # gen.ob_xyz_max = [val for val in dim_max]
-    # gen.ob_xyz_min = [val for val in dim_min]
 
 
 
@@ -618,8 +616,6 @@ class OT_Execute(Operator):
             self.report({"ERROR"}, "No object selected")
             return {'FINISHED'}
 
-        # self.report({"ERROR"}, "Something isn't right")
-        # self.report({"WARNING"}, "Something isn't right")
 
 
         for item in scene.my_idname:
@@ -627,7 +623,6 @@ class OT_Execute(Operator):
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
                 set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
-                print(xyz_min, xyz_max, "min max ")
                 gen.enable_physics = True
             else:
                 set_objs(gen.objs, item.value, name=item.id)
@@ -671,8 +666,6 @@ class OT_Spawn(bpy.types.Operator):
             self.report({"ERROR"}, "No object selected")
             return {'FINISHED'}
 
-        # self.report({"ERROR"}, "Something isn't right")
-        # self.report({"WARNING"}, "Something isn't right")
 
 
 
@@ -733,7 +726,6 @@ class OT_Read(bpy.types.Operator):
             if item.enable_physics:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
                 set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
-                print(xyz_min, xyz_max, "min max ")
                 gen.enable_physics = True
             else:
                 set_objs(gen.objs, item.value, name=item.id)
