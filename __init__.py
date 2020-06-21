@@ -20,7 +20,8 @@ next swap to linux and pull offset function
 advanced options ---
 
 toggle rotate on randomize objs
-change percent cutoff
+pass value into function when calling batch render where i set the key to false or true and read it into thebatch render function
+change percent cutoff / already have function just need to connect it
 
 
 
