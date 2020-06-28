@@ -168,11 +168,11 @@ def remove_custom_operator(scene, i):
         for count, item in  reversed(list(enumerate(scene.my_collection))):
             if item.name.startswith(str(i)):
                 scene.my_collection.remove(count)
-
+        
         for count, item in  reversed(list(enumerate(scene.my_idname))):
             if item.value == i:
 
-                scene.my_idname.remove(count)
+            scene.my_idname.remove(count)
 
         # delete from dictr
         if i in obj_collection:
@@ -393,8 +393,7 @@ def toggle_rotate(self, context):
 def change_cutoff(self, context):
     pass
 def toggle_domain(self, context):
-    for obj in objs:
-        obj.clear()
+    
     if self.toggle_domain == False:
         cam.clear()
         for obj in objs:
