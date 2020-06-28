@@ -71,7 +71,8 @@ from bpy.app.handlers import persistent
 import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
-
+from dataclasses import dataclass
+from typing import List
 from bpy.props import (StringProperty,
                        BoolProperty,
                        IntProperty,
@@ -87,8 +88,22 @@ from bpy.types import (Panel,
                        PropertyGroup,
                        )
 
+@dataclass
+class Ml_Data_Store:
+    def __init__(self, id):
 
+        name: str
+        tag: int = id
+        obj_xyz_max: tuple
+        obj_xyz_min: tuple
+        enable_physics: bool = False
+        toggle_rotate: bool = False
+        cutoff: float = 30
+        object_list: List = []
 
+    
+
+data_store = [Ml_Data_Store(i) for i in range(10)]
 # ------------------------------------------------------------------------
 #    Set objs and helper
 # ------------------------------------------------------------------------
