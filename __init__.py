@@ -71,7 +71,7 @@ from bpy.app.handlers import persistent
 import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 from bpy.props import (StringProperty,
                        BoolProperty,
@@ -90,55 +90,29 @@ from bpy.types import (Panel,
 
 @dataclass
 class Ml_Data_Store:
-    def __init__(self, id):
-
-        name: str
-        tag: int = id
-        obj_xyz_max: tuple
-        obj_xyz_min: tuple
-        enable_physics: bool = False
-        toggle_rotate: bool = False
-        cutoff: float = 30
-        object_list: List = []
-
     
 
+    
+    tag: int
+    name: str = None
+    
+    enable_physics: bool = False
+    obj_xyz_max: tuple = (0, 0, 0)
+    obj_xyz_min: tuple = (0, 0, 0)
+    toggle_rotate: bool = True
+    cutoff: float = 30
+
+    object_list: List[int] = field(default_factory=list)
+    # maybe getter and setter for lists
+    
+    def add(self, value):
+        self.object_list.append(value)
+
+    def update_values(self, **kwargs):
+        self.__dict__.update(kwargs)
+
 data_store = [Ml_Data_Store(i) for i in range(10)]
-# ------------------------------------------------------------------------
-#    Set objs and helper
-# ------------------------------------------------------------------------
 
-def nested_set(dic, keys, value):
-    if value is not None:
-        
-        for key in keys[:-1]:
-            
-            print(dic, "dic weirds")
-            dic = dic.setdefault(key, {})
-
-        #check for objs set
-        if keys[-1] == "objects":
-            b = dic.setdefault('objects', [])
-            if value not in b:
-                b.append(value)
-        
-        else:
-            dic[keys[-1]] = value
-
-        
-
-def set_objs(d, key, name=None, objects=None, xyz_min=None, xyz_max=None, cutoff=None,):
-   
-    print(key, type(key), "keeeeey")
-    nested_set(d, [key, "name"], name)
-   
-
-    nested_set(d, [key,"objects"], objects)
-
-    nested_set(d, [key, "xyz_min"], xyz_min)
-    nested_set(d, [key, "xyz_max"], xyz_max)
-    nested_set(d, [key, "cutoff"], cutoff)
-    return d
 
 
 # ------------------------------------------------------------------------
@@ -428,7 +402,8 @@ class SceneSettingItem(PropertyGroup):
 
 class StrSettingItem(PropertyGroup):
     id: bpy.props.StringProperty()
-    value: IntProperty()
+
+    tag: IntProperty()
 
     obj_xyz_max: FloatVectorProperty(
         name = "XYZ+",
@@ -634,9 +609,13 @@ class OT_Execute(Operator):
 
 
         for item in scene.my_idname:
+
+            xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+
             
+            data_store[item.tag].update_values()
             if item.enable_physics:
-                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+                
                 set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
                 gen.enable_physics = True
             else:
@@ -756,6 +735,22 @@ class OT_Read(bpy.types.Operator):
         self.report({"INFO"}, str(output))
         print(obj_collection, "obj collection tesssst")
         return {'FINISHED'}
+
+
+
+class OT_Test(bpy.types.Operator):
+    bl_idname = "scene.test"
+    bl_label = "Testing button"
+
+    
+    def execute(self, context):
+        scene = context.scene
+        mytool = context.scene.my_tool
+        gen.reset()
+
+        
+        return {'FINISHED'}
+
 
 # ------------------------------------------------------------------------
 #    Panel in Object Mode
@@ -916,6 +911,8 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
         
         row.operator("scene.test_spawn")
         row.operator("scene.test_read")
+
+        layout.operator("scene.test")
         
 # ------------------------------------------------------------------------
 #    Set defaults
@@ -961,6 +958,7 @@ classes = (
     StrSettingItem,
     OT_Spawn,
     OT_Read,
+    OT_Test,
 )
 
 def register():

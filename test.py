@@ -19,10 +19,18 @@ class Ml_Data_Store:
     
     def add(self, value):
         self.object_list.append(value)
+
+    def update_values(self, **kwargs):
+        self.__dict__.update(kwargs)
+   
  
     
 
 data_store = [Ml_Data_Store(i) for i in range(10)]
 
+
+print(data_store[0])
+
+data_store[0].update_values(obj_xyz_max=(3, 3, 3))
 
 print(data_store[0])
