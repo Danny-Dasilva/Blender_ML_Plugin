@@ -6,13 +6,18 @@ error for if domain is 0 0 0
 -------------------------------
 
 
- 
+ valv
+
+ all.value changed to .tag
+
+
+gen.objs was an object list that was appended in the ml class
+
+.tag was the old call in my collection for actual objects
+
 
 to do:
-store op_cls reference to class creation in DataStore, class instance should reset when deleting
-create data store instance and append to it in create operator function
 
-change create_custom_operator I var
 
 obj_collection can also be a default var in ML_Data_store so no need to dell it
 
@@ -22,6 +27,16 @@ get rid of
         else:
             obj_collection[unique_id] += 1
 ```
+
+
+
+store op_cls reference to class creation in DataStore, class instance should reset when deleting
+
+create and remove from data store in create operator function
+
+change create_custom_operator I var
+
+
 because obj collection will be a var instance
 
 update objects and update atributes functions for use in read test and batch render
@@ -118,6 +133,8 @@ class Ml_Data_Store:
     cutoff: float = 30
 
     object_list: List[int] = field(default_factory=list)
+
+    object_count: int = 0
     # maybe getter and setter for lists
 
     def add(self, value):
@@ -126,8 +143,9 @@ class Ml_Data_Store:
     def update_values(self, **kwargs):
         self.__dict__.update(kwargs)
 
-    def reset(self):
-        self.__init__()
+    def reset(self, tag):
+        
+        self.__init__(tag=tag)
 
 data_store = [Ml_Data_Store(i) for i in range(10)]
 
@@ -177,8 +195,7 @@ def remove_custom_operator(scene, i):
             scene.my_collection.remove(count)
         
         #delete var increment instance
-        if i in obj_collection:
-            del obj_collection[i]
+        data_store[i].reset(i)
 
 
         #remove scene instance
@@ -188,7 +205,6 @@ def remove_custom_operator(scene, i):
                 val = count
         scene.my_idname.remove(val)
 
-        print("OBJ COLLECTION", obj_collection)
 
         for item in  scene.my_collection:
             print(item, "items in scene")
@@ -228,13 +244,13 @@ class OT_Add_Obj(Operator):
     
     def execute(self, context):
         unique_id = self.unique_id
-       
-        if unique_id not in obj_collection.keys():
-            obj_collection[unique_id] = 1
-        else:
-            obj_collection[unique_id] += 1
+        
+        
+        data_store[unique_id].object_count += 1
+        object_count = data_store[unique_id].object_count
+        print(object_count, "ADD DATASTORE")
 
-        name = f'{unique_id}{obj_collection[unique_id]}'
+        name = f'{unique_id}{object_count}'
         
         new = context.scene.my_collection.add()
         new.name = name
@@ -251,14 +267,17 @@ class OT_Remove_Obj(Operator):
     def execute(self, context):
         unique_id = self.unique_id
         
-        id = f'{unique_id}{obj_collection[unique_id]}'
+        object_count = data_store[unique_id].object_count
+        id = f'{unique_id}{object_count}'
+
         remove_lst = []
-        
+        print(object_count, "before delete")
         for count, item in enumerate(context.scene.my_collection):
             if item.name == id:
                 context.scene.my_collection.remove(count)
-                obj_collection[unique_id] -= 1
+                data_store[unique_id].object_count -=1
         
+        print(object_count, "after delete")
         print("Delete obj")
         for item in  context.scene.my_collection:
             print(item, "items in scene")
@@ -866,7 +885,6 @@ def addon_search(scene):
 # ------------------------------------------------------------------------
 
 op_cls = {}
-obj_collection = {}
 
 objs = [DrawBox(i) for i in range(10)]
 gen = ML_Gen()
