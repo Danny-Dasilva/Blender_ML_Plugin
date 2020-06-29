@@ -199,10 +199,11 @@ def remove_custom_operator(scene, i):
 
 
 
-
+        print(len(data_store), "BEFORE DELETE")
         # remove data class instance
         del data_store[i]
-        
+
+        print(len(data_store), "AFTER DELETE", i, )
         #remove object per unique id
         to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
         for count in reversed(to_remove):
@@ -226,11 +227,26 @@ def remove_custom_operator(scene, i):
         
 
 def create_custom_operators(scene, count):
-    for i in range(10):
-        if i < count:
-            create_custom_operator(scene, i)
-        else:
-            remove_custom_operator(scene, i)
+    print(len(data_store), "len store", count)
+
+    existing = len(data_store)
+    
+    print(count, existing)
+    if count > existing:
+        for tag in range(existing, count):
+            print(tag, "tag to add")
+            create_custom_operator(scene, tag)
+    
+    elif count < existing:
+        for tag in range(count, existing):
+                print(tag, "tag to remove")
+                remove_custom_operator(scene, tag)
+
+    # for i in range(10):
+    #     if i < count:
+    #         create_custom_operator(scene, i)
+    #     else:
+    #         remove_custom_operator(scene, i)
 
            
 
