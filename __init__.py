@@ -121,9 +121,10 @@ def create_custom_operator(scene, i):
         #str thing
         
         new = scene.my_idname.add()
-        new.name = str(i)
+        new.identifier = i
         new.value = i
-    print(op_cls.keys())
+        print(new.name, new.identifier)
+    
 
 def remove_custom_operator(scene, i):  
     
@@ -138,23 +139,45 @@ def remove_custom_operator(scene, i):
         #unregister classes
         bpy.utils.unregister_class(op_cls[i])
         del op_cls[i]
+        print("OP_CLS", op_cls)
 
-
-        # god this is awful please fix
-        for count, item in  reversed(list(enumerate(scene.my_collection))):
-            if item.name.startswith(str(i)):
-                scene.my_collection.remove(count)
+        remove_lst = []
         
-        for count, item in  reversed(list(enumerate(scene.my_idname))):
-            if item.value == i:
-                scene.my_idname.remove(count)
+        # for count, item in enumerate(scene.my_collection):
+        #     if item.value == i:
+        #         remove_lst.append(count)
+        # print("REMOVE_LST RCO",remove_lst )
 
-        # delete from dictr
+        # print(dir(scene.my_collection.children))
+        # for count in remove_lst:
+        #     try:
+        #         print("count for removal loop", count)
+        #         scene.my_collection.remove(count)
+        #     except:
+        #         print("COUNT", count)
+        obs = [o for o in scene.my_collection if o.value == i]
+        print(obs, "REMOVE_LST OBS")
+        # while obs:
+        #     bpy.data.objects.remove(obs.pop())
+        bpy.ops.object.delete({"selected_objects": obs})
+        
+        for item in  scene.my_collection:
+            print(item, "items in scene")
+
         if i in obj_collection:
             del obj_collection[i]
 
-        for items in scene.my_idname:
-            print(items, "items in scene")
+
+
+        val = None
+        for count, item in enumerate(scene.my_idname):
+            if item.identifier == i:
+                val = count
+        scene.my_idname.remove(val)
+
+        print("OBJ COLLECTION", obj_collection)
+
+        
 
         
 
@@ -194,12 +217,15 @@ class OT_Add_Obj(Operator):
             obj_collection[unique_id] = 1
         else:
             obj_collection[unique_id] += 1
+
         name = f'{unique_id}{obj_collection[unique_id]}'
         
         new = context.scene.my_collection.add()
         new.name = name
         new.value = unique_id
-        
+        print("add obj")
+        for item in  context.scene.my_collection:
+            print(item, "items in scene")
         return {'FINISHED'}
 
 class OT_Remove_Obj(Operator):
@@ -207,17 +233,19 @@ class OT_Remove_Obj(Operator):
     bl_label = "Delete Object"
     unique_id: IntProperty()
     def execute(self, context):
-        unique_id = self.unique
+        unique_id = self.unique_id
+        
         id = f'{unique_id}{obj_collection[unique_id]}'
-
-
-        for count, item in  reversed(list(enumerate(context.scene.my_collection))):
+        remove_lst = []
+        
+        for count, item in enumerate(context.scene.my_collection):
             if item.name == id:
                 context.scene.my_collection.remove(count)
                 obj_collection[unique_id] -= 1
         
+        print("Delete obj")
         for item in  context.scene.my_collection:
-            print(item)
+            print(item, "items in scene")
         
         return {'FINISHED'}
 
@@ -343,7 +371,7 @@ def obj_domain(self, context):
     xyz_max = [val for val in self.obj_xyz_max]
 
     
-    obj = objs[self.value]
+    obj = objs[self.identifier]
 
     obj.setxyz(xyz_min, xyz_max)
     obj.run()
@@ -356,16 +384,14 @@ def frame_advance(self, context):
     gen.frames  = frames
 
 def enable_physics(self, context):
-    obj = objs[self.value]
+    obj = objs[self.identifier]
     if self.enable_physics == False:
         obj.clear()
     else:
         obj.run()
 
-def toggle_rotate(self, context):
-    pass
-def change_cutoff(self, context):
-    pass
+
+
 def toggle_domain(self, context):
     
     if self.toggle_domain == False:
@@ -383,6 +409,7 @@ def toggle_domain(self, context):
 class ObjectHolder(PropertyGroup):
     #my_collection
     object_pointer: bpy.props.PointerProperty(type=bpy.types.Object)
+    #change this to identifier later
     value: IntProperty()
 
 
@@ -424,12 +451,10 @@ class MlAttributes(PropertyGroup):
         name="Rotate Object",
         description="Turn off rotation on random Spawn",
         default = True,
-        update=toggle_rotate
         )
     cutoff: FloatProperty(
         name="Cutoff",
         description="Percent necessary to count the object in frame, test with Read Test",
-        update=change_cutoff
         )
        
 
@@ -531,16 +556,9 @@ class OT_Cam_Spawn(Operator):
     def execute(self, context):
         scene = context.scene
         mytool = scene.my_tool
-        
-        # print the values to the console
-        print("Cam_Test")
-        
+          
         set_cam_dimensions(mytool.cam_xyz_min, mytool.cam_xyz_max)
         gen.randomize_camera(scene)
-
-        print(gen.xyz_max, gen.xyz_min)
-        
-
 
         return {'FINISHED'}
 
@@ -598,8 +616,8 @@ class OT_Execute(Operator):
         for tag in scene.my_idname:
             
             xyz_min, xyz_max = unpack_dim(tag.obj_xyz_min, tag.obj_xyz_max)
-            print(tag, tag.identifier, tag.name, )
-            data_store[tag.identifier].update_values(name=tag.name,
+            
+            data_store[tag.identifier].update_values(name=tag.unique_name,
                                                 enable_physics=tag.enable_physics,
                                                 obj_xyz_min= xyz_min, 
                                                 obj_xyz_max= xyz_max,
@@ -608,12 +626,12 @@ class OT_Execute(Operator):
                     
 
 
-        # for item in context.scene.my_collection:
-        #     if item.object_pointer:
-        #         tag = item.value
-        #         data_store[tag.identifier].add(item.object_pointer)
+        for item in context.scene.my_collection:
+            if item.object_pointer:
+                tag = item.value
+                data_store[tag.identifier].add(item.object_pointer)
 
-        print(data_store[0])
+        print("DATA STORE", data_store)
 
         # filepath if in plugin else default
         # if mytool.filepath:
@@ -647,8 +665,10 @@ class OT_Test(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        gen.reset()
-
+        
+        scene.my_collection.clear()
+        for item in  scene.my_collection:
+            print(item, "items in test")
         
         return {'FINISHED'}
 
@@ -822,7 +842,6 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 
 @persistent
 def addon_search(scene):
-    print("hello")
     if scene.my_idname:
         scene.my_idname.clear()
     init_count(scene)
@@ -906,10 +925,9 @@ def unregister():
             
             del item
 
-    for item in bpy.types.Scene.my_collection:
-        if hasattr(item, 'clear'):
-            item.clear()
-            del item
+    bpy.context.scene.my_collection.clear()
+    bpy.context.scene.my_idname.clear()
+       
             
 
     del bpy.types.Scene.my_tool
