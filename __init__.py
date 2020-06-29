@@ -19,14 +19,6 @@ gen.objs was an object list that was appended in the ml class
 to do:
 
 
-obj_collection can also be a default var in ML_Data_store so no need to dell it
-
-get rid of
-```if unique_id not in obj_collection.keys():
-            obj_collection[unique_id] = 1
-        else:
-            obj_collection[unique_id] += 1
-```
 
 
 
@@ -103,7 +95,7 @@ import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Any
 from bpy.props import (StringProperty,
                        BoolProperty,
                        IntProperty,
@@ -132,6 +124,10 @@ class Ml_Data_Store:
     rotate: bool = True
     cutoff: float = 30
 
+
+    panel_class: Any = None
+
+
     object_list: List[int] = field(default_factory=list)
 
     object_count: int = 0
@@ -147,7 +143,7 @@ class Ml_Data_Store:
         
         self.__init__(tag=tag)
 
-data_store = [Ml_Data_Store(i) for i in range(10)]
+data_store = []
 
 
 
@@ -163,20 +159,34 @@ def create_custom_operator(scene, i):
                     'bl_description': i,
                     'bl_options' : {"DEFAULT_CLOSED"},
                 })
-    if i not in op_cls.keys(): 
-        op_cls[i] = nc
+    data_store.append(Ml_Data_Store(i))
+
+
+    if data_store[i].panel_class is None:
+     
+
+
+
+
         bpy.utils.register_class(nc)
+        data_store[i].update_values(panel_class=nc)
+
+
 
         
-        #create MLAttributes for new unique id
-        new = scene.my_idname.add()
-        new.identifier = i
-        new.value = i
+
+        print(data_store, "DATA STORE ADD")
+    
+    #create MLAttributes for new unique id
+    new = scene.my_idname.add()
+    new.identifier = i
+    new.value = i
     
 
 def remove_custom_operator(scene, i):  
     
-    if i in op_cls.keys():
+    
+    if data_store[i].panel_class is not None:
 
         # remove drawing
         obj = objs[i]
@@ -184,18 +194,21 @@ def remove_custom_operator(scene, i):
             obj.erase()
 
         #unregister classes
-        bpy.utils.unregister_class(op_cls[i])
-        del op_cls[i]
-        print("OP_CLS", op_cls)
+        bpy.utils.unregister_class(data_store[i].panel_class)
+        del data_store[i].panel_class
 
+
+
+
+        # remove data class instance
+        del data_store[i]
         
         #remove object per unique id
         to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
         for count in reversed(to_remove):
             scene.my_collection.remove(count)
         
-        #delete var increment instance
-        data_store[i].reset(i)
+        
 
 
         #remove scene instance
@@ -220,7 +233,6 @@ def create_custom_operators(scene, count):
             remove_custom_operator(scene, i)
 
            
-    print(op_cls.keys())
 
 def set_obj_count(self, context):
     scene = bpy.context.scene
@@ -884,7 +896,6 @@ def addon_search(scene):
 #    Class Inits
 # ------------------------------------------------------------------------
 
-op_cls = {}
 
 objs = [DrawBox(i) for i in range(10)]
 gen = ML_Gen()
@@ -930,13 +941,21 @@ def unregister():
 
 
     
-    
-    for count, item in  reversed(list(enumerate(op_cls.values()))):
-        obj = objs[count]
-        if obj.registered == True:
-            obj.erase()
-        unregister_class(op_cls[count])
-        del op_cls[count]
+    # loop through Ml_Data_Store values 
+    """
+    obj = objs[count]
+    if obj.registered == True:
+        obj.erase()
+
+    unregister_class(data_store[count].cls or somtheing)
+    del op_cls[count]
+    """
+    # for count, item in  reversed(list(enumerate(op_cls.values()))):
+    #     obj = objs[count]
+    #     if obj.registered == True:
+    #         obj.erase()
+    #     unregister_class(op_cls[count])
+    #     del op_cls[count]
 
     
         
