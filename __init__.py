@@ -74,7 +74,7 @@ from bpy.types import (Panel,
                        Operator,
                        PropertyGroup,
                        )
-
+from time import sleep
 @dataclass
 class Ml_Data_Store:
     
@@ -112,8 +112,8 @@ def create_custom_operator(scene, i):
                     {'bl_idname': idname,
                     'bl_label': 'Add a ' + idname,
                     'bl_description': i,
+                    'bl_options' : {"DEFAULT_CLOSED"},
                 })
-    
     if i not in op_cls.keys(): 
         op_cls[i] = nc
         bpy.utils.register_class(nc)
@@ -141,34 +141,18 @@ def remove_custom_operator(scene, i):
         del op_cls[i]
         print("OP_CLS", op_cls)
 
-        remove_lst = []
         
-        # for count, item in enumerate(scene.my_collection):
-        #     if item.value == i:
-        #         remove_lst.append(count)
-        # print("REMOVE_LST RCO",remove_lst )
-
-        # print(dir(scene.my_collection.children))
-        # for count in remove_lst:
-        #     try:
-        #         print("count for removal loop", count)
-        #         scene.my_collection.remove(count)
-        #     except:
-        #         print("COUNT", count)
-        obs = [o for o in scene.my_collection if o.value == i]
-        print(obs, "REMOVE_LST OBS")
-        # while obs:
-        #     bpy.data.objects.remove(obs.pop())
-        bpy.ops.object.delete({"selected_objects": obs})
+        #remove object per unique id
+        to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
+        for count in reversed(to_remove):
+            scene.my_collection.remove(count)
         
-        for item in  scene.my_collection:
-            print(item, "items in scene")
-
+        #delete var increment instance
         if i in obj_collection:
             del obj_collection[i]
 
 
-
+        #remove scene instance
         val = None
         for count, item in enumerate(scene.my_idname):
             if item.identifier == i:
@@ -177,7 +161,9 @@ def remove_custom_operator(scene, i):
 
         print("OBJ COLLECTION", obj_collection)
 
-        
+        for item in  scene.my_collection:
+            print(item, "items in scene")
+
 
         
 
@@ -666,7 +652,7 @@ class OT_Test(bpy.types.Operator):
         scene = context.scene
         mytool = context.scene.my_tool
         
-        scene.my_collection.clear()
+        
         for item in  scene.my_collection:
             print(item, "items in test")
         
