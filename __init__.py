@@ -188,13 +188,13 @@ class OT_Add_Obj(Operator):
     unique_id: bpy.props.IntProperty()
     
     def execute(self, context):
-        unique = self.unique
+        unique_id = self.unique_id
        
-        if unique not in obj_collection.keys():
-            obj_collection[unique] = 1
+        if unique_id not in obj_collection.keys():
+            obj_collection[unique_id] = 1
         else:
-            obj_collection[unique] += 1
-        name = f'{unique}{obj_collection[unique]}'
+            obj_collection[unique_id] += 1
+        name = f'{unique_id}{obj_collection[unique_id]}'
         
         new = context.scene.my_collection.add()
         new.name = name
@@ -205,16 +205,16 @@ class OT_Add_Obj(Operator):
 class OT_Remove_Obj(Operator):
     bl_idname = "scene.remove_obj"
     bl_label = "Delete Object"
-    unique: IntProperty()
+    unique_id: IntProperty()
     def execute(self, context):
-        unique = self.unique
-        id = f'{unique}{obj_collection[unique]}'
+        unique_id = self.unique
+        id = f'{unique_id}{obj_collection[unique_id]}'
 
 
         for count, item in  reversed(list(enumerate(context.scene.my_collection))):
             if item.name == id:
                 context.scene.my_collection.remove(count)
-                obj_collection[unique] -= 1
+                obj_collection[unique_id] -= 1
         
         for item in  context.scene.my_collection:
             print(item)
@@ -381,12 +381,14 @@ def toggle_domain(self, context):
 #    Property Groups
 # ------------------------------------------------------------------------
 class ObjectHolder(PropertyGroup):
+    #my_collection
     object_pointer: bpy.props.PointerProperty(type=bpy.types.Object)
     value: IntProperty()
 
 
 class MlAttributes(PropertyGroup):
-    name: bpy.props.StringProperty()
+    #my_idname
+    unique_name: bpy.props.StringProperty()
 
     identifier: IntProperty()
 
@@ -595,8 +597,8 @@ class OT_Execute(Operator):
 
         for tag in scene.my_idname:
             
-            xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-            
+            xyz_min, xyz_max = unpack_dim(tag.obj_xyz_min, tag.obj_xyz_max)
+            print(tag, tag.identifier, tag.name, )
             data_store[tag.identifier].update_values(name=tag.name,
                                                 enable_physics=tag.enable_physics,
                                                 obj_xyz_min= xyz_min, 
@@ -606,119 +608,35 @@ class OT_Execute(Operator):
                     
 
 
-        for item in context.scene.my_collection:
-            if item.object_pointer:
-                tag = item.value
-                data_store[tag.identifier].add(item.object_pointer)
-        
+        # for item in context.scene.my_collection:
+        #     if item.object_pointer:
+        #         tag = item.value
+        #         data_store[tag.identifier].add(item.object_pointer)
+
+        print(data_store[0])
+
         # filepath if in plugin else default
-        if mytool.filepath:
-            filepath = str(mytool.filepath)
-        else:
-            filepath = bpy.data.scenes[0].render.filepath
-            self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
+        # if mytool.filepath:
+        #     filepath = str(mytool.filepath)
+        # else:
+        #     filepath = bpy.data.scenes[0].render.filepath
+        #     self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
-        file_format = scene.render.image_settings.file_format
-        gen.run(scene, int(mytool.image_count), filepath, file_format)
+        # file_format = scene.render.image_settings.file_format
+        # gen.run(scene, int(mytool.image_count), filepath, file_format)
         return {'FINISHED'}
 
 
-class OT_Spawn(bpy.types.Operator):
-    bl_idname = "scene.test_spawn"
-    bl_label = "Spawn Test"
-
-    
-    def execute(self, context):
-        scene = context.scene
-        mytool = context.scene.my_tool
-        gen.reset()
-
-        # Check if camera domain Exists
-            
-        if not(gen.xyz_min and gen.xyz_max):
-            self.report({"ERROR"}, "Camera Domain Not Set")
-            return {'FINISHED'}
-        # Check if objects are selected Exists
-        if len(context.scene.my_collection) == 0:
-            self.report({"ERROR"}, "No object selected")
-            return {'FINISHED'}
+# class OT_Spawn(bpy.types.Operator):
+#     bl_idname = "scene.test_spawn"
+#     bl_label = "Spawn Test"
 
 
 
 
-        for item in scene.my_idname:
-            
-            if item.enable_physics:
-                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-
-                gen.objs[item.value] = {"name" : item.id, "xyz_min" : xyz_min, "xyz_max" : xyz_max}
-                gen.enable_physics = True
-            else:
-                gen.objs[item.value] = {"name" : item.id}
-
-
-        for item in context.scene.my_collection:
-            if item.tag:
-                gen.add(item.tag, item.name[0])
-        
-        
-        # filepath if in plugin else default
-        if mytool.filepath:
-            filepath = str(mytool.filepath)
-        else:
-            filepath = bpy.data.scenes[0].render.filepath
-            self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
-
-        file_format = scene.render.image_settings.file_format
-
-        gen.batch_render(scene, int(mytool.image_count), filepath, file_format)
-
-        return {'FINISHED'}
-
-
-class OT_Read(bpy.types.Operator):
-    bl_idname = "scene.test_read"
-    bl_label = "Read Test"
-
-    
-    def execute(self, context):
-        scene = context.scene
-        mytool = context.scene.my_tool
-        gen.reset()
-
-        # Check if camera domain Exists
-            
-        if not(gen.xyz_min and gen.xyz_max):
-            self.report({"ERROR"}, "Camera Domain Not Set")
-            return {'FINISHED'}
-
-        # Check if objects are selected Exists
-        if len(context.scene.my_collection) == 0:
-            self.report({"ERROR"}, "No object selected")
-            return {'FINISHED'}
-
-
-        for item in scene.my_idname:
-            
-            if item.enable_physics:
-                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-                set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
-                gen.enable_physics = True
-            else:
-                set_objs(gen.objs, item.value, name=item.id)
-                    
-
-
-        for item in context.scene.my_collection:
-            if item.tag:
-                id = item.name[0]
-                set_objs(gen.objs, int(id), objects=item.tag)
-        
-        output = gen.test_render(scene)
-        self.report({"INFO"}, str(output))
-        print(obj_collection, "obj collection tesssst")
-        return {'FINISHED'}
-
+# class OT_Read(bpy.types.Operator):
+#     bl_idname = "scene.test_read"
+#     bl_label = "Read Test"
 
 
 class OT_Test(bpy.types.Operator):
@@ -807,8 +725,8 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
         #str loop
         for item in context.scene.my_idname:
             
-            if item.value == self.bl_description:
-                layout.prop(item, "id", text=f"{self.bl_description}")
+            if item.identifier == self.bl_description:
+                layout.prop(item, "unique_name", text=f"{self.bl_description}")
         
         
 
@@ -816,23 +734,23 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
         for item in context.scene.my_collection:
             if int(item.name[0]) == self.bl_description:
                 row = self.layout.row(align=True)
-                row.prop(item, "tag", text="add custom title here")
+                row.prop(item, "object_pointer", text="add custom title here")
 
 
 
         split = layout.split()
         col = split.column()
         op = col.operator("scene.add_obj", icon="PLUS")
-        op.unique = self.bl_description
+        op.unique_id = self.bl_description
         col = split.column(align=True)
 
         op = col.operator("scene.remove_obj", icon="TRASH")
-        op.unique = self.bl_description
+        op.unique_id = self.bl_description
 
         # spawn obj loop
         for item in context.scene.my_idname:
             
-            if item.value == self.bl_description:
+            if item.identifier == self.bl_description:
                 row = layout.row()
                 row.prop(item, "enable_physics")
 
@@ -845,8 +763,8 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
                     op.unique = self.bl_description
                 if item.advanced_options:
                     row = layout.row()
-                    row.prop(item, "toggle_rotate")
-                    row.prop(item, "change_cutoff")
+                    row.prop(item, "rotate")
+                    row.prop(item, "cutoff")
                     
        
 
@@ -892,8 +810,8 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 
         row = layout.row(align=True)
         
-        row.operator("scene.test_spawn")
-        row.operator("scene.test_read")
+        # row.operator("scene.test_spawn")
+        # row.operator("scene.test_read")
 
         layout.operator("scene.test")
         
@@ -938,8 +856,8 @@ classes = (
     ObjectHolder,
     OT_Execute,
     MlAttributes,
-    OT_Spawn,
-    OT_Read,
+    # OT_Spawn,
+    # OT_Read,
     OT_Test,
 )
 
