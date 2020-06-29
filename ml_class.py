@@ -14,8 +14,6 @@ class ML_Gen():
     def __init__(self):
         self.xyz_max = None
         self.xyz_min = None
-        self.ob_xyz_max  = [0, 0, 0]
-        self.ob_xyz_min  = [0, 0, 0]
         self.pi = 3.14159265
         self.objs = {}
         self.enable_physics = None
@@ -70,8 +68,6 @@ class ML_Gen():
                     self.randomize_obj(scene, obj, xyz_min, xyz_max)
 
 
-    def set_obj_domain(self, ob_xyz_min, ob_xyz_max):
-        pass
     # run ops
     @staticmethod
     def camera_view_bounds_2d(scene, camera_object, mesh_object):

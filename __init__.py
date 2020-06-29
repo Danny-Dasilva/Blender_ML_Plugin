@@ -147,8 +147,7 @@ def remove_custom_operator(scene, i):
         
         for count, item in  reversed(list(enumerate(scene.my_idname))):
             if item.value == i:
-
-            scene.my_idname.remove(count)
+                scene.my_idname.remove(count)
 
         # delete from dictr
         if i in obj_collection:
@@ -924,7 +923,7 @@ op_cls = {}
 obj_collection = {}
 
 objs = [DrawBox(i) for i in range(10)]
-
+gen = ML_Gen()
 cam = DrawBox(None)    
 # handler_removed = False
 
