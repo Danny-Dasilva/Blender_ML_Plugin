@@ -1,38 +1,25 @@
 '''
-fix call object id 1, ask devin how to -------
-
-
+fix call object id 1
 rename - my_tool my_idname my_collection
-
 error for if domain is 0 0 0 
-
 
 -------------------------------
 
 
-!!!!! FIX MEMORY CLEAR
-
  
 
 
-next swap to linux and pull offset function
+
 
 advanced options ---
 
 toggle rotate on randomize objs
-pass value into function when calling batch render where i set the key to false or true and read it into thebatch render function
-change percent cutoff / already have function just need to connect it
 
-
+swap to linux and pull offset function
 
 ---
 
-dynamic objs list generation for classes, more memory efficient and clears the panel
-
 check cutoff for too many loops- warning
-
-
-fix reverse list enumerate garbage
 fix DRAWBOX normalize function 
 
 ----
@@ -99,12 +86,12 @@ class Ml_Data_Store:
     enable_physics: bool = False
     obj_xyz_max: tuple = (0, 0, 0)
     obj_xyz_min: tuple = (0, 0, 0)
-    toggle_rotate: bool = True
+    rotate: bool = True
     cutoff: float = 30
 
     object_list: List[int] = field(default_factory=list)
     # maybe getter and setter for lists
-    
+
     def add(self, value):
         self.object_list.append(value)
 
@@ -199,7 +186,7 @@ def init_count(scene):
 class OT_Add_Obj(Operator):
     bl_idname = "scene.add_obj"
     bl_label = "Add Object"
-    unique: bpy.props.IntProperty()
+    unique_id: bpy.props.IntProperty()
     
     def execute(self, context):
         unique = self.unique
@@ -208,13 +195,12 @@ class OT_Add_Obj(Operator):
             obj_collection[unique] = 1
         else:
             obj_collection[unique] += 1
-        id = f'{unique}{obj_collection[unique]}'
+        name = f'{unique}{obj_collection[unique]}'
         
         new = context.scene.my_collection.add()
-        new.name = id
-        new.value = int(id)
-        for item in  context.scene.my_collection:
-            print(item)
+        new.name = name
+        new.value = unique_id
+        
         return {'FINISHED'}
 
 class OT_Remove_Obj(Operator):
@@ -395,15 +381,15 @@ def toggle_domain(self, context):
 # ------------------------------------------------------------------------
 #    Property Groups
 # ------------------------------------------------------------------------
-class SceneSettingItem(PropertyGroup):
-    tag: bpy.props.PointerProperty(type=bpy.types.Object)
+class ObjectHolder(PropertyGroup):
+    object_pointer: bpy.props.PointerProperty(type=bpy.types.Object)
     value: IntProperty()
 
 
-class StrSettingItem(PropertyGroup):
-    id: bpy.props.StringProperty()
+class MlAttributes(PropertyGroup):
+    name: bpy.props.StringProperty()
 
-    tag: IntProperty()
+    identifier: IntProperty()
 
     obj_xyz_max: FloatVectorProperty(
         name = "XYZ+",
@@ -433,13 +419,13 @@ class StrSettingItem(PropertyGroup):
         description="Advanced Options",
         default = False,
         )
-    toggle_rotate: BoolProperty(
+    rotate: BoolProperty(
         name="Rotate Object",
         description="Turn off rotation on random Spawn",
         default = True,
         update=toggle_rotate
         )
-    change_cutoff: FloatProperty(
+    cutoff: FloatProperty(
         name="Cutoff",
         description="Percent necessary to count the object in frame, test with Read Test",
         update=change_cutoff
@@ -608,25 +594,23 @@ class OT_Execute(Operator):
 
 
 
-        for item in scene.my_idname:
-
-            xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
-
+        for tag in scene.my_idname:
             
-            data_store[item.tag].update_values()
-            if item.enable_physics:
-                
-                set_objs(gen.objs, item.value, name=item.id, xyz_min=xyz_min, xyz_max=xyz_max)
-                gen.enable_physics = True
-            else:
-                set_objs(gen.objs, item.value, name=item.id)
+            xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+            
+            data_store[tag.identifier].update_values(name=tag.name,
+                                                enable_physics=tag.enable_physics,
+                                                obj_xyz_min= xyz_min, 
+                                                obj_xyz_max= xyz_max,
+                                                rotate= tag.rotate, 
+                                                cutoff= tag.cutoff)
                     
 
 
         for item in context.scene.my_collection:
-            if item.tag:
-                id = item.name[0]
-                set_objs(gen.objs, int(id), objects=item.tag)
+            if item.object_pointer:
+                tag = item.value
+                data_store[tag.identifier].add(item.object_pointer)
         
         # filepath if in plugin else default
         if mytool.filepath:
@@ -941,7 +925,6 @@ obj_collection = {}
 
 objs = [DrawBox(i) for i in range(10)]
 
-gen = ML_Gen()
 cam = DrawBox(None)    
 # handler_removed = False
 
@@ -953,9 +936,9 @@ classes = (
     OT_Obj_Spawn,
     OT_Add_Obj,
     OT_Remove_Obj,
-    SceneSettingItem,
+    ObjectHolder,
     OT_Execute,
-    StrSettingItem,
+    MlAttributes,
     OT_Spawn,
     OT_Read,
     OT_Test,
@@ -968,10 +951,10 @@ def register():
     bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
 
     #dynamic property for object selection
-    bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=SceneSettingItem)
+    bpy.types.Scene.my_collection = bpy.props.CollectionProperty(type=ObjectHolder)
     
     #dynamic property for id names
-    bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=StrSettingItem)
+    bpy.types.Scene.my_idname = bpy.props.CollectionProperty(type=MlAttributes)
 
     # bpy.app.handlers.depsgraph_update_post.append(addon_search)
     
