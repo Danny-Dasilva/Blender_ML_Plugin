@@ -8,13 +8,42 @@ error for if domain is 0 0 0
 
  
 
+to do:
+store op_cls reference to class creation in DataStore, class instance should reset when deleting
+create data store instance and append to it in create operator function
 
+change create_custom_operator I var
+
+obj_collection can also be a default var in ML_Data_store so no need to dell it
+
+get rid of
+```if unique_id not in obj_collection.keys():
+            obj_collection[unique_id] = 1
+        else:
+            obj_collection[unique_id] += 1
+```
+because obj collection will be a var instance
+
+update objects and update atributes functions for use in read test and batch render
+
+
+
+
+this pattern to see if a class instance exists
+
+if not any(d['main_color'] == 'red' for d in a):
+    my check = true
+
+
+ #remove scene instance
+same pattern as other thing
 
 
 advanced options ---
 
 toggle rotate on randomize objs
-
+pick camera
+set limit
 swap to linux and pull offset function
 
 ---
@@ -77,7 +106,6 @@ from bpy.types import (Panel,
 from time import sleep
 @dataclass
 class Ml_Data_Store:
-    
 
     
     tag: int
@@ -97,6 +125,9 @@ class Ml_Data_Store:
 
     def update_values(self, **kwargs):
         self.__dict__.update(kwargs)
+
+    def reset(self):
+        self.__init__()
 
 data_store = [Ml_Data_Store(i) for i in range(10)]
 
@@ -118,12 +149,11 @@ def create_custom_operator(scene, i):
         op_cls[i] = nc
         bpy.utils.register_class(nc)
 
-        #str thing
         
+        #create MLAttributes for new unique id
         new = scene.my_idname.add()
         new.identifier = i
         new.value = i
-        print(new.name, new.identifier)
     
 
 def remove_custom_operator(scene, i):  
@@ -131,7 +161,6 @@ def remove_custom_operator(scene, i):
     if i in op_cls.keys():
 
         # remove drawing
-     
         obj = objs[i]
         if obj.registered == True:
             obj.erase()
@@ -176,6 +205,7 @@ def create_custom_operators(scene, count):
 
            
     print(op_cls.keys())
+
 def set_obj_count(self, context):
     scene = bpy.context.scene
     count = scene.my_tool.obj_num
@@ -501,13 +531,6 @@ class MyProperties(PropertyGroup):
         default="",
         maxlen=1024,
         subtype="DIR_PATH"
-        )
-    my_path: StringProperty(
-        name = "Directory",
-        description="Choose a directory:",
-        default="",
-        maxlen=1024,
-        subtype='DIR_PATH'
         )
 
 
