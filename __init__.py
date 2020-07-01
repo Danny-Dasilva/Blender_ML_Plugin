@@ -1003,5 +1003,3 @@ def unregister():
 if __name__ == "__main__":
 
     register()
-    
-    bpy.ops.object.draw_op('INVOKE_DEFAULT')
