@@ -234,12 +234,12 @@ def create_custom_operators(scene, count):
     print(count, existing)
     if count > existing:
         for tag in range(existing, count):
-            print(tag, "tag to add")
+            print(tag, "tag to ADD")
             create_custom_operator(scene, tag)
     
     elif count < existing:
-        for tag in range(count, existing):
-                print(tag, "tag to remove")
+        for tag in reversed(range(count, existing)):
+                print(tag, "tag to REMOVE")
                 remove_custom_operator(scene, tag)
 
     # for i in range(10):
