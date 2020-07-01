@@ -56,7 +56,7 @@ bl_idname = category.name
 
 
 bl_info = {
-    "name" : "Blender_ML_Plugin",
+    "name" : "aaaaaa",
     "author" : "Danny Dasilva",
     "description" : "Blender Object Detection Data generation",
     "blender" : (2, 80, 0),

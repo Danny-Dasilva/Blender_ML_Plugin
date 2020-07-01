@@ -79,7 +79,7 @@ bl_idname = category.name
 
 
 bl_info = {
-    "name" : "Blender_ML_Plugin",
+    "name" : "Object_Ml_Plugin",
     "author" : "Danny Dasilva",
     "description" : "Blender Object Detection Data generation",
     "blender" : (2, 80, 0),
@@ -207,6 +207,7 @@ def remove_custom_operator(scene, i):
         #remove object per unique id
         to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
         for count in reversed(to_remove):
+            
             scene.my_collection.remove(count)
         
         
