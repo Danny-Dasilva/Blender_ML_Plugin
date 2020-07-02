@@ -22,7 +22,6 @@ to do:
 
 
 
-store op_cls reference to class creation in DataStore, class instance should reset when deleting
 
 create and remove from data store in create operator function
 
@@ -150,69 +149,69 @@ data_store = []
 # ------------------------------------------------------------------------
 #    Generative helper functions
 # ------------------------------------------------------------------------
-def create_custom_operator(scene, i):
-    idname = f"Object id#{str(i + 1)}"
+def create_custom_operator(scene, tag):
+    idname = f"Object id#{str(tag + 1)}"
     nc = type(  'DynOp_' + idname,
                     (OBJECT_PT_Spawn_Ids, ),
                     {'bl_idname': idname,
                     'bl_label': 'Add a ' + idname,
-                    'bl_description': i,
+                    'bl_description': tag,
                     'bl_options' : {"DEFAULT_CLOSED"},
                 })
-    data_store.append(Ml_Data_Store(i))
+    data_store.append(Ml_Data_Store(tag))
 
 
-    if data_store[i].panel_class is None:
+    if data_store[tag].panel_class is None:
      
 
 
 
 
         bpy.utils.register_class(nc)
-        data_store[i].update_values(panel_class=nc)
+        data_store[tag].update_values(panel_class=nc)
 
 
 
         
 
-        print(data_store, "DATA STORE ADD")
+        print(len(data_store), "DATA STORE ADD")
     
     #create MLAttributes for new unique id
     new = scene.my_idname.add()
-    new.identifier = i
-    new.value = i
+    new.identifier = tag
+    new.value = tag
     
 
-def remove_custom_operator(scene, i):  
+def remove_custom_operator(scene, tag):  
     
     
-    if data_store[i].panel_class is not None:
+    if data_store[tag].panel_class is not None:
 
         # remove drawing
-        obj = objs[i]
+        obj = objs[tag]
         if obj.registered == True:
             obj.erase()
 
         #remove object per unique id
-        to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
+        to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == tag]
         for count in reversed(to_remove):
             
             scene.my_collection.remove(count)
 
         #unregister classes
-        bpy.utils.unregister_class(data_store[i].panel_class)
-        del data_store[i].panel_class
+        bpy.utils.unregister_class(data_store[tag].panel_class)
+        del data_store[tag].panel_class
 
 
 
         # remove data class instance
-        del data_store[i]
+        del data_store[tag]
       
 
         #remove scene instance
         val = None
         for count, item in enumerate(scene.my_idname):
-            if item.identifier == i:
+            if item.identifier == tag:
                 val = count
         scene.my_idname.remove(val)
 
@@ -627,18 +626,18 @@ class OT_Obj_Spawn(Operator):
 
         #for test spawn
         for item in scene.my_idname:
-            if item.value == unique:
+            if item.identifier == unique:
                 xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
 
 
         for item in context.scene.my_collection:
 
-            if int(item.name[0]) == unique:
-                obj = item.tag
-                if obj:
-                    gen.randomize_obj(scene, obj, xyz_min, xyz_max)
+            if item.value == unique:
+                pointer = item.object_pointer
+                if pointer:
+                    gen.randomize_obj(scene, pointer, xyz_min, xyz_max)
                 else:
-                    self.report({"WARNING"}, "No object selected")
+                    self.report({"WARNING"}, f"No object selected for id#{item.value}")
                     
 
         return {'FINISHED'}
@@ -681,8 +680,7 @@ class OT_Execute(Operator):
 
         for item in context.scene.my_collection:
             if item.object_pointer:
-                tag = item.value
-                data_store[tag.identifier].add(item.object_pointer)
+                data_store[item.value].add(item.object_pointer)
 
         print("DATA STORE", data_store)
 
@@ -952,6 +950,10 @@ def unregister():
     cam.clear()
     gen.reset()
 
+    # remove drawings
+    for obj in objs:
+        if obj.registered == True:
+            obj.erase()
 
 
     for ml_clss in reversed(data_store):
@@ -978,8 +980,6 @@ def unregister():
     del bpy.types.Scene.my_collection
     del bpy.types.Scene.my_idname
     
-    # if handler_removed == True:
-    #     bpy.app.handlers.depsgraph_update_post.remove(addon_search)
 
 
 if __name__ == "__main__":
