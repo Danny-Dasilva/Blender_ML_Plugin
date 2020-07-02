@@ -193,25 +193,21 @@ def remove_custom_operator(scene, i):
         if obj.registered == True:
             obj.erase()
 
+        #remove object per unique id
+        to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
+        for count in reversed(to_remove):
+            
+            scene.my_collection.remove(count)
+
         #unregister classes
         bpy.utils.unregister_class(data_store[i].panel_class)
         del data_store[i].panel_class
 
 
 
-        print(len(data_store), "BEFORE DELETE")
         # remove data class instance
         del data_store[i]
-
-        print(len(data_store), "AFTER DELETE", i, )
-        #remove object per unique id
-        to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == i]
-        for count in reversed(to_remove):
-            
-            scene.my_collection.remove(count)
-        
-        
-
+      
 
         #remove scene instance
         val = None
@@ -957,22 +953,11 @@ def unregister():
     gen.reset()
 
 
-    
-    # loop through Ml_Data_Store values 
-    """
-    obj = objs[count]
-    if obj.registered == True:
-        obj.erase()
 
-    unregister_class(data_store[count].cls or somtheing)
-    del op_cls[count]
-    """
-    # for count, item in  reversed(list(enumerate(op_cls.values()))):
-    #     obj = objs[count]
-    #     if obj.registered == True:
-    #         obj.erase()
-    #     unregister_class(op_cls[count])
-    #     del op_cls[count]
+    for ml_clss in reversed(data_store):
+        #unregister classes
+        unregister_class(ml_clss.panel_class)
+        del ml_clss.panel_class
 
     
         
@@ -982,11 +967,7 @@ def unregister():
         unregister_class(cls)
     # bpy.types.Scene.my_idname.clear()
     
-    for item in bpy.types.Scene.my_idname:
-        if hasattr(item, 'clear'):
-            item.clear()
-            
-            del item
+    
 
     bpy.context.scene.my_collection.clear()
     bpy.context.scene.my_idname.clear()
