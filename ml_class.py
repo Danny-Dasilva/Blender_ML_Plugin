@@ -52,20 +52,24 @@ class ML_Gen():
         obj.location.z = uniform(xyz_min[2], xyz_max[2])
         
         self.update()
-    def randomize_objs(self, scene):
-        objs = self.objs
-        print("function called")
-        print(self.objs, "objs")
-        for key, ob in objs.items() :
+    def randomize_objs(self, scene, object_list, xyz_min, xyz_max, rotate):
+        pi = self.pi
+        for obj in object_list:
+            self.randomize_obj(scene, obj, xyz_min, xyz_max, rotate)
+    # def randomize_objs(self, scene):
+    #     objs = self.objs
+    #     print("function called")
+    #     print(self.objs, "objs")
+    #     for key, ob in objs.items() :
             
             
-            xyz_min = self.objs[int(key)]['xyz_min']
-            xyz_max = self.objs[int(key)]['xyz_max']
+    #         xyz_min = self.objs[int(key)]['xyz_min']
+    #         xyz_max = self.objs[int(key)]['xyz_max']
 
-            if xyz_min and xyz_max:
-                for obj in ob['objects']:
-                    print(obj, "randomzie", xyz_min, xyz_max)
-                    self.randomize_obj(scene, obj, xyz_min, xyz_max)
+    #         if xyz_min and xyz_max:
+    #             for obj in ob['objects']:
+    #                 print(obj, "randomzie", xyz_min, xyz_max)
+    #                 self.randomize_obj(scene, obj, xyz_min, xyz_max)
 
 
     # run ops
@@ -414,10 +418,8 @@ class ML_Gen():
 
 
 
-    def run(self, scene, image_count, filepath, file_format):
-        #maybe
-        labels = list(self.batch_render(scene, image_count, filepath, file_format))
-
+    def write(self, filepath, labels):
+        
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
         

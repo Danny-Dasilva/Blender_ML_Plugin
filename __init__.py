@@ -20,29 +20,11 @@ to do:
 
 
 
-
-
-
-create and remove from data store in create operator function
-
-change create_custom_operator I var
-
-
-because obj collection will be a var instance
-
-update objects and update atributes functions for use in read test and batch render
-
-
-
-
 this pattern to see if a class instance exists
 
 if not any(d['main_color'] == 'red' for d in a):
     my check = true
-
-
- #remove scene instance
-same pattern as other thing
+    
 
 
 advanced options ---
@@ -144,13 +126,11 @@ class Ml_Data_Store:
 
     def remove(self):
         self.object_count -= 1
-        
-        
+
     def update_values(self, **kwargs):
         self.__dict__.update(kwargs)
 
     def reset(self, tag):
-        
         self.__init__(tag=tag)
 
 data_store = []
@@ -186,7 +166,7 @@ def create_custom_operator(scene, tag):
                 })
     data_store.append(Ml_Data_Store(tag))
 
-
+    #add panel to data store
     if data_store[tag].panel_class is None:
      
         bpy.utils.register_class(nc)
@@ -235,6 +215,7 @@ def create_custom_operators(scene, count):
     existing = len(data_store)
     
     print(count, existing)
+    #basically if the input count is greater or less than the current add or remove accodingly
     if count > existing:
         for tag in range(existing, count):
             print(tag, "tag to ADD")
@@ -244,12 +225,6 @@ def create_custom_operators(scene, count):
         for tag in reversed(range(count, existing)):
                 print(tag, "tag to REMOVE")
                 remove_custom_operator(scene, tag)
-
-    # for i in range(10):
-    #     if i < count:
-    #         create_custom_operator(scene, i)
-    #     else:
-    #         remove_custom_operator(scene, i)
 
            
 
@@ -279,7 +254,7 @@ class OT_Add_Obj(Operator):
         data_store[unique_id].increment()
         name = data_store[unique_id].remove_id
         
-        
+        #create collection instance for sub
         new = context.scene.my_collection.add()
         new.name = name
         new.value = unique_id
@@ -303,11 +278,7 @@ class OT_Remove_Obj(Operator):
         data_store[unique_id].remove()
 
         update(scene.my_idname, scene.my_collection)
-        
-        
-        for item in  context.scene.my_collection:
-            print(item, "items in scene")
-        
+                
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
@@ -666,14 +637,16 @@ class OT_Execute(Operator):
         print("DATA STORE", data_store)
 
         # filepath if in plugin else default
-        # if mytool.filepath:
-        #     filepath = str(mytool.filepath)
-        # else:
-        #     filepath = bpy.data.scenes[0].render.filepath
-        #     self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
+        if mytool.filepath:
+            filepath = str(mytool.filepath)
+        else:
+            filepath = bpy.data.scenes[0].render.filepath
+            self.report({"WARNING"}, "Filepath not set in plugin, defaulting to Output menu settings")
 
-        # file_format = scene.render.image_settings.file_format
-        # gen.run(scene, int(mytool.image_count), filepath, file_format)
+        file_format = scene.render.image_settings.file_format
+        image_count = int(mytool.image_count)
+        labels = list(gen.batch_render(scene, data_store,image_count, filepath, file_format))
+        gen.write(filepath, labels)
         return {'FINISHED'}
 
 
