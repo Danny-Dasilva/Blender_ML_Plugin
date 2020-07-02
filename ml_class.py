@@ -36,16 +36,16 @@ class ML_Gen():
         # #call update
         self.update()
         return scene.camera
-    def randomize_obj(self, scene, obj, xyz_min, xyz_max):
+    def randomize_obj(self, scene, obj, xyz_min, xyz_max, rotate):
         pi = self.pi
-        roll = uniform(0, 90)
-        pitch = uniform(0, 90)
-        yaw = uniform(0, 90)
-        obj.rotation_mode = 'XYZ'
-        obj.rotation_euler[0] = pitch*(pi/180.0)
-        obj.rotation_euler[1] = roll*(pi/180)
-        obj.rotation_euler[2] = yaw*(pi/180.0)
-
+        if rotate:
+            roll = uniform(0, 90)
+            pitch = uniform(0, 90)
+            yaw = uniform(0, 90)
+            obj.rotation_mode = 'XYZ'
+            obj.rotation_euler[0] = pitch*(pi/180.0)
+            obj.rotation_euler[1] = roll*(pi/180)
+            obj.rotation_euler[2] = yaw*(pi/180.0)
 
         obj.location.x = uniform(xyz_min[0], xyz_max[0])   
         obj.location.y = uniform(xyz_min[1], xyz_max[1])                                                                                                                                       

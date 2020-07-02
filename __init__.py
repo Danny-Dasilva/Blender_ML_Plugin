@@ -131,10 +131,21 @@ class Ml_Data_Store:
 
     object_count: int = 0
     # maybe getter and setter for lists
+    @property
+    def remove_id(self):
+        #returns a string that corresponds to the name of the ids in object list
+        return f'{self.tag}{self.object_count}'
 
     def add(self, value):
         self.object_list.append(value)
 
+    def increment(self):
+        self.object_count += 1
+
+    def remove(self):
+        self.object_count -= 1
+        
+        
     def update_values(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -145,6 +156,21 @@ class Ml_Data_Store:
 data_store = []
 
 
+def update(my_idname, my_collection):
+    #set default values 
+    for tag in my_idname:
+        xyz_min, xyz_max = unpack_dim(tag.obj_xyz_min, tag.obj_xyz_max)
+        data_store[tag.identifier].update_values(name=tag.unique_name,
+                                            enable_physics=tag.enable_physics,
+                                            obj_xyz_min= xyz_min, 
+                                            obj_xyz_max= xyz_max,
+                                            rotate= tag.rotate, 
+                                            cutoff= tag.cutoff,
+                                            object_list= [])
+    #add objects                                         
+    for item in my_collection:
+        if item.object_pointer:
+            data_store[item.value].add(item.object_pointer)
 
 # ------------------------------------------------------------------------
 #    Generative helper functions
@@ -269,19 +295,14 @@ class OT_Add_Obj(Operator):
     def execute(self, context):
         unique_id = self.unique_id
         
+        data_store[unique_id].increment()
+        name = data_store[unique_id].remove_id
         
-        data_store[unique_id].object_count += 1
-        object_count = data_store[unique_id].object_count
-        print(object_count, "ADD DATASTORE")
-
-        name = f'{unique_id}{object_count}'
         
         new = context.scene.my_collection.add()
         new.name = name
         new.value = unique_id
-        print("add obj")
-        for item in  context.scene.my_collection:
-            print(item, "items in scene")
+        
         return {'FINISHED'}
 
 class OT_Remove_Obj(Operator):
@@ -290,19 +311,19 @@ class OT_Remove_Obj(Operator):
     unique_id: IntProperty()
     def execute(self, context):
         unique_id = self.unique_id
-        
-        object_count = data_store[unique_id].object_count
-        id = f'{unique_id}{object_count}'
+        scene = context.scene
 
-        remove_lst = []
-        print(object_count, "before delete")
-        for count, item in enumerate(context.scene.my_collection):
-            if item.name == id:
-                context.scene.my_collection.remove(count)
-                data_store[unique_id].object_count -=1
+        remove_id = data_store[unique_id].remove_id
         
-        print(object_count, "after delete")
-        print("Delete obj")
+        for count, item in enumerate(context.scene.my_collection):
+            if item.name == remove_id:
+                scene.my_collection.remove(count)
+                
+        data_store[unique_id].remove()
+
+        update(scene.my_idname, scene.my_collection)
+        
+        
         for item in  context.scene.my_collection:
             print(item, "items in scene")
         
@@ -624,20 +645,15 @@ class OT_Obj_Spawn(Operator):
         unique = self.unique
         scene = context.scene
 
-        #for test spawn
-        for item in scene.my_idname:
-            if item.identifier == unique:
-                xyz_min, xyz_max = unpack_dim(item.obj_xyz_min, item.obj_xyz_max)
+        
+        update(scene.my_idname, scene.my_collection)
+        
+        obj = data_store[unique]
+        print(obj)
+        for pointer in obj.object_list:
+            gen.randomize_obj(scene, pointer, obj.obj_xyz_min, obj.obj_xyz_max, obj.rotate)
 
-
-        for item in context.scene.my_collection:
-
-            if item.value == unique:
-                pointer = item.object_pointer
-                if pointer:
-                    gen.randomize_obj(scene, pointer, xyz_min, xyz_max)
-                else:
-                    self.report({"WARNING"}, f"No object selected for id#{item.value}")
+        #             self.report({"WARNING"}, f"No object selected for id#{item.value}")
                     
 
         return {'FINISHED'}
@@ -664,23 +680,7 @@ class OT_Execute(Operator):
             return {'FINISHED'}
 
 
-
-        for tag in scene.my_idname:
-            
-            xyz_min, xyz_max = unpack_dim(tag.obj_xyz_min, tag.obj_xyz_max)
-            
-            data_store[tag.identifier].update_values(name=tag.unique_name,
-                                                enable_physics=tag.enable_physics,
-                                                obj_xyz_min= xyz_min, 
-                                                obj_xyz_max= xyz_max,
-                                                rotate= tag.rotate, 
-                                                cutoff= tag.cutoff)
-                    
-
-
-        for item in context.scene.my_collection:
-            if item.object_pointer:
-                data_store[item.value].add(item.object_pointer)
+        update(scene.my_idname, scene.my_collection)
 
         print("DATA STORE", data_store)
 
