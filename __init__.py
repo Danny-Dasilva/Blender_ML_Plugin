@@ -33,6 +33,7 @@ toggle rotate on randomize objs
 pick camera
 set limit
 swap to linux and pull offset function
+disable find nearest
 
 ---
 
@@ -370,9 +371,7 @@ class DrawBox():
         if self.set_cam == None:
             self.shader.uniform_float("color", (1, 0, 0, 1))
             
-        else:
-            
-            
+        else:            
             self.shader.uniform_float("color", self.color[self.set_cam])
         self.batch.draw(self.shader)
 
@@ -381,7 +380,6 @@ class DrawBox():
 def cam_domain(self, context):
     scene = bpy.context.scene
     mytool = scene.my_tool
-
 
     # do this once
     init_count(scene)
@@ -487,6 +485,7 @@ class MlAttributes(PropertyGroup):
     cutoff: FloatProperty(
         name="Cutoff",
         description="Percent necessary to count the object in frame, test with Read Test",
+        default=30, 
         )
        
 
@@ -646,7 +645,8 @@ class OT_Execute(Operator):
         file_format = scene.render.image_settings.file_format
         image_count = int(mytool.image_count)
         labels = list(gen.batch_render(scene, data_store,image_count, filepath, file_format))
-        gen.write(filepath, labels)
+        # gen.write(filepath, labels)
+        print(labels)
         return {'FINISHED'}
 
 

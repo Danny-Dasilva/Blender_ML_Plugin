@@ -155,7 +155,7 @@ class ML_Gen():
                 'image': filename,
                 'meshes': {}
             }
-        for key, object in objects.items():
+        for object in objects:
 
             name = self.objs[key]['name']
        
@@ -299,7 +299,6 @@ class ML_Gen():
                 t = (v-normal).length
                 if t < 0.001:
                     same_count += 1
-            
 
         del bvh
         ray_percent = same_count/ count
@@ -309,21 +308,18 @@ class ML_Gen():
             value = False
         return value, ray_percent 
 
-    def get_raycast_percentages(self, scene, cam, objs, cutoff):
-        objects = {}
+    def get_raycast_percentages(self, scene, cam, data_store):
         data = {}
-        print(objs, "objs")
-        for key, ob in objs.items():
-            for obj in ob['objects']:
-                value, ray_percent = self.get_raycast_percentage(scene, cam, obj, cutoff)
-               
-                data[obj.name] = ray_percent
+        visible = []
+        for objs in data_store:
+            for obj in objs.object_list:
+                
+                value, percent = self.get_raycast_percentage(scene, cam, obj, objs.cutoff)
                 if value:
-                    if key in objects.keys(): 
-                        objects[key].append(obj)
-                    else:
-                        objects[key] = [obj]
-        return objects, data
+                    visible.append(obj)
+                data[obj.name] = f'{percent * 100}% vertices visible'
+
+        return visible, data
 
     @staticmethod
     def find_nearest(camera, obj_list):
@@ -355,7 +351,7 @@ class ML_Gen():
 
         obj_list = self.objs
 
-        objects, data = self.get_raycast_percentages(scene, camera, obj_list, 30)
+        objects, data = self.get_raycast_percentages(scene, camera, obj_list)
         
         return data
 
@@ -424,47 +420,93 @@ class ML_Gen():
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
         
 
-    def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
+    # def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
     
-        scene_setup_steps = int(image_count)
-        value = True
-        ball_lst = self.objs[0]["objects"]
-        ball_dict = self.objs
+    #     scene_setup_steps = int(image_count)
+    #     value = True
+    #     ball_lst = self.objs[0]["objects"]
+    #     ball_dict = self.objs
 
-        while loop_count != image_count:
+    #     while loop_count != image_count:
 
-            camera = self.randomize_camera(scene)
-            if self.enable_physics:
-                self.randomize_objs(scene)
+    #         camera = self.randomize_camera(scene)
+    #         if self.enable_physics:
+    #             self.randomize_objs(scene)
                 
-            if self.frames:
-                self.increment_frames(scene)
+    #         if self.frames:
+    #             self.increment_frames(scene)
 
-            nearest_ball = self.find_nearest(camera, ball_lst)
+    #         nearest_ball = self.find_nearest(camera, ball_lst)
         
 
-            self.center_obj(camera, nearest_ball)
+    #         self.center_obj(camera, nearest_ball)
+
+    #         # add in offset percentage
+    #         # self.offset(scene, camera, 50)
+            
+    #         value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
+    #         if value == False:
+    #                 loop_count -= 1
+    #                 value = True
+    #         else:
+                    
+    #                 filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
+                
+    #                 bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+    #                 bpy.ops.render.render(write_still=True)
+
+    #                 objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
+                    
+    #                 scene_labels = self.get_cordinates(scene, camera, objects, filename)
+            
+                    
+    #                 yield scene_labels
+
+    #         loop_count += 1
+    def batch_render(self, scene, data_store, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
+        value = True
+        
+        while loop_count != image_count:
+
+            for obj in data_store:
+                if obj.enable_physics:
+                    self.randomize_objs(scene, obj.object_list, obj.obj_xyz_min, obj.obj_xyz_max, obj.rotate)
+                if self.frames:
+                    self.increment_frames(scene)
+                
+            camera = self.randomize_camera(scene)
+                
+            
+            #Find the nearest object for the lowest obj in list
+            nearest_obj = self.find_nearest(camera, data_store[0].object_list)
+        
+
+            self.center_obj(camera, nearest_obj)
 
             # add in offset percentage
-            # self.offset(scene, camera, 50)
+            self.offset(scene, camera, 50)
             
-            value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
+            value, percent = self.get_raycast_percentage(scene, camera, nearest_obj, 40)
+            print("FIRST OJ", percent)
             if value == False:
                     loop_count -= 1
                     value = True
             else:
-                    
+                    #render image in filepath
                     filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
-                
-                    bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-                    bpy.ops.render.render(write_still=True)
+                    # bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+                    # bpy.ops.render.render(write_still=True)
 
-                    objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
+                  
                     
+                    # #loop through objects instead
+                    objects, data = self.get_raycast_percentages(scene, camera, data_store)
+                    print(data, objects, "PRINT OUT")
+                    # #loop through objects instead
                     scene_labels = self.get_cordinates(scene, camera, objects, filename)
-            
+
                     
-                    yield scene_labels
+                    yield objects
 
             loop_count += 1
             
