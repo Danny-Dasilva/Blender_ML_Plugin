@@ -189,16 +189,8 @@ def create_custom_operator(scene, tag):
 
     if data_store[tag].panel_class is None:
      
-
-
-
-
         bpy.utils.register_class(nc)
         data_store[tag].update_values(panel_class=nc)
-
-
-
-        
 
         print(len(data_store), "DATA STORE ADD")
     
@@ -210,7 +202,6 @@ def create_custom_operator(scene, tag):
 
 def remove_custom_operator(scene, tag):  
     
-    
     if data_store[tag].panel_class is not None:
 
         # remove drawing
@@ -221,29 +212,19 @@ def remove_custom_operator(scene, tag):
         #remove object per unique id
         to_remove = [count for count, item in enumerate(scene.my_collection) if item.value == tag]
         for count in reversed(to_remove):
-            
             scene.my_collection.remove(count)
 
-        #unregister classes
+
+        #unregister panel
         bpy.utils.unregister_class(data_store[tag].panel_class)
-        del data_store[tag].panel_class
-
-
 
         # remove data class instance
         del data_store[tag]
       
 
         #remove scene instance
-        val = None
-        for count, item in enumerate(scene.my_idname):
-            if item.identifier == tag:
-                val = count
-        scene.my_idname.remove(val)
+        scene.my_idname.remove(tag)
 
-
-        for item in  scene.my_collection:
-            print(item, "items in scene")
 
 
         
