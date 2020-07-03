@@ -138,12 +138,6 @@ class ML_Gen():
         if min_x == max_x or min_y == max_y:
             return None
 
-        """ Figure out the rendered image size """
-        render = scene.render
-        fac = render.resolution_percentage * 0.01
-        dim_x = render.resolution_x * fac
-        dim_y = render.resolution_y * fac
-
         return (min_x, min_y), (max_x, max_y)
 
 

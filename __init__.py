@@ -18,9 +18,11 @@ if not any(d['main_color'] == 'red' for d in a):
     my check = true
     
 
-make sure find nearest is executed on the lowest thing with objects instead of [0]
+spawn test points camera and everything
 
-rorate obj is greyed out if physics not enabled
+def write(self, filepath, labels):
+
+    try and except error saying path doesnt exist
 
 add check if loop count is too high
 
@@ -782,7 +784,7 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
 
         #obj loop
         for item in context.scene.my_collection:
-            if int(item.name[0]) == self.bl_description:
+            if item.value == self.bl_description:
                 row = self.layout.row(align=True)
                 row.prop(item, "object_pointer", text="add custom title here")
 
@@ -817,13 +819,6 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
                     sub.prop(item, "rotate")
                     sub.enabled = item.enable_physics
                     row.prop(item, "cutoff")
-
-
-
-                    
-       
-
-
 
 
 class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
