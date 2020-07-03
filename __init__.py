@@ -118,7 +118,7 @@ class Ml_Data_Store:
     def remove_id(self):
         #returns a string that corresponds to the name of the ids in object list
         return f'{self.tag}{self.object_count}'
-
+    
     def add(self, value):
         self.object_list.append(value)
 

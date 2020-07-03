@@ -155,24 +155,23 @@ class ML_Gen():
                 'image': filename,
                 'meshes': {}
             }
-        for object in objects:
+        for obj, name in objects.items():
 
-            name = self.objs[key]['name']
+            
        
             cordinates['meshes'][name] = {}
  
-            for count, obj in enumerate(object):
+            
       
-                bounding_box = self.camera_view_bounds_2d(scene, camera_object, obj)
-                if bounding_box:
-                    cordinates['meshes'][name][count] = {
-                                    'x1': bounding_box[0][0],
-                                    'y1': bounding_box[0][1],
-                                    'x2': bounding_box[1][0],
-                                    'y2': bounding_box[1][1]
-                                }
-                else:
-                    return None
+            bounding_box = self.camera_view_bounds_2d(scene, camera_object, obj)
+            if bounding_box:
+                cordinates['meshes'][name][obj.name] = {
+                                'x1': bounding_box[0][0],
+                                'y1': bounding_box[0][1],
+                                'x2': bounding_box[1][0],
+                                'y2': bounding_box[1][1]
+                            }
+            
         return cordinates
     @staticmethod
     def measure (first, second):
@@ -310,14 +309,16 @@ class ML_Gen():
 
     def get_raycast_percentages(self, scene, cam, data_store):
         data = {}
-        visible = []
+        visible = {}
         for objs in data_store:
             for obj in objs.object_list:
                 
+                name = objs.name or objs.tag
                 value, percent = self.get_raycast_percentage(scene, cam, obj, objs.cutoff)
                 if value:
-                    visible.append(obj)
-                data[obj.name] = f'{percent * 100}% vertices visible'
+                    
+                    visible[obj] = name
+                data[name] = f'{percent * 100}% vertices visible'
 
         return visible, data
 
@@ -487,7 +488,7 @@ class ML_Gen():
             self.offset(scene, camera, 50)
             
             value, percent = self.get_raycast_percentage(scene, camera, nearest_obj, 40)
-            print("FIRST OJ", percent)
+        
             if value == False:
                     loop_count -= 1
                     value = True
@@ -501,12 +502,12 @@ class ML_Gen():
                     
                     # #loop through objects instead
                     objects, data = self.get_raycast_percentages(scene, camera, data_store)
-                    print(data, objects, "PRINT OUT")
+                    print(objects, data, "VISIBLE ? DATA")
                     # #loop through objects instead
                     scene_labels = self.get_cordinates(scene, camera, objects, filename)
-
+               
                     
-                    yield objects
+                    yield scene_labels
 
             loop_count += 1
             
