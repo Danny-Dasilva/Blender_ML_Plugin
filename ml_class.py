@@ -15,7 +15,7 @@ class ML_Gen():
         self.xyz_max = None
         self.xyz_min = None
         self.pi = 3.14159265
-
+        self.limit = 0.0001
         self.enable_physics = None
         self.frames = None
     @staticmethod
@@ -271,8 +271,8 @@ class ML_Gen():
             e.select = False
 
     def get_raycast_percentage(self, scene, cam, obj, cutoff):
+        limit = self.limit
         # Threshold to test if ray cast corresponds to the original vertex
-        limit = 0.0001
         viewlayer = bpy.context.view_layer
         # Deselect mesh elements
         self.DeselectEdgesAndPolygons( obj )
@@ -296,7 +296,7 @@ class ML_Gen():
                 # Try a ray cast, in order to test the vertex visibility from the camera
                 location, normal, index, distance, t, ty = scene.ray_cast(viewlayer, cam.location, (v - cam.location).normalized() )
                 t = (v-normal).length
-                if t < 0.001:
+                if t < limit:
                     same_count += 1
 
         del bvh
@@ -369,10 +369,16 @@ class ML_Gen():
             self.randomize(scene, data_store)
                 
             camera = self.randomize_camera(scene)
-                
             
+            
+            for data in reversed(data_store):
+
+                # basically if value exists assign it
+                if (current := data.object_list):
+                    obj_list = current
+
             #Find the nearest object for the lowest obj in list
-            nearest_obj = self.find_nearest(camera, data_store[0].object_list)
+            nearest_obj = self.find_nearest(camera, obj_list)
         
 
             self.center_obj(camera, nearest_obj)

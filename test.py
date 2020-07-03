@@ -1,7 +1,11 @@
 my_list = ['red', 'blue', 'orange']
 
-name = 'aaa'
-id = 1
-a = name or id
+inputs = list()
 
-print(a)
+val = None
+t = 0
+
+
+
+
+print(current := val)

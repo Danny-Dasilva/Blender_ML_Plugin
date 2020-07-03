@@ -18,6 +18,8 @@ if not any(d['main_color'] == 'red' for d in a):
     my check = true
     
 
+make sure find nearest is executed on the lowest thing with objects instead of [0]
+
 
 advanced options ---
 
@@ -403,6 +405,12 @@ def frame_advance(self, context):
     frames = mytool.frame_advance
     gen.frames  = frames
 
+def limit(self, context):
+    mytool = context.scene.my_tool
+    limit = mytool.limit
+    gen.limit  = limit
+
+
 def enable_physics(self, context):
     obj = objs[self.identifier]
     if self.enable_physics == False:
@@ -496,6 +504,13 @@ class MyProperties(PropertyGroup):
         min = 1,
         max = 500,
         update=frame_advance
+        )
+
+    limit: FloatProperty(
+        name = "frame advance",
+        description="Choose the number of frames to advance vefore the camera positions itself",
+        default = 0.0001,
+        update=limit
         )
     image_count: IntProperty(
         name = "image_count",
@@ -692,7 +707,7 @@ class Inherit_Panel:
     bl_context = "objectmode"   
     
 class OBJECT_PT_Camera_Settings(Inherit_Panel, Panel):
-    bl_label = "My Panel"
+    bl_label = "Blender Ml"
     bl_idname = "OBJECT_PT_Camera_Settings"
    
     bpy.types.Scene.prop = PointerProperty(type=bpy.types.Object)
