@@ -20,6 +20,9 @@ if not any(d['main_color'] == 'red' for d in a):
 
 make sure find nearest is executed on the lowest thing with objects instead of [0]
 
+rorate obj is greyed out if physics not enabled
+
+add check if loop count is too high
 
 advanced options ---
 
@@ -484,6 +487,9 @@ class MlAttributes(PropertyGroup):
         name="Cutoff",
         description="Percent necessary to count the object in frame, test with Read Test",
         default=30, 
+        min= 0, 
+        max = 100,
+
         )
        
 
@@ -807,8 +813,13 @@ class OBJECT_PT_Spawn_Ids(Inherit_Panel, Panel):
                     op.unique = self.bl_description
                 if item.advanced_options:
                     row = layout.row()
-                    row.prop(item, "rotate")
+                    sub = row.row()
+                    sub.prop(item, "rotate")
+                    sub.enabled = item.enable_physics
                     row.prop(item, "cutoff")
+
+
+
                     
        
 

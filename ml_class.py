@@ -372,10 +372,9 @@ class ML_Gen():
             
             
             for data in reversed(data_store):
-
-                # basically if value exists assign it
-                if (current := data.object_list):
-                    obj_list = current
+                if data.object_list:
+                    obj_list = data.object_list
+                    cutoff = data.cutoff
 
             #Find the nearest object for the lowest obj in list
             nearest_obj = self.find_nearest(camera, obj_list)
@@ -386,8 +385,8 @@ class ML_Gen():
             # add in offset percentage
             self.offset(scene, camera, 50)
             
-            value, percent = self.get_raycast_percentage(scene, camera, nearest_obj, 40)
-        
+            value, percent = self.get_raycast_percentage(scene, camera, nearest_obj, cutoff)
+          
             if value == False:
                     loop_count -= 1
                     value = True
@@ -407,7 +406,6 @@ class ML_Gen():
                
                     
                     yield scene_labels
-
             loop_count += 1
             
 
