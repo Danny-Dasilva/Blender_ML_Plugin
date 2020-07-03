@@ -6,14 +6,6 @@ error for if domain is 0 0 0
 -------------------------------
 
 
- valv
-
- all.value changed to .tag
-
-
-gen.objs was an object list that was appended in the ml class
-
-.tag was the old call in my collection for actual objects
 
 
 to do:
@@ -29,11 +21,9 @@ if not any(d['main_color'] == 'red' for d in a):
 
 advanced options ---
 
-toggle rotate on randomize objs
-pick camera
-set limit
-swap to linux and pull offset function
-disable find nearest
+pick camera  - 
+set limit - 
+disable find nearest - 
 
 ---
 
@@ -632,8 +622,6 @@ class OT_Execute(Operator):
 
         update(scene.my_idname, scene.my_collection)
 
-        print("DATA STORE", data_store)
-
         # filepath if in plugin else default
         if mytool.filepath:
             filepath = str(mytool.filepath)
@@ -644,26 +632,26 @@ class OT_Execute(Operator):
         file_format = scene.render.image_settings.file_format
         image_count = int(mytool.image_count)
         labels = list(gen.batch_render(scene, data_store,image_count, filepath, file_format))
-        # gen.write(filepath, labels)
-        print(labels)
+        gen.write(filepath, labels)
         return {'FINISHED'}
 
 
 class OT_Spawn(bpy.types.Operator):
     bl_idname = "scene.test_spawn"
     bl_label = "Spawn Test"
+    def execute(self, context):
+        scene = context.scene
+        update(scene.my_idname, scene.my_collection)
+        #randomize and increment frames
+        gen.randomize(scene, data_store)
 
-
-
+        return {'FINISHED'}
 
 class OT_Read(bpy.types.Operator):
     bl_idname = "scene.test_read"
     bl_label = "Read Test"
     def execute(self, context):
         scene = context.scene
-        mytool = context.scene.my_tool
-
-             
         
         # Check if objects are selected Exists
         if len(context.scene.my_collection) == 0:
@@ -673,7 +661,7 @@ class OT_Read(bpy.types.Operator):
 
         update(scene.my_idname, scene.my_collection)
         labels = str(gen.test_render(scene, data_store))
-        
+
         self.report({"INFO"}, labels)
         return {'FINISHED'}
 

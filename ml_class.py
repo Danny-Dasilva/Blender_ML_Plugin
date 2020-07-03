@@ -350,124 +350,23 @@ class ML_Gen():
         
         return data
 
-
-    # def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render"):
-
-    #     scene_setup_steps = int(image_count)
-    #     value = True
-    #     loop_count = 0
-    #     labels = []
-
-    #     while loop_count != scene_setup_steps:
-    #         print(self.objs, "objs object")
-    #         ball_lst = self.objs[0]["objects"]
-    #         ball_dict = self.objs
-            
-    #         camera = self.randomize_camera(scene)
-
-    #         # if mytool.enable physics
-    #         if self.enable_physics:
-    #             self.randomize_objs(scene)
-            
-    #         if self.frames:
-    #             self.increment_frames(scene)
-
-
-
-    #         nearest_ball = self.find_nearest(camera, ball_lst)
-      
-
-    #         self.center_obj(camera, nearest_ball)
-
-
-    #         # add in offset percentage
-    #         self.offset(scene, camera, 60)
-
-    #         value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
-    #         if value == False:
-    #             loop_count -= 1
-    #             value = True
-    #         else:
-    #             print(percent, "good")
-    #             filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
-            
-    #             bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-    #             bpy.ops.render.render(write_still=True)
-
-    #             objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
-                
-    #             scene_labels = self.get_cordinates(scene, camera, objects, self.names_dict, filename)
-          
-    #             labels.append(scene_labels) # Merge lists
-    #         loop_count += 1
-           
-
-
-    #     print(labels, "labels")
-    #     with open(f'{filepath}/labels.json', 'w+') as f:
-    #         json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
-
-
-
     def write(self, filepath, labels):
         
         with open(f'{filepath}/labels.json', 'w+') as f:
             json.dump(labels, f, sort_keys=True, indent=4, separators=(',', ': '))
         
-
-    # def batch_render(self, scene, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
-    
-    #     scene_setup_steps = int(image_count)
-    #     value = True
-    #     ball_lst = self.objs[0]["objects"]
-    #     ball_dict = self.objs
-
-    #     while loop_count != image_count:
-
-    #         camera = self.randomize_camera(scene)
-    #         if self.enable_physics:
-    #             self.randomize_objs(scene)
-                
-    #         if self.frames:
-    #             self.increment_frames(scene)
-
-    #         nearest_ball = self.find_nearest(camera, ball_lst)
-        
-
-    #         self.center_obj(camera, nearest_ball)
-
-    #         # add in offset percentage
-    #         # self.offset(scene, camera, 50)
-            
-    #         value, percent = self.get_raycast_percentage(scene, camera, nearest_ball, 40)
-    #         if value == False:
-    #                 loop_count -= 1
-    #                 value = True
-    #         else:
-                    
-    #                 filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
-                
-    #                 bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-    #                 bpy.ops.render.render(write_still=True)
-
-    #                 objects, data = self.get_raycast_percentages(scene, camera, self.objs, 30)
-                    
-    #                 scene_labels = self.get_cordinates(scene, camera, objects, filename)
-            
-                    
-    #                 yield scene_labels
-
-    #         loop_count += 1
+    def randomize(self, scene, data_store):
+        for obj in data_store:
+            if obj.enable_physics:
+                self.randomize_objs(scene, obj.object_list, obj.obj_xyz_min, obj.obj_xyz_max, obj.rotate)
+            if self.frames:
+                self.increment_frames(scene)
     def batch_render(self, scene, data_store, image_count, filepath, file_format, file_prefix="render", loop_count = 0):
         value = True
         
         while loop_count != image_count:
 
-            for obj in data_store:
-                if obj.enable_physics:
-                    self.randomize_objs(scene, obj.object_list, obj.obj_xyz_min, obj.obj_xyz_max, obj.rotate)
-                if self.frames:
-                    self.increment_frames(scene)
+            self.randomize(scene, data_store)
                 
             camera = self.randomize_camera(scene)
                 
