@@ -618,7 +618,6 @@ class OT_Execute(Operator):
     def execute(self, context):
         scene = context.scene
         mytool = context.scene.my_tool
-        gen.reset()
 
         # Check if camera domain Exists
             
@@ -650,16 +649,33 @@ class OT_Execute(Operator):
         return {'FINISHED'}
 
 
-# class OT_Spawn(bpy.types.Operator):
-#     bl_idname = "scene.test_spawn"
-#     bl_label = "Spawn Test"
+class OT_Spawn(bpy.types.Operator):
+    bl_idname = "scene.test_spawn"
+    bl_label = "Spawn Test"
 
 
 
 
-# class OT_Read(bpy.types.Operator):
-#     bl_idname = "scene.test_read"
-#     bl_label = "Read Test"
+class OT_Read(bpy.types.Operator):
+    bl_idname = "scene.test_read"
+    bl_label = "Read Test"
+    def execute(self, context):
+        scene = context.scene
+        mytool = context.scene.my_tool
+
+             
+        
+        # Check if objects are selected Exists
+        if len(context.scene.my_collection) == 0:
+            self.report({"ERROR"}, "No object selected")
+            return {'FINISHED'}
+
+
+        update(scene.my_idname, scene.my_collection)
+        labels = str(gen.test_render(scene, data_store))
+        
+        self.report({"INFO"}, labels)
+        return {'FINISHED'}
 
 
 class OT_Test(bpy.types.Operator):
@@ -835,8 +851,8 @@ class OBJECT_PT_Render_Settings(Inherit_Panel, Panel):
 
         row = layout.row(align=True)
         
-        # row.operator("scene.test_spawn")
-        # row.operator("scene.test_read")
+        row.operator("scene.test_spawn")
+        row.operator("scene.test_read")
 
         layout.operator("scene.test")
         
@@ -878,8 +894,8 @@ classes = (
     ObjectHolder,
     OT_Execute,
     MlAttributes,
-    # OT_Spawn,
-    # OT_Read,
+    OT_Spawn,
+    OT_Read,
     OT_Test,
 )
 
@@ -902,7 +918,6 @@ def unregister():
     from bpy.utils import unregister_class
     # clear gpu
     cam.clear()
-    gen.reset()
 
     # remove drawings
     for obj in objs:

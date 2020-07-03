@@ -15,7 +15,7 @@ class ML_Gen():
         self.xyz_max = None
         self.xyz_min = None
         self.pi = 3.14159265
-        self.objs = {}
+
         self.enable_physics = None
         self.frames = None
     @staticmethod
@@ -318,7 +318,7 @@ class ML_Gen():
                 if value:
                     
                     visible[obj] = name
-                data[name] = f'{percent * 100}% vertices visible'
+                data[obj.name] = f'{percent * 100}% vertices visible'
 
         return visible, data
 
@@ -341,18 +341,12 @@ class ML_Gen():
         for i in range(self.frames):
             scene.frame_set(i)
     
-    def clear_dicts(self):
-        self.objs = {}
+    
 
-    def reset(self):
-        self.clear_dicts()
-
-    def test_render(self, scene):
+    def test_render(self, scene, data_store):
         camera = scene.camera
 
-        obj_list = self.objs
-
-        objects, data = self.get_raycast_percentages(scene, camera, obj_list)
+        objects, data = self.get_raycast_percentages(scene, camera, data_store)
         
         return data
 
@@ -495,14 +489,14 @@ class ML_Gen():
             else:
                     #render image in filepath
                     filename = f'{str(file_prefix)}-{str(loop_count)}.{file_format.lower()}'
-                    # bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
-                    # bpy.ops.render.render(write_still=True)
+                    bpy.context.scene.render.filepath = os.path.join(f'{filepath}/', filename)
+                    bpy.ops.render.render(write_still=True)
 
                   
                     
                     # #loop through objects instead
                     objects, data = self.get_raycast_percentages(scene, camera, data_store)
-                    print(objects, data, "VISIBLE ? DATA")
+                    
                     # #loop through objects instead
                     scene_labels = self.get_cordinates(scene, camera, objects, filename)
                
