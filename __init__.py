@@ -208,7 +208,6 @@ def remove_custom_operator(scene, tag):
         
 
 def create_custom_operators(scene, count):
-    print(len(data_store), "len store", count)
 
     existing = len(data_store)
     
@@ -223,8 +222,6 @@ def create_custom_operators(scene, count):
         for tag in reversed(range(count, existing)):
                 print(tag, "tag to REMOVE")
                 remove_custom_operator(scene, tag)
-
-           
 
 def set_obj_count(self, context):
     scene = bpy.context.scene
